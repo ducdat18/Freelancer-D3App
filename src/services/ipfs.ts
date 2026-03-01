@@ -67,44 +67,25 @@ export function isGarbageMetadataUri(uri: string | null | undefined): boolean {
 }
 
 /**
- * Clean and normalize CID/hash
+ * Extract bare CID from any IPFS URI format.
+ * Works with: "QmHash", "ipfs://QmHash", "https://gateway/ipfs/QmHash", "/ipfs/QmHash"
  */
 function normalizeCID(hash: string): string {
-  let clean = hash.trim()
-
-  // Strip ipfs:// scheme
-  if (clean.startsWith('ipfs://')) {
-    clean = clean.slice(7)
-  }
-
-  // Strip all leading/trailing slashes
-  clean = clean.replace(/^\/+|\/+$/g, '')
-
-  // Strip any /ipfs/ or ipfs/ path prefix (e.g. from full gateway URLs or malformed URIs)
-  const gatewayPrefixes = ['/ipfs/', 'ipfs/']
-  for (const prefix of gatewayPrefixes) {
-    if (clean.includes(prefix)) {
-      clean = clean.split(prefix).pop() || clean
-    }
-  }
-
-  return clean
+  const s = hash.trim()
+  // Directly pull the CIDv0 (Qm...) or CIDv1 (bafy...) from anywhere in the string
+  const match = s.match(/(Qm[1-9A-HJ-NP-Za-km-z]{44}|b[a-z2-7]{58,})/i)
+  if (match) return match[1]
+  // Fallback: strip scheme + path prefix step by step
+  return s.replace(/^ipfs:\/\//i, '').replace(/^\/+/, '').replace(/^ipfs\//i, '').trim()
 }
 
 /**
- * Build gateway URL without double slashes
+ * Build a clean gateway URL with exactly one /ipfs/ segment.
  */
 function buildGatewayUrl(gateway: string, cid: string): string {
-  // Strip ALL trailing slashes from gateway
-  const cleanGateway = gateway.replace(/\/+$/, '')
-  // Strip ALL leading slashes from cid
-  const cleanCid = cid.replace(/^\/+/, '')
-
-  if (cleanGateway.endsWith('/ipfs')) {
-    return `${cleanGateway}/${cleanCid}`
-  }
-
-  return `${cleanGateway}/ipfs/${cleanCid}`
+  const base = gateway.replace(/\/+$/, '')
+  const clean = cid.replace(/^\/+/, '')
+  return base.endsWith('/ipfs') ? `${base}/${clean}` : `${base}/ipfs/${clean}`
 }
 
 /**
@@ -241,10 +222,7 @@ export async function fetchJobMetadata(hash: string): Promise<JobMetadata | null
  * Generate IPFS URL from hash
  */
 export function getIPFSUrl(hash: string): string {
-  const cleanHash = normalizeCID(hash)
-  const url = buildGatewayUrl(PRIMARY_GATEWAY, cleanHash)
-  // Final safety: collapse duplicate /ipfs/ path segments (/ipfs//ipfs/ or /ipfs/ipfs/ → /ipfs/)
-  return url.replace(/\/ipfs\/+ipfs\//g, '/ipfs/')
+  return buildGatewayUrl(PRIMARY_GATEWAY, normalizeCID(hash))
 }
 
 /**

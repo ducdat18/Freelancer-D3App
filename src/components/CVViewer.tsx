@@ -27,8 +27,7 @@ export default function CVViewer({ open, onClose, cvHash, freelancerName }: CVVi
   // Check if it's a mock hash (testing mode)
   const isMockHash = cvHash.startsWith('QmMock');
 
-  // Use the configured IPFS gateway URL; collapse duplicate /ipfs/ path segments
-  const gatewayUrl = getIPFSUrl(cvHash).replace(/\/ipfs\/+ipfs\//g, '/ipfs/');
+  const gatewayUrl = getIPFSUrl(cvHash);
 
   const handleLoad = () => {
     setLoading(false);
