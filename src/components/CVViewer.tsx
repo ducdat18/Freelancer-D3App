@@ -11,7 +11,6 @@ import {
   Button,
 } from '@mui/material';
 import { Close, Download, OpenInNew } from '@mui/icons-material';
-import { getIPFSUrl } from '../services/ipfs';
 
 interface CVViewerProps {
   open: boolean;
@@ -24,10 +23,16 @@ export default function CVViewer({ open, onClose, cvHash, freelancerName }: CVVi
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Check if it's a mock hash (testing mode)
-  const isMockHash = cvHash.startsWith('QmMock');
+  // Extract bare CID then build a clean URL with exactly one /ipfs/ segment
+  const cid = (() => {
+    const m = cvHash.match(/(Qm[1-9A-HJ-NP-Za-km-z]{44}|b[a-z2-7]{58,})/i);
+    return m ? m[1] : cvHash.replace(/^ipfs:\/\//i, '').replace(/^\/+/, '').replace(/^ipfs\//i, '').trim();
+  })();
+  const gatewayBase = (process.env.NEXT_PUBLIC_IPFS_GATEWAY || 'https://gateway.pinata.cloud/ipfs/')
+    .replace(/\/+$/, '').replace(/\/ipfs$/, '');
+  const gatewayUrl = `${gatewayBase}/ipfs/${cid}`;
 
-  const gatewayUrl = getIPFSUrl(cvHash);
+  const isMockHash = cid.startsWith('QmMock');
 
   const handleLoad = () => {
     setLoading(false);
