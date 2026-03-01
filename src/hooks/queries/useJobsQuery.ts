@@ -249,6 +249,7 @@ export function useSubmitBidMutation() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.bids.byJob(variables.jobPda.toBase58()) });
       queryClient.invalidateQueries({ queryKey: queryKeys.jobs.detail(variables.jobPda.toBase58()) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.jobs.lists() });
     },
   });
 }

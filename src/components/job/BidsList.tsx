@@ -29,6 +29,8 @@ import {
   Lock,
   Warning,
   EmojiEvents,
+  Psychology,
+  Shield,
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
 import { useOptimizedJobBids, getBidStatusText, getBidStatusColor, type BidWithDetails } from '../../hooks/useOptimizedBids';
@@ -49,20 +51,21 @@ interface BidsListProps {
   clientAddress: string; // Job owner's address
   jobBudgetSol?: number;
   jobTitle?: string;
+  jobDescription?: string;
   onBidAccepted?: () => void;
 }
 
-export default function BidsList({ jobPda, clientAddress, jobBudgetSol = 0, jobTitle, onBidAccepted }: BidsListProps) {
+export default function BidsList({ jobPda, clientAddress, jobBudgetSol = 0, jobTitle, jobDescription, onBidAccepted }: BidsListProps) {
   const { publicKey } = useWallet();
   const { addNotification } = useNotificationContext();
   // ✅ PERFORMANCE: Use optimized hook with React Query caching
   const { bids, loading, error, refetch } = useOptimizedJobBids(jobPda);
 
   // ✅ NEW: Use composite transaction hook (Fixes Issue C)
-  const { 
-    acceptBidWithDeposit, 
-    checkSufficientBalance, 
-    estimateTransactionFee 
+  const {
+    acceptBidWithDeposit,
+    checkSufficientBalance,
+    estimateTransactionFee
   } = useCompositeTransactions();
 
   const [selectedBid, setSelectedBid] = useState<BidWithDetails | null>(null);
@@ -79,6 +82,11 @@ export default function BidsList({ jobPda, clientAddress, jobBudgetSol = 0, jobT
   const [selectedFreelancer, setSelectedFreelancer] = useState<string>('');
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [chatRecipient, setChatRecipient] = useState<string>('');
+  const [proposalDialogBid, setProposalDialogBid] = useState<BidWithDetails | null>(null);
+  const [riskDialogBid, setRiskDialogBid] = useState<BidWithDetails | null>(null);
+  const [riskLoading, setRiskLoading] = useState(false);
+  const [riskResult, setRiskResult] = useState<any>(null);
+  const [riskError, setRiskError] = useState('');
 
   // ✅ FIXED: Move useEffect BEFORE early return to comply with Rules of Hooks
   useEffect(() => {
@@ -136,7 +144,7 @@ export default function BidsList({ jobPda, clientAddress, jobBudgetSol = 0, jobT
       addNotification(
         NotificationType.PROPOSAL_ACCEPTED,
         'Bid Accepted',
-        `You hired ${formatAddress(selectedBid.account.freelancer)} for "${jobTitle || 'the job'}". ${selectedBid.budgetInSol} SOL locked in escrow.`,
+        `You hired ${formatAddress(selectedBid.account.freelancer)} for "${jobTitle || 'the job'}". ${selectedBid.budgetInSol.toFixed(4)} SOL locked in escrow.`,
         `/jobs/${jobPda.toBase58()}`
       );
 
@@ -165,6 +173,40 @@ export default function BidsList({ jobPda, clientAddress, jobBudgetSol = 0, jobT
   const handleOpenChat = (freelancerAddress: string) => {
     setChatRecipient(freelancerAddress);
     setChatDialogOpen(true);
+  };
+
+  const handleRiskCheck = async (bid: BidWithDetails) => {
+    setRiskDialogBid(bid);
+    setRiskLoading(true);
+    setRiskResult(null);
+    setRiskError('');
+    try {
+      const cvText = getCleanProposal(bid.account.proposal);
+      const res = await fetch('/api/ai/risk-assessment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobDescription: jobDescription || jobTitle || 'Freelance job',
+          cvText,
+          jobTitle,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) setRiskError(data.error || 'Analysis failed. Please try again.');
+      else setRiskResult(data);
+    } catch {
+      setRiskError('Network error. Please try again.');
+    } finally {
+      setRiskLoading(false);
+    }
+  };
+
+  const closeRiskDialog = () => {
+    if (!riskLoading) {
+      setRiskDialogBid(null);
+      setRiskResult(null);
+      setRiskError('');
+    }
   };
 
   const formatAddress = (address: PublicKey) => {
@@ -395,6 +437,15 @@ export default function BidsList({ jobPda, clientAddress, jobBudgetSol = 0, jobT
                         >
                           Accept Bid
                         </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<Visibility />}
+                          onClick={() => setProposalDialogBid(bid)}
+                          sx={{ flex: '0 1 auto', minWidth: '110px' }}
+                        >
+                          Full Proposal
+                        </Button>
                         {bid.account.cvUri && bid.account.cvUri.trim() !== '' && (
                           <Button
                             variant="outlined"
@@ -406,6 +457,19 @@ export default function BidsList({ jobPda, clientAddress, jobBudgetSol = 0, jobT
                             View CV
                           </Button>
                         )}
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<Psychology />}
+                          onClick={() => handleRiskCheck(bid)}
+                          sx={{
+                            flex: '0 1 auto', minWidth: '110px',
+                            borderColor: 'rgba(128,132,238,0.4)', color: '#8084ee',
+                            '&:hover': { borderColor: '#8084ee', bgcolor: 'rgba(128,132,238,0.06)' },
+                          }}
+                        >
+                          Risk Check
+                        </Button>
                         <Button
                           variant="outlined"
                           size="small"
@@ -508,8 +572,8 @@ export default function BidsList({ jobPda, clientAddress, jobBudgetSol = 0, jobT
 
               {/* ✅ NEW: Balance Check */}
               {balanceCheck && (
-                <Alert 
-                  severity={balanceCheck.sufficient ? "success" : "error"} 
+                <Alert
+                  severity={balanceCheck.sufficient ? "success" : "error"}
                   sx={{ mb: 2 }}
                 >
                   <Typography variant="body2">
@@ -574,6 +638,196 @@ export default function BidsList({ jobPda, clientAddress, jobBudgetSol = 0, jobT
           recipientAddress={chatRecipient}
         />
       )}
+
+      {/* Full Proposal Dialog */}
+      <Dialog
+        open={!!proposalDialogBid}
+        onClose={() => setProposalDialogBid(null)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6" fontWeight={600}>Full Proposal</Typography>
+            <IconButton onClick={() => setProposalDialogBid(null)}><Close /></IconButton>
+          </Box>
+          {proposalDialogBid && (
+            <Typography variant="caption" color="text.secondary">
+              From {formatAddress(proposalDialogBid.account.freelancer)} · {proposalDialogBid.budgetInSol.toFixed(4)} SOL · {proposalDialogBid.account.timelineDays} days
+            </Typography>
+          )}
+        </DialogTitle>
+        <DialogContent>
+          {proposalDialogBid && (
+            <Box
+              sx={{
+                whiteSpace: 'pre-line',
+                fontFamily: 'monospace',
+                fontSize: '0.85rem',
+                lineHeight: 1.7,
+                p: 2,
+                bgcolor: 'background.default',
+                borderRadius: 1,
+                border: '1px solid rgba(0,255,195,0.08)',
+              }}
+            >
+              {getCleanProposal(proposalDialogBid.account.proposal)}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          {proposalDialogBid && (
+            <Button
+              startIcon={<Psychology sx={{ fontSize: 16 }} />}
+              onClick={() => {
+                const bid = proposalDialogBid;
+                setProposalDialogBid(null);
+                handleRiskCheck(bid);
+              }}
+              sx={{ color: '#8084ee', mr: 'auto' }}
+            >
+              Run Risk Check
+            </Button>
+          )}
+          <Button onClick={() => setProposalDialogBid(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Risk Assessment Dialog */}
+      <Dialog
+        open={!!riskDialogBid}
+        onClose={closeRiskDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Psychology sx={{ color: '#8084ee' }} />
+              <Typography variant="h6" fontWeight={600}>AI Risk Assessment</Typography>
+            </Box>
+            <IconButton onClick={closeRiskDialog} disabled={riskLoading}><Close /></IconButton>
+          </Box>
+          {riskDialogBid && (
+            <Typography variant="caption" color="text.secondary">
+              Evaluating bid from {formatAddress(riskDialogBid.account.freelancer)}
+            </Typography>
+          )}
+        </DialogTitle>
+        <DialogContent>
+          {riskLoading && (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <CircularProgress sx={{ color: '#8084ee', mb: 2 }} />
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Analyzing proposal with Gemini AI…
+              </Typography>
+              <LinearProgress sx={{ mt: 1, '& .MuiLinearProgress-bar': { bgcolor: '#8084ee' } }} />
+            </Box>
+          )}
+
+          {riskError && !riskLoading && (
+            <Alert severity="error">{riskError}</Alert>
+          )}
+
+          {riskResult && !riskLoading && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+              {/* Score gauges row */}
+              <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', py: 1 }}>
+                {[
+                  { value: riskResult.matchScore, label: 'JOB MATCH' },
+                  { value: riskResult.authenticityScore, label: 'CV CREDIBILITY' },
+                ].map(({ value, label }) => {
+                  const c = value >= 70 ? '#4caf50' : value >= 40 ? '#ff9800' : '#f44336';
+                  return (
+                    <Box key={label} sx={{ textAlign: 'center' }}>
+                      <Box sx={{ position: 'relative', display: 'inline-flex', mb: 0.5 }}>
+                        <CircularProgress variant="determinate" value={100} size={60} thickness={5}
+                          sx={{ color: 'rgba(255,255,255,0.06)', position: 'absolute' }} />
+                        <CircularProgress variant="determinate" value={value} size={60} thickness={5}
+                          sx={{ color: c }} />
+                        <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Typography sx={{ fontFamily: '"Orbitron",sans-serif', fontWeight: 700, fontSize: '0.85rem', color: c, lineHeight: 1 }}>
+                            {value}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.65rem' }}>
+                        {label}
+                      </Typography>
+                    </Box>
+                  );
+                })}
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                  {(() => {
+                    const cfg = {
+                      LOW:    { color: '#4caf50', bg: 'rgba(76,175,80,0.12)',   border: 'rgba(76,175,80,0.3)',   label: 'LOW RISK' },
+                      MEDIUM: { color: '#ff9800', bg: 'rgba(255,152,0,0.12)',   border: 'rgba(255,152,0,0.3)',   label: 'MED RISK' },
+                      HIGH:   { color: '#f44336', bg: 'rgba(244,67,54,0.12)',   border: 'rgba(244,67,54,0.3)',   label: 'HIGH RISK' },
+                    }[riskResult.riskLevel as 'LOW' | 'MEDIUM' | 'HIGH'] ?? { color: '#ff9800', bg: 'rgba(255,152,0,0.12)', border: 'rgba(255,152,0,0.3)', label: 'UNKNOWN' };
+                    return (
+                      <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, px: 1.5, py: 0.5, border: `1px solid ${cfg.border}`, borderRadius: 1, bgcolor: cfg.bg }}>
+                        <Shield sx={{ fontSize: 14, color: cfg.color }} />
+                        <Typography sx={{ fontFamily: '"Orbitron",sans-serif', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', color: cfg.color }}>
+                          {cfg.label}
+                        </Typography>
+                      </Box>
+                    );
+                  })()}
+                  <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, fontSize: '0.6rem' }}>
+                    risk {riskResult.riskScore}/100
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Divider />
+
+              {/* Summary */}
+              <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: 'rgba(128,132,238,0.06)', border: '1px solid rgba(128,132,238,0.12)' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+                  {riskResult.summary}
+                </Typography>
+              </Box>
+
+              {/* Findings */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                {riskResult.findings.map((f: { type: string; text: string }, i: number) => {
+                  const bg = f.type === 'positive' ? 'rgba(76,175,80,0.08)' : f.type === 'danger' ? 'rgba(244,67,54,0.08)' : 'rgba(255,152,0,0.08)';
+                  const border = f.type === 'positive' ? 'rgba(76,175,80,0.2)' : f.type === 'danger' ? 'rgba(244,67,54,0.2)' : 'rgba(255,152,0,0.2)';
+                  const icon = f.type === 'positive'
+                    ? <CheckCircle sx={{ fontSize: 14, color: '#4caf50', flexShrink: 0 }} />
+                    : f.type === 'danger'
+                    ? <Cancel sx={{ fontSize: 14, color: '#f44336', flexShrink: 0 }} />
+                    : <Warning sx={{ fontSize: 14, color: '#ff9800', flexShrink: 0 }} />;
+                  return (
+                    <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, p: 1, borderRadius: 1, bgcolor: bg, border: `1px solid ${border}` }}>
+                      {icon}
+                      <Typography variant="caption" sx={{ lineHeight: 1.5, color: 'text.secondary' }}>{f.text}</Typography>
+                    </Box>
+                  );
+                })}
+              </Box>
+
+              {/* Recommendation */}
+              {(() => {
+                const rc = riskResult.riskLevel === 'LOW' ? '#4caf50' : riskResult.riskLevel === 'MEDIUM' ? '#ff9800' : '#f44336';
+                return (
+                  <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: `${rc}0d`, border: `1px solid ${rc}30` }}>
+                    <Typography variant="caption" fontWeight={600} sx={{ color: rc, display: 'block', mb: 0.25, fontFamily: '"Orbitron",sans-serif', fontSize: '0.6rem', letterSpacing: '0.1em' }}>
+                      RECOMMENDATION
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5 }}>
+                      {riskResult.recommendation}
+                    </Typography>
+                  </Box>
+                );
+              })()}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={closeRiskDialog} disabled={riskLoading}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

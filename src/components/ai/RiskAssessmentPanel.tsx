@@ -286,7 +286,7 @@ Skills, experience, education, past projects — anything relevant."
             <Box>
               <LinearProgress sx={{ mb: 1, '& .MuiLinearProgress-bar': { bgcolor: '#8084ee' } }} />
               <Typography variant="caption" color="text.secondary">
-                Claude AI is reading your CV and the job description…
+                Gemini AI is reading your CV and the job description…
               </Typography>
             </Box>
           )}

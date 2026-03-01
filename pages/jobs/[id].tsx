@@ -1109,6 +1109,7 @@ export default function JobDetail() {
                   clientAddress={job.client.toBase58()}
                   jobBudgetSol={budgetInSol}
                   jobTitle={metadata?.title || job?.title}
+                  jobDescription={`${job.title}\n\n${job.description}${metadata?.skills?.length ? '\n\nRequired skills: ' + metadata.skills.join(', ') : ''}`}
                   onBidAccepted={reloadJobData}
                 />
               </Box>
