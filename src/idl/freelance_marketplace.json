@@ -45,6 +45,433 @@
       ]
     },
     {
+      "name": "add_identity_stamp",
+      "discriminator": [
+        82,
+        181,
+        147,
+        2,
+        78,
+        232,
+        140,
+        227
+      ],
+      "accounts": [
+        {
+          "name": "identity_stamps",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  100,
+                  101,
+                  110,
+                  116,
+                  105,
+                  116,
+                  121,
+                  45,
+                  115,
+                  116,
+                  97,
+                  109,
+                  112,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sybil_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  121,
+                  98,
+                  105,
+                  108,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "user"
+        },
+        {
+          "name": "oracle",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "stamp_type",
+          "type": "u8"
+        },
+        {
+          "name": "provider_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "weight",
+          "type": "u8"
+        },
+        {
+          "name": "expires_at",
+          "type": {
+            "option": "i64"
+          }
+        }
+      ]
+    },
+    {
+      "name": "add_oracle_authority",
+      "discriminator": [
+        76,
+        27,
+        52,
+        25,
+        4,
+        26,
+        173,
+        96
+      ],
+      "accounts": [
+        {
+          "name": "ai_oracle_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  105,
+                  45,
+                  111,
+                  114,
+                  97,
+                  99,
+                  108,
+                  101,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "new_oracle",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "add_service_endpoint",
+      "discriminator": [
+        131,
+        78,
+        171,
+        230,
+        69,
+        134,
+        63,
+        186
+      ],
+      "accounts": [
+        {
+          "name": "did_document",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "service_type",
+          "type": "u8"
+        },
+        {
+          "name": "endpoint_uri",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "add_verification_method",
+      "discriminator": [
+        213,
+        200,
+        190,
+        61,
+        28,
+        104,
+        245,
+        25
+      ],
+      "accounts": [
+        {
+          "name": "did_document",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "method_type",
+          "type": "u8"
+        },
+        {
+          "name": "public_key",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "add_zk_verifier",
+      "discriminator": [
+        66,
+        226,
+        17,
+        253,
+        240,
+        221,
+        54,
+        85
+      ],
+      "accounts": [
+        {
+          "name": "zk_verifier_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  122,
+                  107,
+                  45,
+                  118,
+                  101,
+                  114,
+                  105,
+                  102,
+                  105,
+                  101,
+                  114,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "verifier",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "anchor_verifiable_credential",
+      "discriminator": [
+        254,
+        56,
+        39,
+        90,
+        75,
+        138,
+        242,
+        105
+      ],
+      "accounts": [
+        {
+          "name": "vc_anchor",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  99,
+                  45,
+                  97,
+                  110,
+                  99,
+                  104,
+                  111,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "issuer"
+              },
+              {
+                "kind": "arg",
+                "path": "index"
+              }
+            ]
+          }
+        },
+        {
+          "name": "issuer_vc_counter",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  99,
+                  45,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "issuer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "subject"
+        },
+        {
+          "name": "issuer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "credential_type",
+          "type": "string"
+        },
+        {
+          "name": "metadata_uri",
+          "type": "string"
+        },
+        {
+          "name": "expires_at",
+          "type": {
+            "option": "i64"
+          }
+        },
+        {
+          "name": "index",
+          "type": "u32"
+        }
+      ]
+    },
+    {
       "name": "approve_milestone",
       "docs": [
         "Approve a milestone and release payment"
@@ -133,6 +560,92 @@
       "args": []
     },
     {
+      "name": "approve_recovery",
+      "discriminator": [
+        148,
+        96,
+        41,
+        38,
+        108,
+        189,
+        129,
+        214
+      ],
+      "accounts": [
+        {
+          "name": "recovery_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "recovery_config.owner",
+                "account": "RecoveryConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "recovery_request",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  45,
+                  114,
+                  101,
+                  113,
+                  117,
+                  101,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "recovery_config.owner",
+                "account": "RecoveryConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "guardian",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "approve_work",
       "docs": [
         "Client approves submitted work and releases payment",
@@ -210,6 +723,183 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "cancel_recovery",
+      "discriminator": [
+        176,
+        23,
+        203,
+        37,
+        121,
+        251,
+        227,
+        83
+      ],
+      "accounts": [
+        {
+          "name": "recovery_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "recovery_request",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  45,
+                  114,
+                  101,
+                  113,
+                  117,
+                  101,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "cast_dao_vote",
+      "discriminator": [
+        129,
+        151,
+        210,
+        43,
+        50,
+        222,
+        234,
+        39
+      ],
+      "accounts": [
+        {
+          "name": "dao_vote",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  97,
+                  111,
+                  45,
+                  118,
+                  111,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "proposal"
+              },
+              {
+                "kind": "account",
+                "path": "voter"
+              }
+            ]
+          }
+        },
+        {
+          "name": "proposal",
+          "writable": true
+        },
+        {
+          "name": "dao_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  97,
+                  111,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "voter",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "vote_for",
+          "type": "bool"
+        },
+        {
+          "name": "token_amount",
+          "type": "u64"
+        },
+        {
+          "name": "sbt_count",
+          "type": "u32"
+        }
+      ]
     },
     {
       "name": "cast_staked_vote",
@@ -580,6 +1270,173 @@
       "args": []
     },
     {
+      "name": "claim_staking_rewards",
+      "discriminator": [
+        229,
+        141,
+        170,
+        69,
+        111,
+        94,
+        6,
+        72
+      ],
+      "accounts": [
+        {
+          "name": "token_stake",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  45,
+                  115,
+                  116,
+                  97,
+                  107,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "platform_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  116,
+                  102,
+                  111,
+                  114,
+                  109,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "treasury",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  116,
+                  102,
+                  111,
+                  114,
+                  109,
+                  45,
+                  116,
+                  114,
+                  101,
+                  97,
+                  115,
+                  117,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_reward_account",
+          "writable": true
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "collect_platform_fee",
+      "discriminator": [
+        151,
+        88,
+        172,
+        250,
+        117,
+        185,
+        59,
+        209
+      ],
+      "accounts": [
+        {
+          "name": "platform_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  116,
+                  102,
+                  111,
+                  114,
+                  109,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "job_amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "complete_job",
       "docs": [
         "Complete a job (client marks work as complete and releases payment)"
@@ -610,6 +1467,51 @@
         {
           "name": "client",
           "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_did_document",
+      "discriminator": [
+        253,
+        40,
+        200,
+        239,
+        69,
+        147,
+        82,
+        182
+      ],
+      "accounts": [
+        {
+          "name": "did_document",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
@@ -771,6 +1673,256 @@
           "type": "u64"
         }
       ]
+    },
+    {
+      "name": "create_proposal",
+      "discriminator": [
+        132,
+        116,
+        68,
+        174,
+        216,
+        160,
+        198,
+        22
+      ],
+      "accounts": [
+        {
+          "name": "proposal",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  112,
+                  111,
+                  115,
+                  97,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "dao_config.proposal_count",
+                "account": "DAOConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "dao_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  97,
+                  111,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "proposer_token_account",
+          "writable": true
+        },
+        {
+          "name": "proposal_stake_vault",
+          "writable": true
+        },
+        {
+          "name": "proposer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "description_uri",
+          "type": "string"
+        },
+        {
+          "name": "proposal_type",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "create_session_key",
+      "discriminator": [
+        137,
+        204,
+        246,
+        242,
+        200,
+        143,
+        215,
+        56
+      ],
+      "accounts": [
+        {
+          "name": "session_key",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110,
+                  45,
+                  107,
+                  101,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              },
+              {
+                "kind": "account",
+                "path": "session_signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_session_counter",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  45,
+                  115,
+                  101,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110,
+                  45,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "session_signer"
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "valid_until",
+          "type": "i64"
+        },
+        {
+          "name": "max_amount",
+          "type": "u64"
+        },
+        {
+          "name": "allowed_actions",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "deactivate_did",
+      "discriminator": [
+        241,
+        89,
+        102,
+        174,
+        101,
+        4,
+        65,
+        95
+      ],
+      "accounts": [
+        {
+          "name": "did_document",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": []
     },
     {
       "name": "deposit_escrow",
@@ -939,6 +2091,64 @@
       ]
     },
     {
+      "name": "dispute_ai_verification",
+      "discriminator": [
+        163,
+        188,
+        26,
+        20,
+        45,
+        113,
+        46,
+        84
+      ],
+      "accounts": [
+        {
+          "name": "ai_verification_result",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  105,
+                  45,
+                  118,
+                  101,
+                  114,
+                  105,
+                  102,
+                  105,
+                  99,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "ai_verification_result.job",
+                "account": "AIVerificationResult"
+              }
+            ]
+          }
+        },
+        {
+          "name": "disputer",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "reason",
+          "type": "string"
+        }
+      ]
+    },
+    {
       "name": "dispute_milestone",
       "docs": [
         "Open dispute for a specific milestone"
@@ -1063,6 +2273,671 @@
       "args": []
     },
     {
+      "name": "distribute_level2_commission",
+      "discriminator": [
+        212,
+        163,
+        19,
+        152,
+        252,
+        113,
+        140,
+        62
+      ],
+      "accounts": [
+        {
+          "name": "referral_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  102,
+                  101,
+                  114,
+                  114,
+                  97,
+                  108,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "referral_payout",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  102,
+                  101,
+                  114,
+                  114,
+                  97,
+                  108,
+                  45,
+                  112,
+                  97,
+                  121,
+                  111,
+                  117,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              },
+              {
+                "kind": "account",
+                "path": "level2_referrer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job"
+        },
+        {
+          "name": "level2_referrer",
+          "writable": true
+        },
+        {
+          "name": "referred_user"
+        },
+        {
+          "name": "fee_source",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "job_amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "distribute_referral_commission",
+      "discriminator": [
+        21,
+        171,
+        100,
+        2,
+        246,
+        135,
+        125,
+        247
+      ],
+      "accounts": [
+        {
+          "name": "referral_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  102,
+                  101,
+                  114,
+                  114,
+                  97,
+                  108,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "referral_payout",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  102,
+                  101,
+                  114,
+                  114,
+                  97,
+                  108,
+                  45,
+                  112,
+                  97,
+                  121,
+                  111,
+                  117,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              },
+              {
+                "kind": "account",
+                "path": "referrer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "referrer_referral_account",
+          "writable": true,
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  102,
+                  101,
+                  114,
+                  114,
+                  97,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "referrer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job"
+        },
+        {
+          "name": "referrer",
+          "writable": true
+        },
+        {
+          "name": "referred_user"
+        },
+        {
+          "name": "fee_source",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "job_amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "execute_buyback_burn",
+      "discriminator": [
+        93,
+        133,
+        32,
+        3,
+        36,
+        116,
+        94,
+        202
+      ],
+      "accounts": [
+        {
+          "name": "platform_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  116,
+                  102,
+                  111,
+                  114,
+                  109,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_mint",
+          "writable": true
+        },
+        {
+          "name": "buyback_token_account",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "burn_amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "execute_proposal",
+      "discriminator": [
+        186,
+        60,
+        116,
+        133,
+        108,
+        128,
+        111,
+        28
+      ],
+      "accounts": [
+        {
+          "name": "proposal",
+          "writable": true
+        },
+        {
+          "name": "dao_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  97,
+                  111,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "executor",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "execute_recovery",
+      "discriminator": [
+        203,
+        133,
+        133,
+        228,
+        153,
+        121,
+        182,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "recovery_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "recovery_config.owner",
+                "account": "RecoveryConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "recovery_request",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  45,
+                  114,
+                  101,
+                  113,
+                  117,
+                  101,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "recovery_config.owner",
+                "account": "RecoveryConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "executor",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "finalize_kyc",
+      "docs": [
+        "Finalize KYC — record face comparison result (Verified / Rejected)"
+      ],
+      "discriminator": [
+        10,
+        40,
+        222,
+        170,
+        13,
+        14,
+        19,
+        119
+      ],
+      "accounts": [
+        {
+          "name": "kyc_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  107,
+                  121,
+                  99
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "id_type",
+          "type": {
+            "defined": {
+              "name": "IdType"
+            }
+          }
+        },
+        {
+          "name": "face_distance_bp",
+          "type": "u32"
+        },
+        {
+          "name": "matched",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "finalize_proposal",
+      "discriminator": [
+        23,
+        68,
+        51,
+        167,
+        109,
+        173,
+        187,
+        164
+      ],
+      "accounts": [
+        {
+          "name": "proposal",
+          "writable": true
+        },
+        {
+          "name": "dao_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  97,
+                  111,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "finalizer",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "fund_dao_treasury",
+      "discriminator": [
+        238,
+        35,
+        247,
+        102,
+        8,
+        9,
+        232,
+        230
+      ],
+      "accounts": [
+        {
+          "name": "dao_treasury",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  97,
+                  111,
+                  45,
+                  116,
+                  114,
+                  101,
+                  97,
+                  115,
+                  117,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "funder",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "fund_fee_payer",
+      "discriminator": [
+        229,
+        43,
+        114,
+        214,
+        126,
+        65,
+        76,
+        235
+      ],
+      "accounts": [
+        {
+          "name": "fee_payer_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  101,
+                  101,
+                  45,
+                  112,
+                  97,
+                  121,
+                  101,
+                  114,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "fee_payer_pool",
+          "writable": true
+        },
+        {
+          "name": "funder",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "fund_milestone",
       "docs": [
         "Fund a specific milestone escrow"
@@ -1156,6 +3031,140 @@
       ]
     },
     {
+      "name": "init_ai_oracle_config",
+      "discriminator": [
+        119,
+        167,
+        76,
+        102,
+        41,
+        13,
+        109,
+        60
+      ],
+      "accounts": [
+        {
+          "name": "ai_oracle_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  105,
+                  45,
+                  111,
+                  114,
+                  97,
+                  99,
+                  108,
+                  101,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "primary_oracle"
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "min_confidence",
+          "type": "u8"
+        },
+        {
+          "name": "min_oracle_consensus",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "init_dao_config",
+      "discriminator": [
+        221,
+        27,
+        38,
+        124,
+        136,
+        36,
+        175,
+        170
+      ],
+      "accounts": [
+        {
+          "name": "dao_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  97,
+                  111,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_mint"
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "min_proposal_stake",
+          "type": "u64"
+        },
+        {
+          "name": "voting_period",
+          "type": "i64"
+        },
+        {
+          "name": "quorum_percentage",
+          "type": "u8"
+        },
+        {
+          "name": "reputation_multiplier",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "init_dispute_config",
       "docs": [
         "Initialize dispute configuration"
@@ -1235,6 +3244,72 @@
         {
           "name": "quorum_percentage",
           "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "init_fee_payer_config",
+      "discriminator": [
+        190,
+        202,
+        152,
+        51,
+        206,
+        175,
+        188,
+        179
+      ],
+      "accounts": [
+        {
+          "name": "fee_payer_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  101,
+                  101,
+                  45,
+                  112,
+                  97,
+                  121,
+                  101,
+                  114,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "fee_payer"
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "daily_budget",
+          "type": "u64"
+        },
+        {
+          "name": "max_tx_per_user_per_day",
+          "type": "u16"
         }
       ]
     },
@@ -1357,6 +3432,140 @@
       "args": []
     },
     {
+      "name": "init_platform_config",
+      "discriminator": [
+        101,
+        52,
+        47,
+        49,
+        156,
+        16,
+        32,
+        118
+      ],
+      "accounts": [
+        {
+          "name": "platform_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  116,
+                  102,
+                  111,
+                  114,
+                  109,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_mint"
+        },
+        {
+          "name": "treasury"
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "fee_percentage",
+          "type": "u8"
+        },
+        {
+          "name": "buyback_percentage",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "init_referral_config",
+      "discriminator": [
+        145,
+        155,
+        38,
+        84,
+        247,
+        132,
+        242,
+        131
+      ],
+      "accounts": [
+        {
+          "name": "referral_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  102,
+                  101,
+                  114,
+                  114,
+                  97,
+                  108,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "level1_percentage",
+          "type": "u8"
+        },
+        {
+          "name": "level2_percentage",
+          "type": "u8"
+        },
+        {
+          "name": "max_levels",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "init_sbt_counter",
       "docs": [
         "Initialize SBT counter for a user"
@@ -1402,6 +3611,124 @@
         },
         {
           "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "init_sybil_config",
+      "discriminator": [
+        184,
+        137,
+        151,
+        198,
+        232,
+        51,
+        145,
+        142
+      ],
+      "accounts": [
+        {
+          "name": "sybil_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  121,
+                  98,
+                  105,
+                  108,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "oracle_authority"
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "min_score_to_bid",
+          "type": "u16"
+        },
+        {
+          "name": "min_score_to_post",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "init_zk_verifier_config",
+      "discriminator": [
+        10,
+        247,
+        23,
+        198,
+        66,
+        13,
+        40,
+        101
+      ],
+      "accounts": [
+        {
+          "name": "zk_verifier_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  122,
+                  107,
+                  45,
+                  118,
+                  101,
+                  114,
+                  105,
+                  102,
+                  105,
+                  101,
+                  114,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
           "writable": true,
           "signer": true
         },
@@ -1466,6 +3793,102 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "initiate_recovery",
+      "discriminator": [
+        132,
+        148,
+        60,
+        74,
+        49,
+        178,
+        235,
+        187
+      ],
+      "accounts": [
+        {
+          "name": "recovery_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "recovery_config.owner",
+                "account": "RecoveryConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "recovery_request",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  45,
+                  114,
+                  101,
+                  113,
+                  117,
+                  101,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "recovery_config.owner",
+                "account": "RecoveryConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "guardian",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "new_owner",
+          "type": "pubkey"
+        }
+      ]
     },
     {
       "name": "mark_message_read",
@@ -2003,6 +4426,250 @@
       ]
     },
     {
+      "name": "recalculate_humanity_score",
+      "discriminator": [
+        87,
+        55,
+        67,
+        111,
+        250,
+        112,
+        170,
+        153
+      ],
+      "accounts": [
+        {
+          "name": "identity_stamps",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  100,
+                  101,
+                  110,
+                  116,
+                  105,
+                  116,
+                  121,
+                  45,
+                  115,
+                  116,
+                  97,
+                  109,
+                  112,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "identity_stamps.user",
+                "account": "IdentityStamps"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "record_sponsored_tx",
+      "discriminator": [
+        37,
+        43,
+        154,
+        246,
+        224,
+        178,
+        169,
+        63
+      ],
+      "accounts": [
+        {
+          "name": "fee_payer_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  101,
+                  101,
+                  45,
+                  112,
+                  97,
+                  121,
+                  101,
+                  114,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_gas_usage",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  115,
+                  45,
+                  117,
+                  115,
+                  97,
+                  103,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user"
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "gas_cost",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "register_referral",
+      "discriminator": [
+        158,
+        196,
+        134,
+        102,
+        193,
+        102,
+        184,
+        86
+      ],
+      "accounts": [
+        {
+          "name": "referral_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  102,
+                  101,
+                  114,
+                  114,
+                  97,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "referral_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  102,
+                  101,
+                  114,
+                  114,
+                  97,
+                  108,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "referrer"
+        },
+        {
+          "name": "referrer_referral_account",
+          "writable": true,
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  102,
+                  101,
+                  114,
+                  114,
+                  97,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "referrer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "reject_milestone",
       "docs": [
         "Reject a milestone work submission"
@@ -2117,6 +4784,97 @@
       "args": []
     },
     {
+      "name": "release_quality_collateral",
+      "discriminator": [
+        213,
+        241,
+        143,
+        151,
+        76,
+        251,
+        202,
+        58
+      ],
+      "accounts": [
+        {
+          "name": "quality_stake",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  113,
+                  117,
+                  97,
+                  108,
+                  105,
+                  116,
+                  121,
+                  45,
+                  115,
+                  116,
+                  97,
+                  107,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job"
+        },
+        {
+          "name": "staker_token_account",
+          "writable": true
+        },
+        {
+          "name": "quality_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  113,
+                  117,
+                  97,
+                  108,
+                  105,
+                  116,
+                  121,
+                  45,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "release_token_escrow",
       "docs": [
         "Release SPL token escrow to freelancer"
@@ -2158,6 +4916,240 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "remove_identity_stamp",
+      "discriminator": [
+        245,
+        95,
+        55,
+        109,
+        41,
+        93,
+        152,
+        214
+      ],
+      "accounts": [
+        {
+          "name": "identity_stamps",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  100,
+                  101,
+                  110,
+                  116,
+                  105,
+                  116,
+                  121,
+                  45,
+                  115,
+                  116,
+                  97,
+                  109,
+                  112,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "identity_stamps.user",
+                "account": "IdentityStamps"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sybil_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  121,
+                  98,
+                  105,
+                  108,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "oracle",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "stamp_type",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "remove_verification_method",
+      "discriminator": [
+        33,
+        238,
+        66,
+        183,
+        62,
+        210,
+        133,
+        150
+      ],
+      "accounts": [
+        {
+          "name": "did_document",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "method_index",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "reset_kyc",
+      "docs": [
+        "Reset KYC — set record back to Pending"
+      ],
+      "discriminator": [
+        243,
+        198,
+        176,
+        246,
+        194,
+        17,
+        128,
+        52
+      ],
+      "accounts": [
+        {
+          "name": "kyc_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  107,
+                  121,
+                  99
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "resolve_ai_dispute",
+      "discriminator": [
+        144,
+        5,
+        165,
+        21,
+        18,
+        134,
+        234,
+        107
+      ],
+      "accounts": [
+        {
+          "name": "ai_verification_result",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  105,
+                  45,
+                  118,
+                  101,
+                  114,
+                  105,
+                  102,
+                  105,
+                  99,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "ai_verification_result.job",
+                "account": "AIVerificationResult"
+              }
+            ]
+          }
+        },
+        {
+          "name": "resolver",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "override_score",
+          "type": "u8"
+        },
+        {
+          "name": "resolution_uri",
+          "type": "string"
+        }
+      ]
     },
     {
       "name": "resolve_dispute",
@@ -2328,6 +5320,30 @@
       "args": []
     },
     {
+      "name": "revoke_credential",
+      "discriminator": [
+        38,
+        123,
+        95,
+        95,
+        223,
+        158,
+        169,
+        87
+      ],
+      "accounts": [
+        {
+          "name": "vc_anchor",
+          "writable": true
+        },
+        {
+          "name": "issuer",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "revoke_sbt",
       "docs": [
         "Revoke an SBT (admin action for fraud)"
@@ -2346,6 +5362,184 @@
         {
           "name": "reputation_sbt",
           "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "revoke_session_key",
+      "discriminator": [
+        81,
+        192,
+        32,
+        110,
+        104,
+        116,
+        144,
+        151
+      ],
+      "accounts": [
+        {
+          "name": "session_key",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110,
+                  45,
+                  107,
+                  101,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "session_key.owner",
+                "account": "SessionKey"
+              },
+              {
+                "kind": "account",
+                "path": "session_key.session_pubkey",
+                "account": "SessionKey"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_session_counter",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  45,
+                  115,
+                  101,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110,
+                  45,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "session_key.owner",
+                "account": "SessionKey"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "revoke_zk_credential",
+      "discriminator": [
+        52,
+        163,
+        73,
+        21,
+        220,
+        45,
+        160,
+        24
+      ],
+      "accounts": [
+        {
+          "name": "zk_credential",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  122,
+                  107,
+                  45,
+                  99,
+                  114,
+                  101,
+                  100,
+                  101,
+                  110,
+                  116,
+                  105,
+                  97,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "zk_credential.user",
+                "account": "ZKCredential"
+              },
+              {
+                "kind": "account",
+                "path": "zk_credential.credential_index",
+                "account": "ZKCredential"
+              }
+            ]
+          }
+        },
+        {
+          "name": "zk_verifier_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  122,
+                  107,
+                  45,
+                  118,
+                  101,
+                  114,
+                  105,
+                  102,
+                  105,
+                  101,
+                  114,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
         },
         {
           "name": "authority",
@@ -2579,6 +5773,172 @@
       ]
     },
     {
+      "name": "setup_recovery",
+      "discriminator": [
+        39,
+        91,
+        244,
+        181,
+        183,
+        142,
+        7,
+        55
+      ],
+      "accounts": [
+        {
+          "name": "recovery_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "guardians",
+          "type": {
+            "vec": "pubkey"
+          }
+        },
+        {
+          "name": "threshold",
+          "type": "u8"
+        },
+        {
+          "name": "timelock_period",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "slash_quality_collateral",
+      "discriminator": [
+        89,
+        20,
+        241,
+        193,
+        78,
+        205,
+        200,
+        182
+      ],
+      "accounts": [
+        {
+          "name": "quality_stake",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  113,
+                  117,
+                  97,
+                  108,
+                  105,
+                  116,
+                  121,
+                  45,
+                  115,
+                  116,
+                  97,
+                  107,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job"
+        },
+        {
+          "name": "quality_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  113,
+                  117,
+                  97,
+                  108,
+                  105,
+                  116,
+                  121,
+                  45,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "beneficiary_token_account",
+          "writable": true
+        },
+        {
+          "name": "beneficiary"
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "stake_for_jury",
       "docs": [
         "Stake tokens to become eligible as a juror"
@@ -2705,6 +6065,343 @@
       ]
     },
     {
+      "name": "stake_quality_collateral",
+      "discriminator": [
+        215,
+        217,
+        170,
+        248,
+        232,
+        67,
+        34,
+        8
+      ],
+      "accounts": [
+        {
+          "name": "quality_stake",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  113,
+                  117,
+                  97,
+                  108,
+                  105,
+                  116,
+                  121,
+                  45,
+                  115,
+                  116,
+                  97,
+                  107,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job"
+        },
+        {
+          "name": "staker_token_account",
+          "writable": true
+        },
+        {
+          "name": "quality_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  113,
+                  117,
+                  97,
+                  108,
+                  105,
+                  116,
+                  121,
+                  45,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "staker",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "stake_tokens",
+      "discriminator": [
+        136,
+        126,
+        91,
+        162,
+        40,
+        131,
+        13,
+        127
+      ],
+      "accounts": [
+        {
+          "name": "token_stake",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  45,
+                  115,
+                  116,
+                  97,
+                  107,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "platform_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  116,
+                  102,
+                  111,
+                  114,
+                  109,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_token_account",
+          "writable": true
+        },
+        {
+          "name": "stake_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  101,
+                  45,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "lock_period",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "submit_ai_verification",
+      "discriminator": [
+        112,
+        92,
+        13,
+        210,
+        76,
+        63,
+        175,
+        52
+      ],
+      "accounts": [
+        {
+          "name": "ai_verification_result",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  105,
+                  45,
+                  118,
+                  101,
+                  114,
+                  105,
+                  102,
+                  105,
+                  99,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ai_oracle_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  105,
+                  45,
+                  111,
+                  114,
+                  97,
+                  99,
+                  108,
+                  101,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "job"
+        },
+        {
+          "name": "oracle",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "verification_type",
+          "type": "u8"
+        },
+        {
+          "name": "score",
+          "type": "u8"
+        },
+        {
+          "name": "confidence",
+          "type": "u8"
+        },
+        {
+          "name": "result_uri",
+          "type": "string"
+        },
+        {
+          "name": "details_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "submit_bid",
       "docs": [
         "Submit a bid for a job"
@@ -2775,6 +6472,63 @@
           "name": "cv_uri",
           "type": {
             "option": "string"
+          }
+        }
+      ]
+    },
+    {
+      "name": "submit_kyc",
+      "docs": [
+        "Submit KYC — creates or resets record to Pending"
+      ],
+      "discriminator": [
+        89,
+        123,
+        234,
+        30,
+        100,
+        127,
+        96,
+        189
+      ],
+      "accounts": [
+        {
+          "name": "kyc_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  107,
+                  121,
+                  99
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "id_type",
+          "type": {
+            "defined": {
+              "name": "IdType"
+            }
           }
         }
       ]
@@ -2949,6 +6703,134 @@
       ]
     },
     {
+      "name": "submit_zk_credential",
+      "discriminator": [
+        74,
+        232,
+        182,
+        226,
+        187,
+        51,
+        238,
+        61
+      ],
+      "accounts": [
+        {
+          "name": "zk_credential",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  122,
+                  107,
+                  45,
+                  99,
+                  114,
+                  101,
+                  100,
+                  101,
+                  110,
+                  116,
+                  105,
+                  97,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "arg",
+                "path": "index"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_zk_counter",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  122,
+                  107,
+                  45,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "credential_type",
+          "type": "string"
+        },
+        {
+          "name": "commitment",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "proof_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "public_inputs_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "valid_until",
+          "type": {
+            "option": "i64"
+          }
+        },
+        {
+          "name": "index",
+          "type": "u32"
+        }
+      ]
+    },
+    {
       "name": "unstake_from_jury",
       "docs": [
         "Unstake tokens and leave the juror pool"
@@ -3066,6 +6948,375 @@
       "args": []
     },
     {
+      "name": "unstake_tokens",
+      "discriminator": [
+        58,
+        119,
+        215,
+        143,
+        203,
+        223,
+        32,
+        86
+      ],
+      "accounts": [
+        {
+          "name": "token_stake",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  45,
+                  115,
+                  116,
+                  97,
+                  107,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "platform_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  116,
+                  102,
+                  111,
+                  114,
+                  109,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_token_account",
+          "writable": true
+        },
+        {
+          "name": "stake_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  101,
+                  45,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "update_guardians",
+      "discriminator": [
+        43,
+        62,
+        250,
+        138,
+        141,
+        117,
+        132,
+        97
+      ],
+      "accounts": [
+        {
+          "name": "recovery_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "new_guardians",
+          "type": {
+            "vec": "pubkey"
+          }
+        },
+        {
+          "name": "new_threshold",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "use_session_key",
+      "discriminator": [
+        146,
+        44,
+        68,
+        208,
+        174,
+        231,
+        215,
+        14
+      ],
+      "accounts": [
+        {
+          "name": "session_key",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110,
+                  45,
+                  107,
+                  101,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "session_key.owner",
+                "account": "SessionKey"
+              },
+              {
+                "kind": "account",
+                "path": "session_signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "session_signer",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "action_type",
+          "type": "u16"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "verify_service_endpoint",
+      "discriminator": [
+        65,
+        247,
+        33,
+        0,
+        95,
+        136,
+        152,
+        183
+      ],
+      "accounts": [
+        {
+          "name": "did_document",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "did_document.owner",
+                "account": "DIDDocument"
+              }
+            ]
+          }
+        },
+        {
+          "name": "verifier",
+          "docs": [
+            "Verifier must be an authorized oracle or admin"
+          ],
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "endpoint_index",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "verify_zk_credential",
+      "discriminator": [
+        19,
+        241,
+        103,
+        66,
+        240,
+        143,
+        40,
+        168
+      ],
+      "accounts": [
+        {
+          "name": "zk_credential",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  122,
+                  107,
+                  45,
+                  99,
+                  114,
+                  101,
+                  100,
+                  101,
+                  110,
+                  116,
+                  105,
+                  97,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "zk_credential.user",
+                "account": "ZKCredential"
+              },
+              {
+                "kind": "account",
+                "path": "zk_credential.credential_index",
+                "account": "ZKCredential"
+              }
+            ]
+          }
+        },
+        {
+          "name": "zk_verifier_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  122,
+                  107,
+                  45,
+                  118,
+                  101,
+                  114,
+                  105,
+                  102,
+                  105,
+                  101,
+                  114,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "verifier",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "vote_dispute",
       "docs": [
         "Vote on dispute (arbitrators with high reputation)",
@@ -3173,6 +7424,32 @@
   ],
   "accounts": [
     {
+      "name": "AIOracleConfig",
+      "discriminator": [
+        20,
+        54,
+        55,
+        194,
+        240,
+        143,
+        207,
+        91
+      ]
+    },
+    {
+      "name": "AIVerificationResult",
+      "discriminator": [
+        77,
+        6,
+        154,
+        87,
+        119,
+        97,
+        161,
+        239
+      ]
+    },
+    {
       "name": "AchievementRecord",
       "discriminator": [
         29,
@@ -3209,6 +7486,58 @@
         180,
         75,
         242
+      ]
+    },
+    {
+      "name": "DAOConfig",
+      "discriminator": [
+        213,
+        84,
+        208,
+        52,
+        106,
+        144,
+        215,
+        198
+      ]
+    },
+    {
+      "name": "DAOTreasury",
+      "discriminator": [
+        253,
+        54,
+        193,
+        235,
+        222,
+        20,
+        227,
+        226
+      ]
+    },
+    {
+      "name": "DAOVote",
+      "discriminator": [
+        233,
+        150,
+        207,
+        239,
+        47,
+        144,
+        116,
+        40
+      ]
+    },
+    {
+      "name": "DIDDocument",
+      "discriminator": [
+        30,
+        242,
+        108,
+        40,
+        241,
+        147,
+        46,
+        221
       ]
     },
     {
@@ -3261,6 +7590,32 @@
         22,
         218,
         155
+      ]
+    },
+    {
+      "name": "FeePayerConfig",
+      "discriminator": [
+        104,
+        89,
+        253,
+        7,
+        4,
+        149,
+        47,
+        66
+      ]
+    },
+    {
+      "name": "IdentityStamps",
+      "discriminator": [
+        97,
+        141,
+        241,
+        250,
+        88,
+        186,
+        84,
+        23
       ]
     },
     {
@@ -3329,6 +7684,19 @@
       ]
     },
     {
+      "name": "KycRecord",
+      "discriminator": [
+        60,
+        42,
+        41,
+        19,
+        198,
+        74,
+        18,
+        101
+      ]
+    },
+    {
       "name": "Milestone",
       "discriminator": [
         38,
@@ -3365,6 +7733,110 @@
         69,
         20,
         175
+      ]
+    },
+    {
+      "name": "PlatformConfig",
+      "discriminator": [
+        160,
+        78,
+        128,
+        0,
+        248,
+        83,
+        230,
+        160
+      ]
+    },
+    {
+      "name": "Proposal",
+      "discriminator": [
+        26,
+        94,
+        189,
+        187,
+        116,
+        136,
+        53,
+        33
+      ]
+    },
+    {
+      "name": "QualityStake",
+      "discriminator": [
+        33,
+        106,
+        252,
+        167,
+        238,
+        196,
+        61,
+        136
+      ]
+    },
+    {
+      "name": "RecoveryConfig",
+      "discriminator": [
+        53,
+        220,
+        64,
+        189,
+        255,
+        179,
+        242,
+        74
+      ]
+    },
+    {
+      "name": "RecoveryRequest",
+      "discriminator": [
+        143,
+        116,
+        126,
+        64,
+        175,
+        138,
+        150,
+        111
+      ]
+    },
+    {
+      "name": "ReferralAccount",
+      "discriminator": [
+        237,
+        162,
+        80,
+        78,
+        196,
+        233,
+        91,
+        2
+      ]
+    },
+    {
+      "name": "ReferralConfig",
+      "discriminator": [
+        102,
+        148,
+        171,
+        235,
+        148,
+        83,
+        250,
+        140
+      ]
+    },
+    {
+      "name": "ReferralPayout",
+      "discriminator": [
+        228,
+        230,
+        61,
+        235,
+        166,
+        99,
+        39,
+        130
       ]
     },
     {
@@ -3407,6 +7879,19 @@
       ]
     },
     {
+      "name": "SessionKey",
+      "discriminator": [
+        93,
+        186,
+        163,
+        139,
+        160,
+        255,
+        81,
+        112
+      ]
+    },
+    {
       "name": "StakedVoteRecord",
       "discriminator": [
         121,
@@ -3417,6 +7902,19 @@
         2,
         170,
         146
+      ]
+    },
+    {
+      "name": "SybilConfig",
+      "discriminator": [
+        136,
+        182,
+        233,
+        201,
+        110,
+        162,
+        3,
+        120
       ]
     },
     {
@@ -3446,6 +7944,32 @@
       ]
     },
     {
+      "name": "TokenStake",
+      "discriminator": [
+        229,
+        123,
+        21,
+        243,
+        246,
+        164,
+        57,
+        239
+      ]
+    },
+    {
+      "name": "UserGasUsage",
+      "discriminator": [
+        90,
+        104,
+        87,
+        70,
+        232,
+        247,
+        213,
+        131
+      ]
+    },
+    {
       "name": "UserSBTCounter",
       "discriminator": [
         28,
@@ -3456,6 +7980,58 @@
         177,
         225,
         100
+      ]
+    },
+    {
+      "name": "UserSessionCounter",
+      "discriminator": [
+        233,
+        215,
+        27,
+        123,
+        222,
+        36,
+        22,
+        228
+      ]
+    },
+    {
+      "name": "UserZKCounter",
+      "discriminator": [
+        54,
+        206,
+        229,
+        39,
+        133,
+        89,
+        38,
+        133
+      ]
+    },
+    {
+      "name": "VCAnchor",
+      "discriminator": [
+        154,
+        165,
+        225,
+        151,
+        42,
+        10,
+        63,
+        114
+      ]
+    },
+    {
+      "name": "VCCounter",
+      "discriminator": [
+        116,
+        145,
+        252,
+        168,
+        99,
+        4,
+        164,
+        165
       ]
     },
     {
@@ -3483,9 +8059,87 @@
         32,
         119
       ]
+    },
+    {
+      "name": "ZKCredential",
+      "discriminator": [
+        231,
+        119,
+        0,
+        159,
+        93,
+        172,
+        202,
+        76
+      ]
+    },
+    {
+      "name": "ZKVerifierConfig",
+      "discriminator": [
+        163,
+        3,
+        108,
+        197,
+        107,
+        162,
+        79,
+        125
+      ]
     }
   ],
   "events": [
+    {
+      "name": "AIDisputeResolved",
+      "discriminator": [
+        228,
+        255,
+        80,
+        135,
+        131,
+        188,
+        245,
+        223
+      ]
+    },
+    {
+      "name": "AIOracleConfigInitialized",
+      "discriminator": [
+        235,
+        135,
+        173,
+        67,
+        141,
+        110,
+        200,
+        234
+      ]
+    },
+    {
+      "name": "AIVerificationDisputed",
+      "discriminator": [
+        8,
+        181,
+        145,
+        137,
+        31,
+        124,
+        9,
+        77
+      ]
+    },
+    {
+      "name": "AIVerificationSubmitted",
+      "discriminator": [
+        151,
+        208,
+        238,
+        128,
+        181,
+        67,
+        91,
+        239
+      ]
+    },
     {
       "name": "AchievementMinted",
       "discriminator": [
@@ -3575,6 +8229,58 @@
         226,
         125,
         63
+      ]
+    },
+    {
+      "name": "DAOConfigInitialized",
+      "discriminator": [
+        113,
+        5,
+        151,
+        197,
+        29,
+        127,
+        106,
+        197
+      ]
+    },
+    {
+      "name": "DAOVoteCast",
+      "discriminator": [
+        160,
+        207,
+        222,
+        156,
+        191,
+        205,
+        70,
+        165
+      ]
+    },
+    {
+      "name": "DIDCreated",
+      "discriminator": [
+        119,
+        114,
+        111,
+        119,
+        139,
+        145,
+        17,
+        42
+      ]
+    },
+    {
+      "name": "DIDDeactivated",
+      "discriminator": [
+        80,
+        250,
+        148,
+        157,
+        178,
+        107,
+        147,
+        229
       ]
     },
     {
@@ -3669,6 +8375,32 @@
       ]
     },
     {
+      "name": "FeePayerConfigInitialized",
+      "discriminator": [
+        194,
+        176,
+        82,
+        237,
+        141,
+        89,
+        134,
+        135
+      ]
+    },
+    {
+      "name": "FeePayerFunded",
+      "discriminator": [
+        228,
+        128,
+        14,
+        60,
+        229,
+        50,
+        235,
+        233
+      ]
+    },
+    {
       "name": "FreelancerNotification",
       "discriminator": [
         58,
@@ -3679,6 +8411,58 @@
         119,
         13,
         228
+      ]
+    },
+    {
+      "name": "GuardiansUpdated",
+      "discriminator": [
+        95,
+        227,
+        219,
+        160,
+        108,
+        60,
+        210,
+        101
+      ]
+    },
+    {
+      "name": "HumanityScoreRecalculated",
+      "discriminator": [
+        69,
+        222,
+        200,
+        88,
+        117,
+        127,
+        212,
+        227
+      ]
+    },
+    {
+      "name": "IdentityStampAdded",
+      "discriminator": [
+        124,
+        104,
+        175,
+        147,
+        237,
+        6,
+        75,
+        93
+      ]
+    },
+    {
+      "name": "IdentityStampRemoved",
+      "discriminator": [
+        47,
+        51,
+        201,
+        122,
+        249,
+        74,
+        245,
+        2
       ]
     },
     {
@@ -3770,6 +8554,45 @@
         83,
         182,
         87
+      ]
+    },
+    {
+      "name": "KycFinalized",
+      "discriminator": [
+        66,
+        151,
+        157,
+        114,
+        162,
+        123,
+        12,
+        149
+      ]
+    },
+    {
+      "name": "KycReset",
+      "discriminator": [
+        31,
+        37,
+        189,
+        120,
+        236,
+        50,
+        138,
+        15
+      ]
+    },
+    {
+      "name": "KycSubmitted",
+      "discriminator": [
+        93,
+        140,
+        138,
+        188,
+        236,
+        201,
+        123,
+        149
       ]
     },
     {
@@ -3890,6 +8713,227 @@
       ]
     },
     {
+      "name": "OracleAuthorityAdded",
+      "discriminator": [
+        15,
+        245,
+        241,
+        215,
+        145,
+        239,
+        207,
+        216
+      ]
+    },
+    {
+      "name": "PlatformConfigInitialized",
+      "discriminator": [
+        108,
+        139,
+        227,
+        208,
+        240,
+        110,
+        23,
+        168
+      ]
+    },
+    {
+      "name": "PlatformFeeCollected",
+      "discriminator": [
+        44,
+        79,
+        0,
+        185,
+        164,
+        86,
+        134,
+        83
+      ]
+    },
+    {
+      "name": "ProposalCreated",
+      "discriminator": [
+        186,
+        8,
+        160,
+        108,
+        81,
+        13,
+        51,
+        206
+      ]
+    },
+    {
+      "name": "ProposalExecuted",
+      "discriminator": [
+        92,
+        213,
+        189,
+        201,
+        101,
+        83,
+        111,
+        83
+      ]
+    },
+    {
+      "name": "ProposalFinalized",
+      "discriminator": [
+        159,
+        104,
+        210,
+        220,
+        86,
+        209,
+        61,
+        51
+      ]
+    },
+    {
+      "name": "QualityCollateralReleased",
+      "discriminator": [
+        190,
+        160,
+        43,
+        114,
+        22,
+        219,
+        198,
+        180
+      ]
+    },
+    {
+      "name": "QualityCollateralSlashed",
+      "discriminator": [
+        36,
+        180,
+        166,
+        33,
+        172,
+        42,
+        228,
+        59
+      ]
+    },
+    {
+      "name": "QualityCollateralStaked",
+      "discriminator": [
+        67,
+        30,
+        83,
+        84,
+        157,
+        63,
+        243,
+        107
+      ]
+    },
+    {
+      "name": "RecoveryApproved",
+      "discriminator": [
+        97,
+        50,
+        186,
+        253,
+        67,
+        239,
+        34,
+        47
+      ]
+    },
+    {
+      "name": "RecoveryCancelled",
+      "discriminator": [
+        191,
+        25,
+        236,
+        86,
+        25,
+        77,
+        117,
+        96
+      ]
+    },
+    {
+      "name": "RecoveryExecuted",
+      "discriminator": [
+        161,
+        218,
+        6,
+        191,
+        85,
+        217,
+        12,
+        144
+      ]
+    },
+    {
+      "name": "RecoveryInitiated",
+      "discriminator": [
+        138,
+        165,
+        92,
+        207,
+        123,
+        93,
+        223,
+        98
+      ]
+    },
+    {
+      "name": "RecoverySetup",
+      "discriminator": [
+        164,
+        212,
+        141,
+        215,
+        77,
+        201,
+        181,
+        13
+      ]
+    },
+    {
+      "name": "ReferralCommissionPaid",
+      "discriminator": [
+        200,
+        177,
+        254,
+        208,
+        65,
+        94,
+        246,
+        125
+      ]
+    },
+    {
+      "name": "ReferralConfigInitialized",
+      "discriminator": [
+        98,
+        183,
+        48,
+        93,
+        148,
+        142,
+        129,
+        196
+      ]
+    },
+    {
+      "name": "ReferralRegistered",
+      "discriminator": [
+        210,
+        150,
+        27,
+        227,
+        209,
+        161,
+        7,
+        232
+      ]
+    },
+    {
       "name": "ReputationSBTMinted",
       "discriminator": [
         186,
@@ -3942,6 +8986,71 @@
       ]
     },
     {
+      "name": "ServiceEndpointAdded",
+      "discriminator": [
+        157,
+        253,
+        234,
+        161,
+        218,
+        3,
+        1,
+        42
+      ]
+    },
+    {
+      "name": "ServiceEndpointVerified",
+      "discriminator": [
+        241,
+        192,
+        48,
+        35,
+        195,
+        178,
+        46,
+        41
+      ]
+    },
+    {
+      "name": "SessionKeyCreated",
+      "discriminator": [
+        242,
+        227,
+        114,
+        120,
+        164,
+        30,
+        58,
+        114
+      ]
+    },
+    {
+      "name": "SessionKeyRevoked",
+      "discriminator": [
+        18,
+        208,
+        143,
+        205,
+        85,
+        72,
+        180,
+        176
+      ]
+    },
+    {
+      "name": "SessionKeyUsed",
+      "discriminator": [
+        96,
+        55,
+        182,
+        174,
+        76,
+        126,
+        195,
+        104
+      ]
+    },
+    {
       "name": "StakedDisputeResolved",
       "discriminator": [
         104,
@@ -3978,6 +9087,32 @@
         49,
         103,
         208
+      ]
+    },
+    {
+      "name": "StakingRewardsClaimed",
+      "discriminator": [
+        251,
+        169,
+        50,
+        96,
+        7,
+        92,
+        141,
+        137
+      ]
+    },
+    {
+      "name": "SybilConfigInitialized",
+      "discriminator": [
+        39,
+        195,
+        143,
+        240,
+        34,
+        143,
+        210,
+        227
       ]
     },
     {
@@ -4033,6 +9168,123 @@
       ]
     },
     {
+      "name": "TokensBurned",
+      "discriminator": [
+        230,
+        255,
+        34,
+        113,
+        226,
+        53,
+        227,
+        9
+      ]
+    },
+    {
+      "name": "TokensStaked",
+      "discriminator": [
+        220,
+        130,
+        145,
+        142,
+        109,
+        123,
+        38,
+        100
+      ]
+    },
+    {
+      "name": "TokensUnstaked",
+      "discriminator": [
+        137,
+        203,
+        131,
+        80,
+        135,
+        107,
+        181,
+        150
+      ]
+    },
+    {
+      "name": "TransactionSponsored",
+      "discriminator": [
+        162,
+        27,
+        192,
+        171,
+        6,
+        128,
+        47,
+        153
+      ]
+    },
+    {
+      "name": "TreasuryFunded",
+      "discriminator": [
+        172,
+        66,
+        241,
+        101,
+        216,
+        219,
+        147,
+        130
+      ]
+    },
+    {
+      "name": "VCAnchored",
+      "discriminator": [
+        64,
+        125,
+        152,
+        124,
+        155,
+        114,
+        168,
+        178
+      ]
+    },
+    {
+      "name": "VCRevoked",
+      "discriminator": [
+        221,
+        107,
+        166,
+        122,
+        151,
+        61,
+        43,
+        253
+      ]
+    },
+    {
+      "name": "VerificationMethodAdded",
+      "discriminator": [
+        76,
+        171,
+        201,
+        51,
+        216,
+        165,
+        128,
+        241
+      ]
+    },
+    {
+      "name": "VerificationMethodRemoved",
+      "discriminator": [
+        239,
+        108,
+        108,
+        1,
+        108,
+        146,
+        182,
+        32
+      ]
+    },
+    {
       "name": "WorkRejected",
       "discriminator": [
         155,
@@ -4057,111 +9309,414 @@
         64,
         125
       ]
+    },
+    {
+      "name": "ZKCredentialRevoked",
+      "discriminator": [
+        14,
+        46,
+        227,
+        66,
+        116,
+        122,
+        27,
+        209
+      ]
+    },
+    {
+      "name": "ZKCredentialSubmitted",
+      "discriminator": [
+        193,
+        142,
+        149,
+        39,
+        107,
+        89,
+        80,
+        217
+      ]
+    },
+    {
+      "name": "ZKCredentialVerified",
+      "discriminator": [
+        154,
+        69,
+        206,
+        145,
+        208,
+        167,
+        202,
+        29
+      ]
+    },
+    {
+      "name": "ZKVerifierAdded",
+      "discriminator": [
+        41,
+        130,
+        7,
+        30,
+        205,
+        163,
+        212,
+        242
+      ]
+    },
+    {
+      "name": "ZKVerifierConfigInitialized",
+      "discriminator": [
+        69,
+        49,
+        66,
+        0,
+        190,
+        201,
+        109,
+        194
+      ]
     }
   ],
   "errors": [
     {
       "code": 6000,
-      "name": "InvalidStakeAmount",
-      "msg": "Invalid stake amount"
+      "name": "InvalidGuardianCount",
+      "msg": "Invalid guardian count (2-5)"
     },
     {
       "code": 6001,
-      "name": "InvalidJurorCount",
-      "msg": "Juror count must be between 3 and 11"
+      "name": "InvalidThreshold",
+      "msg": "Invalid threshold (min 2, max guardian count)"
     },
     {
       "code": 6002,
-      "name": "VotingPeriodTooShort",
-      "msg": "Voting period must be at least 1 hour"
+      "name": "TimelockTooShort",
+      "msg": "Timelock too short (min 1 hour)"
     },
     {
       "code": 6003,
-      "name": "SlashPercentageTooHigh",
-      "msg": "Slash percentage must not exceed 50%"
+      "name": "TimelockTooLong",
+      "msg": "Timelock too long (max 7 days)"
     },
     {
       "code": 6004,
-      "name": "InvalidRewardPercentage",
-      "msg": "Invalid reward percentage"
+      "name": "OwnerCannotBeGuardian",
+      "msg": "Owner cannot be a guardian"
     },
     {
       "code": 6005,
-      "name": "InvalidQuorumPercentage",
-      "msg": "Invalid quorum percentage (must be 50-100)"
+      "name": "DuplicateGuardian",
+      "msg": "Duplicate guardian"
     },
     {
       "code": 6006,
-      "name": "InsufficientStakeAmount",
-      "msg": "Insufficient stake amount"
+      "name": "Unauthorized",
+      "msg": "Unauthorized"
     },
     {
       "code": 6007,
-      "name": "RegistryFull",
-      "msg": "Juror registry is full (max 100)"
+      "name": "RecoveryNotActive",
+      "msg": "Recovery not active"
     },
     {
       "code": 6008,
-      "name": "StakeNotActive",
-      "msg": "Stake is not active"
+      "name": "NotAGuardian",
+      "msg": "Not a guardian"
     },
     {
       "code": 6009,
-      "name": "ActiveDisputesPending",
-      "msg": "Cannot unstake with active disputes pending"
+      "name": "SameOwner",
+      "msg": "Same owner address"
     },
     {
       "code": 6010,
-      "name": "NotEnoughJurors",
-      "msg": "Not enough jurors in registry"
+      "name": "AlreadyExecuted",
+      "msg": "Already executed"
     },
     {
       "code": 6011,
-      "name": "JurorSelectionFailed",
-      "msg": "Juror selection failed"
+      "name": "RecoveryCancelled",
+      "msg": "Recovery cancelled"
     },
     {
       "code": 6012,
-      "name": "NotSelectedJuror",
-      "msg": "Not a selected juror for this dispute"
+      "name": "AlreadyApproved",
+      "msg": "Already approved"
     },
     {
       "code": 6013,
-      "name": "DisputeAlreadyResolved",
-      "msg": "Dispute already resolved"
+      "name": "TimelockNotExpired",
+      "msg": "Timelock not expired"
     },
     {
       "code": 6014,
-      "name": "VotingPeriodExpired",
-      "msg": "Voting period has expired"
+      "name": "InsufficientApprovals",
+      "msg": "Insufficient approvals"
     },
     {
       "code": 6015,
-      "name": "CalculationOverflow",
-      "msg": "Calculation overflow"
-    },
-    {
-      "code": 6016,
-      "name": "QuorumNotMet",
-      "msg": "Quorum not met"
-    },
-    {
-      "code": 6017,
-      "name": "VotingPeriodNotEnded",
-      "msg": "Voting period has not ended"
-    },
-    {
-      "code": 6018,
-      "name": "DisputeNotYetResolved",
-      "msg": "Dispute not yet resolved"
-    },
-    {
-      "code": 6019,
-      "name": "RewardAlreadyClaimed",
-      "msg": "Reward already claimed"
+      "name": "Overflow",
+      "msg": "Arithmetic overflow"
     }
   ],
   "types": [
+    {
+      "name": "AIDisputeResolved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "resolver",
+            "type": "pubkey"
+          },
+          {
+            "name": "override_score",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIOracleConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "oracle_authorities",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "min_confidence",
+            "type": "u8"
+          },
+          {
+            "name": "min_oracle_consensus",
+            "type": "u8"
+          },
+          {
+            "name": "total_verifications",
+            "type": "u64"
+          },
+          {
+            "name": "active",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIOracleConfigInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "primary_oracle",
+            "type": "pubkey"
+          },
+          {
+            "name": "min_confidence",
+            "type": "u8"
+          },
+          {
+            "name": "min_oracle_consensus",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIVerificationDisputed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "disputed_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIVerificationResult",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "verification_type",
+            "type": "u8"
+          },
+          {
+            "name": "oracle_count",
+            "type": "u8"
+          },
+          {
+            "name": "oracle_scores",
+            "type": {
+              "array": [
+                "u8",
+                5
+              ]
+            }
+          },
+          {
+            "name": "oracle_confidences",
+            "type": {
+              "array": [
+                "u8",
+                5
+              ]
+            }
+          },
+          {
+            "name": "oracle_keys",
+            "type": {
+              "array": [
+                "pubkey",
+                5
+              ]
+            }
+          },
+          {
+            "name": "final_score",
+            "type": "u8"
+          },
+          {
+            "name": "final_confidence",
+            "type": "u8"
+          },
+          {
+            "name": "consensus_reached",
+            "type": "bool"
+          },
+          {
+            "name": "auto_approved",
+            "type": "bool"
+          },
+          {
+            "name": "result_uri",
+            "type": "string"
+          },
+          {
+            "name": "details_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "last_updated",
+            "type": "i64"
+          },
+          {
+            "name": "disputed",
+            "type": "bool"
+          },
+          {
+            "name": "dispute_reason",
+            "type": "string"
+          },
+          {
+            "name": "human_reviewed",
+            "type": "bool"
+          },
+          {
+            "name": "resolution_uri",
+            "type": "string"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIVerificationSubmitted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "oracle",
+            "type": "pubkey"
+          },
+          {
+            "name": "verification_type",
+            "type": "u8"
+          },
+          {
+            "name": "score",
+            "type": "u8"
+          },
+          {
+            "name": "confidence",
+            "type": "u8"
+          },
+          {
+            "name": "oracle_count",
+            "type": "u8"
+          },
+          {
+            "name": "consensus_reached",
+            "type": "bool"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
     {
       "name": "AchievementMinted",
       "type": {
@@ -4536,6 +10091,314 @@
           {
             "name": "timestamp",
             "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DAOConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "proposal_count",
+            "type": "u64"
+          },
+          {
+            "name": "min_proposal_stake",
+            "type": "u64"
+          },
+          {
+            "name": "voting_period",
+            "type": "i64"
+          },
+          {
+            "name": "quorum_percentage",
+            "type": "u8"
+          },
+          {
+            "name": "reputation_multiplier",
+            "type": "u8"
+          },
+          {
+            "name": "total_proposals_executed",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DAOConfigInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "voting_period",
+            "type": "i64"
+          },
+          {
+            "name": "quorum_percentage",
+            "type": "u8"
+          },
+          {
+            "name": "reputation_multiplier",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DAOTreasury",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "total_balance",
+            "type": "u64"
+          },
+          {
+            "name": "allocated",
+            "type": "u64"
+          },
+          {
+            "name": "last_deposit",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DAOVote",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "proposal",
+            "type": "pubkey"
+          },
+          {
+            "name": "voter",
+            "type": "pubkey"
+          },
+          {
+            "name": "vote_weight",
+            "type": "u64"
+          },
+          {
+            "name": "vote_for",
+            "type": "bool"
+          },
+          {
+            "name": "token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "sbt_count",
+            "type": "u32"
+          },
+          {
+            "name": "voted_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DAOVoteCast",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "proposal_id",
+            "type": "u64"
+          },
+          {
+            "name": "voter",
+            "type": "pubkey"
+          },
+          {
+            "name": "vote_for",
+            "type": "bool"
+          },
+          {
+            "name": "vote_weight",
+            "type": "u64"
+          },
+          {
+            "name": "token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "sbt_count",
+            "type": "u32"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DIDCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "did_uri",
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DIDDeactivated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "did_owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DIDDocument",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "did_uri",
+            "type": "string"
+          },
+          {
+            "name": "verification_method_count",
+            "type": "u8"
+          },
+          {
+            "name": "vm_types",
+            "type": {
+              "array": [
+                "u8",
+                5
+              ]
+            }
+          },
+          {
+            "name": "vm_keys",
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                5
+              ]
+            }
+          },
+          {
+            "name": "vm_controllers",
+            "type": {
+              "array": [
+                "pubkey",
+                5
+              ]
+            }
+          },
+          {
+            "name": "service_endpoint_count",
+            "type": "u8"
+          },
+          {
+            "name": "se_types",
+            "type": {
+              "array": [
+                "u8",
+                5
+              ]
+            }
+          },
+          {
+            "name": "se_uris",
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "se_verified",
+            "type": {
+              "array": [
+                "bool",
+                5
+              ]
+            }
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "updated_at",
+            "type": "i64"
+          },
+          {
+            "name": "active",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }
@@ -4933,6 +10796,98 @@
       }
     },
     {
+      "name": "FeePayerConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "fee_payer",
+            "type": "pubkey"
+          },
+          {
+            "name": "daily_budget",
+            "type": "u64"
+          },
+          {
+            "name": "spent_today",
+            "type": "u64"
+          },
+          {
+            "name": "last_reset",
+            "type": "i64"
+          },
+          {
+            "name": "max_tx_per_user_per_day",
+            "type": "u16"
+          },
+          {
+            "name": "total_sponsored",
+            "type": "u64"
+          },
+          {
+            "name": "active",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FeePayerConfigInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "fee_payer",
+            "type": "pubkey"
+          },
+          {
+            "name": "daily_budget",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FeePayerFunded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "funder",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "total_pool",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
       "name": "FreelancerNotification",
       "type": {
         "kind": "struct",
@@ -4956,6 +10911,205 @@
           {
             "name": "timestamp",
             "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GuardiansUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "new_guardian_count",
+            "type": "u8"
+          },
+          {
+            "name": "new_threshold",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HumanityScoreRecalculated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "new_score",
+            "type": "u16"
+          },
+          {
+            "name": "active_stamps",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IdType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "NationalId"
+          },
+          {
+            "name": "Passport"
+          },
+          {
+            "name": "DriversLicense"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IdentityStampAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "stamp_type",
+            "type": "u8"
+          },
+          {
+            "name": "weight",
+            "type": "u8"
+          },
+          {
+            "name": "new_score",
+            "type": "u16"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IdentityStampRemoved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "stamp_type",
+            "type": "u8"
+          },
+          {
+            "name": "new_score",
+            "type": "u16"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IdentityStamps",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "stamp_count",
+            "type": "u8"
+          },
+          {
+            "name": "stamp_types",
+            "type": {
+              "array": [
+                "u8",
+                10
+              ]
+            }
+          },
+          {
+            "name": "stamp_provider_hashes",
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                10
+              ]
+            }
+          },
+          {
+            "name": "stamp_weights",
+            "type": {
+              "array": [
+                "u8",
+                10
+              ]
+            }
+          },
+          {
+            "name": "stamp_verified_at",
+            "type": {
+              "array": [
+                "i64",
+                10
+              ]
+            }
+          },
+          {
+            "name": "stamp_expires_at",
+            "type": {
+              "array": [
+                "i64",
+                10
+              ]
+            }
+          },
+          {
+            "name": "humanity_score",
+            "type": "u16"
+          },
+          {
+            "name": "threshold_reached",
+            "type": "bool"
+          },
+          {
+            "name": "last_updated",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }
@@ -5355,6 +11509,123 @@
           {
             "name": "voting_deadline",
             "type": "i64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "KycFinalized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "verified",
+            "type": "bool"
+          },
+          {
+            "name": "face_distance_bp",
+            "type": "u32"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "KycRecord",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "KycStatus"
+              }
+            }
+          },
+          {
+            "name": "id_type",
+            "type": {
+              "defined": {
+                "name": "IdType"
+              }
+            }
+          },
+          {
+            "name": "submitted_at",
+            "type": "i64"
+          },
+          {
+            "name": "verified_at",
+            "type": "i64"
+          },
+          {
+            "name": "face_distance_bp",
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "KycReset",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "KycStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Verified"
+          },
+          {
+            "name": "Rejected"
+          }
+        ]
+      }
+    },
+    {
+      "name": "KycSubmitted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
           },
           {
             "name": "timestamp",
@@ -5824,6 +12095,802 @@
       }
     },
     {
+      "name": "OracleAuthorityAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "oracle",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_oracles",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PlatformConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_staked",
+            "type": "u64"
+          },
+          {
+            "name": "fee_percentage",
+            "type": "u8"
+          },
+          {
+            "name": "buyback_percentage",
+            "type": "u8"
+          },
+          {
+            "name": "accumulated_fees",
+            "type": "u64"
+          },
+          {
+            "name": "total_fees_collected",
+            "type": "u64"
+          },
+          {
+            "name": "total_burned",
+            "type": "u64"
+          },
+          {
+            "name": "last_distribution",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PlatformConfigInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "fee_percentage",
+            "type": "u8"
+          },
+          {
+            "name": "buyback_percentage",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PlatformFeeCollected",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job_amount",
+            "type": "u64"
+          },
+          {
+            "name": "fee_amount",
+            "type": "u64"
+          },
+          {
+            "name": "total_accumulated",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Proposal",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u64"
+          },
+          {
+            "name": "proposer",
+            "type": "pubkey"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "description_uri",
+            "type": "string"
+          },
+          {
+            "name": "proposal_type",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "type": "u8"
+          },
+          {
+            "name": "votes_for",
+            "type": "u64"
+          },
+          {
+            "name": "votes_against",
+            "type": "u64"
+          },
+          {
+            "name": "total_voters",
+            "type": "u32"
+          },
+          {
+            "name": "stake_amount",
+            "type": "u64"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "voting_ends_at",
+            "type": "i64"
+          },
+          {
+            "name": "executed",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProposalCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "proposal_id",
+            "type": "u64"
+          },
+          {
+            "name": "proposer",
+            "type": "pubkey"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "proposal_type",
+            "type": "u8"
+          },
+          {
+            "name": "voting_ends_at",
+            "type": "i64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProposalExecuted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "proposal_id",
+            "type": "u64"
+          },
+          {
+            "name": "executor",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProposalFinalized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "proposal_id",
+            "type": "u64"
+          },
+          {
+            "name": "status",
+            "type": "u8"
+          },
+          {
+            "name": "votes_for",
+            "type": "u64"
+          },
+          {
+            "name": "votes_against",
+            "type": "u64"
+          },
+          {
+            "name": "total_voters",
+            "type": "u32"
+          },
+          {
+            "name": "quorum_met",
+            "type": "bool"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "QualityCollateralReleased",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "staker",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "QualityCollateralSlashed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "staker",
+            "type": "pubkey"
+          },
+          {
+            "name": "beneficiary",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "QualityCollateralStaked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "staker",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "QualityStake",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "staker",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "staked_at",
+            "type": "i64"
+          },
+          {
+            "name": "released",
+            "type": "bool"
+          },
+          {
+            "name": "slashed",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RecoveryApproved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "approver",
+            "type": "pubkey"
+          },
+          {
+            "name": "approval_count",
+            "type": "u8"
+          },
+          {
+            "name": "threshold",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RecoveryCancelled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RecoveryConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "guardians",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "threshold",
+            "type": "u8"
+          },
+          {
+            "name": "timelock_period",
+            "type": "i64"
+          },
+          {
+            "name": "active",
+            "type": "bool"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "updated_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RecoveryExecuted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "old_owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "new_owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "approval_count",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RecoveryInitiated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "new_owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "initiated_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "executable_at",
+            "type": "i64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RecoveryRequest",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "new_owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "initiated_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "approvals",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "initiated_at",
+            "type": "i64"
+          },
+          {
+            "name": "executable_at",
+            "type": "i64"
+          },
+          {
+            "name": "executed",
+            "type": "bool"
+          },
+          {
+            "name": "cancelled",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RecoverySetup",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "guardian_count",
+            "type": "u8"
+          },
+          {
+            "name": "threshold",
+            "type": "u8"
+          },
+          {
+            "name": "timelock_period",
+            "type": "i64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReferralAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "referrer",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "referral_count",
+            "type": "u32"
+          },
+          {
+            "name": "total_earnings",
+            "type": "u64"
+          },
+          {
+            "name": "registered_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReferralCommissionPaid",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "referrer",
+            "type": "pubkey"
+          },
+          {
+            "name": "referred_user",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "level",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReferralConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "level1_percentage",
+            "type": "u8"
+          },
+          {
+            "name": "level2_percentage",
+            "type": "u8"
+          },
+          {
+            "name": "max_levels",
+            "type": "u8"
+          },
+          {
+            "name": "total_referrals",
+            "type": "u64"
+          },
+          {
+            "name": "total_commissions_paid",
+            "type": "u64"
+          },
+          {
+            "name": "active",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReferralConfigInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "level1_percentage",
+            "type": "u8"
+          },
+          {
+            "name": "level2_percentage",
+            "type": "u8"
+          },
+          {
+            "name": "max_levels",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReferralPayout",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "referrer",
+            "type": "pubkey"
+          },
+          {
+            "name": "referred_user",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "level",
+            "type": "u8"
+          },
+          {
+            "name": "paid",
+            "type": "bool"
+          },
+          {
+            "name": "paid_at",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReferralRegistered",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "referrer",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
       "name": "Reputation",
       "type": {
         "kind": "struct",
@@ -6078,6 +13145,182 @@
       }
     },
     {
+      "name": "ServiceEndpointAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "did_owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "service_type",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ServiceEndpointVerified",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "did_owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "endpoint_index",
+            "type": "u8"
+          },
+          {
+            "name": "verifier",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SessionKey",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "session_pubkey",
+            "type": "pubkey"
+          },
+          {
+            "name": "valid_until",
+            "type": "i64"
+          },
+          {
+            "name": "max_amount",
+            "type": "u64"
+          },
+          {
+            "name": "spent_amount",
+            "type": "u64"
+          },
+          {
+            "name": "allowed_actions",
+            "type": "u16"
+          },
+          {
+            "name": "active",
+            "type": "bool"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "tx_count",
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SessionKeyCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "session_pubkey",
+            "type": "pubkey"
+          },
+          {
+            "name": "valid_until",
+            "type": "i64"
+          },
+          {
+            "name": "max_amount",
+            "type": "u64"
+          },
+          {
+            "name": "allowed_actions",
+            "type": "u16"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SessionKeyRevoked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "session_pubkey",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SessionKeyUsed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "session_pubkey",
+            "type": "pubkey"
+          },
+          {
+            "name": "action_type",
+            "type": "u16"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "remaining_budget",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
       "name": "StakedDisputeResolved",
       "type": {
         "kind": "struct",
@@ -6193,6 +13436,90 @@
           {
             "name": "slashed",
             "type": "bool"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StakingRewardsClaimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SybilConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "oracle_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "min_score_to_bid",
+            "type": "u16"
+          },
+          {
+            "name": "min_score_to_post",
+            "type": "u16"
+          },
+          {
+            "name": "active",
+            "type": "bool"
+          },
+          {
+            "name": "total_verified_users",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SybilConfigInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "oracle_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "min_score_to_bid",
+            "type": "u16"
+          },
+          {
+            "name": "min_score_to_post",
+            "type": "u16"
           },
           {
             "name": "timestamp",
@@ -6420,6 +13747,190 @@
       }
     },
     {
+      "name": "TokenStake",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "staked_at",
+            "type": "i64"
+          },
+          {
+            "name": "last_claimed",
+            "type": "i64"
+          },
+          {
+            "name": "lock_until",
+            "type": "i64"
+          },
+          {
+            "name": "accumulated_rewards",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokensBurned",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "total_burned",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokensStaked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "lock_period",
+            "type": "i64"
+          },
+          {
+            "name": "total_staked",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokensUnstaked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "total_staked",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TransactionSponsored",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "gas_cost",
+            "type": "u64"
+          },
+          {
+            "name": "daily_remaining",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TreasuryFunded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "funder",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "total_balance",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UserGasUsage",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "tx_today",
+            "type": "u16"
+          },
+          {
+            "name": "total_sponsored",
+            "type": "u64"
+          },
+          {
+            "name": "last_reset",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
       "name": "UserSBTCounter",
       "type": {
         "kind": "struct",
@@ -6435,6 +13946,226 @@
           {
             "name": "bump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UserSessionCounter",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "active_sessions",
+            "type": "u8"
+          },
+          {
+            "name": "total_sessions",
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UserZKCounter",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "count",
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VCAnchor",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "issuer",
+            "type": "pubkey"
+          },
+          {
+            "name": "subject",
+            "type": "pubkey"
+          },
+          {
+            "name": "credential_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "credential_type",
+            "type": "string"
+          },
+          {
+            "name": "metadata_uri",
+            "type": "string"
+          },
+          {
+            "name": "issued_at",
+            "type": "i64"
+          },
+          {
+            "name": "expires_at",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "revoked",
+            "type": "bool"
+          },
+          {
+            "name": "vc_index",
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VCAnchored",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "issuer",
+            "type": "pubkey"
+          },
+          {
+            "name": "subject",
+            "type": "pubkey"
+          },
+          {
+            "name": "credential_type",
+            "type": "string"
+          },
+          {
+            "name": "credential_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "vc_index",
+            "type": "u32"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VCCounter",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "issuer",
+            "type": "pubkey"
+          },
+          {
+            "name": "count",
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VCRevoked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "issuer",
+            "type": "pubkey"
+          },
+          {
+            "name": "subject",
+            "type": "pubkey"
+          },
+          {
+            "name": "vc_index",
+            "type": "u32"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VerificationMethodAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "did_owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "method_type",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VerificationMethodRemoved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "did_owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "method_index",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
           }
         ]
       }
@@ -6547,6 +14278,223 @@
           {
             "name": "deliverable_uri",
             "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ZKCredential",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "credential_type",
+            "type": "string"
+          },
+          {
+            "name": "commitment",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "proof_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "public_inputs_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "verifier",
+            "type": "pubkey"
+          },
+          {
+            "name": "submitted_at",
+            "type": "i64"
+          },
+          {
+            "name": "verified_at",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "valid_until",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "verified",
+            "type": "bool"
+          },
+          {
+            "name": "revoked",
+            "type": "bool"
+          },
+          {
+            "name": "credential_index",
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ZKCredentialRevoked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "credential_index",
+            "type": "u32"
+          },
+          {
+            "name": "revoked_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ZKCredentialSubmitted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "credential_type",
+            "type": "string"
+          },
+          {
+            "name": "credential_index",
+            "type": "u32"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ZKCredentialVerified",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "verifier",
+            "type": "pubkey"
+          },
+          {
+            "name": "credential_index",
+            "type": "u32"
+          },
+          {
+            "name": "credential_type",
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ZKVerifierAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "verifier",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ZKVerifierConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "authorized_verifiers",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "total_credentials",
+            "type": "u64"
+          },
+          {
+            "name": "active",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ZKVerifierConfigInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
           },
           {
             "name": "timestamp",

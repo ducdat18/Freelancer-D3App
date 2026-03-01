@@ -317,7 +317,7 @@ export function useDID() {
 
         // @ts-ignore
         const tx = await program.methods
-          .anchorVerifiableCredential(credentialType, metadataUri, expiresAtArg)
+          .anchorVerifiableCredential(credentialType, metadataUri, expiresAtArg, currentCount)
           .accounts({
             vcAnchor: vcAnchorPda,
             vcCounter: counterPda,

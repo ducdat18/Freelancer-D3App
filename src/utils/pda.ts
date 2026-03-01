@@ -485,3 +485,16 @@ export function deriveZKCounterPDA(user: PublicKeyType): [PublicKeyType, number]
     PROGRAM_ID
   );
 }
+
+// ==================== KYC PDAs ====================
+
+/**
+ * Derive KYC Record PDA
+ * @param user - User's public key
+ */
+export function deriveKycPDA(user: PublicKeyType): [PublicKeyType, number] {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from(SEEDS.KYC), user.toBuffer()],
+    PROGRAM_ID
+  );
+}

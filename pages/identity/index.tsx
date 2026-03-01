@@ -29,6 +29,7 @@ import VerifiedBadge from '../../src/components/VerifiedBadge';
 import { useSolanaProgram } from '../../src/hooks/useSolanaProgram';
 import { useDID } from '../../src/hooks/useDID';
 import { useIdentityVerification } from '../../src/hooks/useIdentityVerification';
+import { useKyc } from '../../src/hooks/useKyc';
 import { useFaceApi } from '../../src/hooks/useFaceApi';
 import { detectFaceDescriptor, faceDistance } from '../../src/hooks/useFaceApi';
 import type { FaceDescriptor } from '../../src/hooks/useFaceApi';
@@ -232,8 +233,13 @@ export default function IdentityPage() {
   const { setVisible } = useWalletModal();
   const addressStr = publicKey?.toBase58() ?? null;
 
-  const { status: kycStatus, isVerified, record, startPending, finalise, reset: kycReset } = useIdentityVerification(addressStr);
+  const { status: kycStatus, isVerified, record, loaded: kycLoaded, startPending, finalise, reset: kycReset, syncFromChain } = useIdentityVerification(addressStr);
+  const { submitKyc, finalizeKyc, resetKycOnChain, fetchKycRecord, loading: kycChainLoading } = useKyc();
   const { status: faceApiStatus, detect } = useFaceApi();
+
+  // On-chain transaction state
+  const [chainTxSig, setChainTxSig] = useState<string | null>(null);
+  const [chainError, setChainError] = useState<string | null>(null);
 
   const {
     didDocument, credentials, loading: didLoading, error: didError,
@@ -282,6 +288,21 @@ export default function IdentityPage() {
     }
   }, [connected, publicKey, fetchDIDDocument, fetchUserCredentials]);
 
+  // Chain-sync: if localStorage shows 'none' but chain has a record, sync it
+  useEffect(() => {
+    if (!connected || !publicKey || !kycLoaded || kycStatus !== 'none') return;
+    fetchKycRecord(publicKey as any).then((chainRec) => {
+      if (!chainRec || chainRec.status === 'none' || chainRec.status === 'pending') return;
+      syncFromChain(
+        chainRec.status,
+        chainRec.idType,
+        chainRec.submittedAt,
+        chainRec.verifiedAt,
+        chainRec.faceDistanceBp,
+      );
+    }).catch(() => {/* ignore if chain read fails */});
+  }, [connected, publicKey, kycLoaded, kycStatus, fetchKycRecord, syncFromChain]);
+
   // ─── Handle ID photo upload ─────────────────────────────────────────────────
 
   const handleIdFile = useCallback(async (file: File) => {
@@ -328,6 +349,8 @@ export default function IdentityPage() {
   const handleCompare = useCallback(async () => {
     if (!idDescriptor || !selfieDescriptor || !idType) return;
     setComparing(true);
+    setChainTxSig(null);
+    setChainError(null);
 
     // Small delay for UX
     await new Promise((r) => setTimeout(r, 800));
@@ -337,7 +360,16 @@ export default function IdentityPage() {
     setCompareResult({ distance: dist, match });
     finalise(idType, dist);
     setComparing(false);
-  }, [idDescriptor, selfieDescriptor, idType, finalise]);
+
+    // Write result on-chain (submit pending → finalize)
+    try {
+      await submitKyc(idType);
+      const sig = await finalizeKyc(idType, dist, match);
+      setChainTxSig(sig);
+    } catch (err: any) {
+      setChainError(err?.message ?? 'On-chain write failed');
+    }
+  }, [idDescriptor, selfieDescriptor, idType, finalise, submitKyc, finalizeKyc]);
 
   const resetKyc = () => {
     setKycStep(0);
@@ -351,7 +383,11 @@ export default function IdentityPage() {
     setSelfieDescriptor(null);
     setSelfieStatus(null);
     setCompareResult(null);
+    setChainTxSig(null);
+    setChainError(null);
     kycReset();
+    // Best-effort on-chain reset (ignore errors if record doesn't exist yet)
+    resetKycOnChain().catch(() => {});
   };
 
   // ─── DID handlers ───────────────────────────────────────────────────────────
@@ -637,6 +673,36 @@ export default function IdentityPage() {
                   </Box>
                 ))}
               </Box>
+
+              {/* On-chain status */}
+              {kycChainLoading && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2.5, py: 1.25, bgcolor: 'rgba(0,255,195,0.04)', border: '1px solid rgba(0,255,195,0.15)', borderRadius: 2, minWidth: 280 }}>
+                  <CircularProgress size={14} sx={{ color: '#00ffc3', flexShrink: 0 }} />
+                  <Typography variant="caption" color="text.secondary">Writing result to Solana...</Typography>
+                </Box>
+              )}
+              {chainTxSig && (
+                <Box sx={{ px: 2.5, py: 1.25, bgcolor: 'rgba(76,175,80,0.04)', border: '1px solid rgba(76,175,80,0.2)', borderRadius: 2, minWidth: 280 }}>
+                  <Typography variant="caption" sx={{ color: '#4caf50', display: 'block', mb: 0.5 }}>✓ Recorded on Solana</Typography>
+                  <Typography
+                    component="a"
+                    href={`https://explorer.solana.com/tx/${chainTxSig}?cluster=devnet`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="caption"
+                    sx={{ fontFamily: 'monospace', color: '#00ffc3', wordBreak: 'break-all', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                  >
+                    {chainTxSig.slice(0, 32)}…
+                  </Typography>
+                </Box>
+              )}
+              {chainError && (
+                <Box sx={{ px: 2.5, py: 1.25, bgcolor: 'rgba(255,152,0,0.05)', border: '1px solid rgba(255,152,0,0.2)', borderRadius: 2, minWidth: 280 }}>
+                  <Typography variant="caption" sx={{ color: '#ff9800', display: 'block' }}>
+                    On-chain write skipped: {chainError}
+                  </Typography>
+                </Box>
+              )}
 
               {!compareResult.match && (
                 <Button variant="contained" onClick={resetKyc} startIcon={<ArrowBack />}>Try Again</Button>

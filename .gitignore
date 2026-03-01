@@ -43,5 +43,24 @@ contracts/typechain-types
 .keys/
 .vercel
 
+# Anchor / Rust build artifacts (3.6GB — never commit)
+target/
+**/*.so
+**/*.d
+
+# Local database
+chat.db
+
+# Windows junk
+*.Zone.Identifier
+NUL
+
+# Test scripts
+test-*.js
+create-test-job.js
+close-old-jobs.js
+debug-accounts.js
+list-job-accounts.js
+
 # Face-api models (copied from node_modules, re-run: cp node_modules/@vladmandic/face-api/model/{tiny_face_detector,face_landmark_68_tiny,face_recognition}_model* public/models/)
 # public/models/

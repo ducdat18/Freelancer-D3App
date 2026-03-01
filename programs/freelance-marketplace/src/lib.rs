@@ -16,6 +16,7 @@ pub mod account_abstraction;
 pub mod social_recovery;
 pub mod ai_oracle;
 pub mod zk_proofs;
+pub mod kyc;
 pub use nft::*;
 pub use token_escrow::*;
 pub use arbitrator_fees::*;
@@ -32,6 +33,7 @@ pub use account_abstraction::*;
 pub use social_recovery::*;
 pub use ai_oracle::*;
 pub use zk_proofs::*;
+pub use kyc::*;
 
 declare_id!("FStwCj8zLzNkz7gTavooDcqF4FSyDcF9o9SCh96yyP7i");
 
@@ -1185,8 +1187,9 @@ pub mod freelance_marketplace {
         credential_type: String,
         metadata_uri: String,
         expires_at: Option<i64>,
+        index: u32,
     ) -> Result<()> {
-        did::anchor_verifiable_credential(ctx, credential_type, metadata_uri, expires_at)
+        did::anchor_verifiable_credential(ctx, credential_type, metadata_uri, expires_at, index)
     }
 
     pub fn revoke_credential(ctx: Context<RevokeVC>) -> Result<()> {
@@ -1387,8 +1390,9 @@ pub mod freelance_marketplace {
         proof_hash: [u8; 32],
         public_inputs_hash: [u8; 32],
         valid_until: Option<i64>,
+        index: u32,
     ) -> Result<()> {
-        zk_proofs::submit_zk_credential(ctx, credential_type, commitment, proof_hash, public_inputs_hash, valid_until)
+        zk_proofs::submit_zk_credential(ctx, credential_type, commitment, proof_hash, public_inputs_hash, valid_until, index)
     }
 
     pub fn verify_zk_credential(ctx: Context<VerifyZKCredential>) -> Result<()> {
@@ -1397,6 +1401,28 @@ pub mod freelance_marketplace {
 
     pub fn revoke_zk_credential(ctx: Context<RevokeZKCredential>) -> Result<()> {
         zk_proofs::revoke_zk_credential(ctx)
+    }
+
+    // ==================== KYC IDENTITY ====================
+
+    /// Submit KYC — creates or resets record to Pending
+    pub fn submit_kyc(ctx: Context<SubmitKyc>, id_type: IdType) -> Result<()> {
+        kyc::submit_kyc(ctx, id_type)
+    }
+
+    /// Finalize KYC — record face comparison result (Verified / Rejected)
+    pub fn finalize_kyc(
+        ctx: Context<FinalizeKyc>,
+        id_type: IdType,
+        face_distance_bp: u32,
+        matched: bool,
+    ) -> Result<()> {
+        kyc::finalize_kyc(ctx, id_type, face_distance_bp, matched)
+    }
+
+    /// Reset KYC — set record back to Pending
+    pub fn reset_kyc(ctx: Context<ResetKyc>) -> Result<()> {
+        kyc::reset_kyc(ctx)
     }
 }
 

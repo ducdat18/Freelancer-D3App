@@ -96,6 +96,7 @@ export function useZKCredentials() {
           Array.from(proofHash),
           Array.from(publicInputsHash),
           validUntil ? validUntil : null,
+          currentCount,
         )
         .accounts({
           zkCredential: credPDA,

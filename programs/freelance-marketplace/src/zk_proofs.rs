@@ -56,6 +56,7 @@ pub fn submit_zk_credential(
     proof_hash: [u8; 32],
     public_inputs_hash: [u8; 32],
     valid_until: Option<i64>,
+    index: u32,
 ) -> Result<()> {
     let credential = &mut ctx.accounts.zk_credential;
     let counter = &mut ctx.accounts.user_zk_counter;
@@ -209,12 +210,13 @@ pub struct ManageZKVerifier<'info> {
 }
 
 #[derive(Accounts)]
+#[instruction(credential_type: String, commitment: [u8; 32], proof_hash: [u8; 32], public_inputs_hash: [u8; 32], valid_until: Option<i64>, index: u32)]
 pub struct SubmitZKCredential<'info> {
     #[account(
         init,
         payer = user,
         space = 8 + ZKCredential::INIT_SPACE,
-        seeds = [b"zk-credential", user.key().as_ref(), &user_zk_counter.count.to_le_bytes()],
+        seeds = [b"zk-credential", user.key().as_ref(), &index.to_le_bytes()],
         bump
     )]
     pub zk_credential: Account<'info, ZKCredential>,

@@ -187,6 +187,7 @@ pub fn anchor_verifiable_credential(
     credential_type: String,
     metadata_uri: String,
     expires_at: Option<i64>,
+    index: u32,
 ) -> Result<()> {
     let vc = &mut ctx.accounts.vc_anchor;
     let counter = &mut ctx.accounts.issuer_vc_counter;
@@ -295,13 +296,13 @@ pub struct VerifyServiceEndpoint<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(credential_type: String, metadata_uri: String)]
+#[instruction(credential_type: String, metadata_uri: String, expires_at: Option<i64>, index: u32)]
 pub struct AnchorVC<'info> {
     #[account(
         init,
         payer = issuer,
         space = 8 + VCAnchor::INIT_SPACE,
-        seeds = [b"vc-anchor", issuer.key().as_ref(), &issuer_vc_counter.count.to_le_bytes()],
+        seeds = [b"vc-anchor", issuer.key().as_ref(), &index.to_le_bytes()],
         bump
     )]
     pub vc_anchor: Account<'info, VCAnchor>,

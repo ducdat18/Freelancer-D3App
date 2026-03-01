@@ -112,4 +112,6 @@ export const SEEDS = {
   ZK_VERIFIER_CONFIG: "zk-verifier-config",
   ZK_CREDENTIAL: "zk-credential",
   ZK_COUNTER: "zk-counter",
+  // KYC Identity
+  KYC: "kyc",
 };

@@ -1,0 +1,27 @@
+# Anchor / Rust (not needed at runtime)
+target/
+programs/
+Cargo.toml
+Cargo.lock
+Anchor.toml
+
+# Test / debug scripts
+test-*.js
+create-test-job.js
+close-old-jobs.js
+debug-accounts.js
+list-job-accounts.js
+scripts/
+tests/
+test/
+
+# Docs / internal
+docs/
+diagrams/
+thesis/
+*.md
+CHAT_API_AUTH.md
+DEBUG_SUBMIT_WORK_ISSUE.md
+
+# Local DB
+chat.db

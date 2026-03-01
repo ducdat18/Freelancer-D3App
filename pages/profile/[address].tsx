@@ -14,7 +14,8 @@ import { SolanaIconSimple } from '../../src/components/SolanaIcon';
 import { PictureAsPdf, Description, PersonAdd, Star } from '@mui/icons-material';
 import { detectUserRole, getRoleDisplayText, getRoleColor, getExperienceLevel } from '../../src/utils/userRole';
 import VerifiedBadge from '../../src/components/VerifiedBadge';
-import { getVerificationStatus } from '../../src/hooks/useIdentityVerification';
+import { useSolanaProgram } from '../../src/hooks/useSolanaProgram';
+import { fetchKycStatusOnChain } from '../../src/hooks/useKyc';
 
 export default function Profile() {
   const router = useRouter();
@@ -26,7 +27,9 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [savedCVs, setSavedCVs] = useState<any[]>([]);
   const [profileData, setProfileData] = useState<any>(null);
+  const [isKycVerified, setIsKycVerified] = useState(false);
 
+  const { program } = useSolanaProgram();
   const { fetchAllJobs } = useJobs();
   const { fetchReputation } = useReputation();
   const [clientJobs, setClientJobs] = useState<any[]>([]);
@@ -56,6 +59,10 @@ export default function Profile() {
         setClientJobs(cJobs);
         setFreelancerJobs(fJobs);
 
+        // Fetch KYC status from chain (source of truth)
+        const kycStatus = await fetchKycStatusOnChain(program, pubkey);
+        setIsKycVerified(kycStatus === 'verified');
+
         // Load CV data and profile from localStorage
         if (typeof window !== 'undefined') {
           try {
@@ -82,7 +89,7 @@ export default function Profile() {
     }
 
     loadProfile();
-  }, [address]);
+  }, [address, program]);
 
   if (loading) {
     return (
@@ -154,7 +161,7 @@ export default function Profile() {
   const experienceLevel = reputation ? getExperienceLevel(reputation.completedJobs) : null;
 
   const initials = addressStr.slice(0, 2).toUpperCase();
-  const isKycVerified = addressStr ? getVerificationStatus(addressStr) === 'verified' : false;
+  // isKycVerified is loaded from chain in loadProfile effect
 
   return (
     <Layout>

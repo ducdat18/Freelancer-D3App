@@ -25,7 +25,6 @@ import { getExperienceLevel } from '../../src/utils/userRole';
 import { motion } from 'framer-motion';
 import { staggerContainer, staggerChild } from '../../src/utils/animations';
 import VerifiedBadge from '../../src/components/VerifiedBadge';
-import { getVerificationStatus } from '../../src/hooks/useIdentityVerification';
 
 const MotionBox = motion.create(Box);
 const MotionCard = motion.create(Card);
@@ -78,6 +77,7 @@ export default function FindTalent() {
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [selectedFreelancer, setSelectedFreelancer] = useState<string>('');
   const [selectedJob, setSelectedJob] = useState<string>('');
+  const [kycVerified, setKycVerified] = useState<Record<string, boolean>>({});
 
   useEffect(() => { loadFreelancers(); }, [program]);
 
@@ -135,7 +135,21 @@ export default function FindTalent() {
         });
       } catch { }
 
-      setFreelancers(Array.from(freelancerMap.values()));
+      const freelancerList = Array.from(freelancerMap.values());
+      setFreelancers(freelancerList);
+
+      // Batch-fetch KYC statuses from chain
+      try {
+        // @ts-ignore
+        const allKycRecords = await program.account.kycRecord.all();
+        const verifiedMap: Record<string, boolean> = {};
+        allKycRecords.forEach((r: any) => {
+          const addr = r.account.authority.toBase58();
+          const isVerified = r.account.status?.verified !== undefined;
+          verifiedMap[addr] = isVerified;
+        });
+        setKycVerified(verifiedMap);
+      } catch { /* chain may not have kyc program yet */ }
     } catch {
       setError('Failed to load freelancers');
     } finally {
@@ -422,7 +436,7 @@ export default function FindTalent() {
                 const expLevel = rep ? getExperienceLevel(rep.completedJobs) : null;
                 const isTopRated = rep && rep.averageRating >= 4.5 && rep.totalReviews > 0;
                 const initials = freelancer.address.slice(0, 2).toUpperCase();
-                const isKycVerified = getVerificationStatus(freelancer.address) === 'verified';
+                const isKycVerified = kycVerified[freelancer.address] === true;
 
                 return (
                   <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={freelancer.address}>
