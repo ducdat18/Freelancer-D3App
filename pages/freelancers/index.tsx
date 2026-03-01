@@ -4,7 +4,7 @@ import {
   Avatar, Chip, Button, TextField, InputAdornment,
   Alert, Stack, FormControl, InputLabel, Select, MenuItem,
   Dialog, DialogTitle, DialogContent, DialogActions,
-  IconButton, CircularProgress,
+  IconButton, CircularProgress, Tooltip,
 } from '@mui/material';
 import {
   Search as SearchIcon, Star, Work, Chat, Person, Close, Send,
@@ -14,6 +14,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { PublicKey } from '@solana/web3.js';
+import { formatSol } from '../../src/types/solana';
 import { useRouter } from 'next/router';
 import Layout from '../../src/components/Layout';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
@@ -203,77 +204,6 @@ export default function FindTalent() {
     setInviteDialogOpen(false);
   };
 
-  // Wallet not connected
-  if (!connected) {
-    return (
-      <Layout>
-        <Box
-          sx={{
-            borderBottom: '1px solid rgba(0,255,195,0.08)',
-            background: 'linear-gradient(180deg, rgba(0,255,195,0.03) 0%, transparent 100%)',
-            px: { xs: 2, md: 4 },
-            py: { xs: 4, md: 5 },
-          }}
-        >
-          <Container maxWidth="lg">
-            <Chip
-              label="// TALENT NETWORK"
-              size="small"
-              variant="outlined"
-              sx={{
-                fontFamily: '"Orbitron", monospace',
-                fontSize: '0.6rem',
-                letterSpacing: 2,
-                color: '#00ffc3',
-                borderColor: 'rgba(0,255,195,0.25)',
-                bgcolor: 'rgba(0,255,195,0.04)',
-                mb: 1.5,
-              }}
-            />
-            <Typography
-              variant="h3"
-              fontWeight={700}
-              sx={{
-                background: 'linear-gradient(135deg, #fff 20%, #00ffc3 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              Find Talent
-            </Typography>
-          </Container>
-        </Box>
-        <Container maxWidth="sm" sx={{ py: 10, textAlign: 'center' }}>
-          <Box
-            sx={{
-              p: 5,
-              border: '1px solid rgba(0,255,195,0.12)',
-              borderRadius: 3,
-              bgcolor: 'rgba(0,255,195,0.02)',
-            }}
-          >
-            <AccountBalanceWallet sx={{ fontSize: 52, color: '#00ffc3', mb: 2, opacity: 0.7 }} />
-            <Typography variant="h6" fontWeight={700} gutterBottom>
-              Connect Your Wallet
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, lineHeight: 1.7 }}>
-              Connect your Solana wallet to browse freelancers, view their on-chain reputation,
-              and invite them to your open jobs.
-            </Typography>
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<AccountBalanceWallet />}
-              onClick={() => setVisible(true)}
-            >
-              Connect Wallet
-            </Button>
-          </Box>
-        </Container>
-      </Layout>
-    );
-  }
-
   return (
     <Layout>
       {/* Page Header */}
@@ -398,6 +328,31 @@ export default function FindTalent() {
             </FormControl>
           </Stack>
         </Box>
+
+        {!connected && (
+          <Box
+            sx={{
+              mb: 3, p: 2,
+              border: '1px solid rgba(0,255,195,0.15)',
+              borderRadius: 1.5,
+              bgcolor: 'rgba(0,255,195,0.04)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap',
+            }}
+          >
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              Browse freelancers freely — connect your wallet to message or invite them to your jobs.
+            </Typography>
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<AccountBalanceWallet sx={{ fontSize: 15 }} />}
+              onClick={() => setVisible(true)}
+              sx={{ flexShrink: 0, fontSize: '0.75rem' }}
+            >
+              Connect Wallet
+            </Button>
+          </Box>
+        )}
 
         {loading ? (
           <LoadingSpinner
@@ -582,16 +537,21 @@ export default function FindTalent() {
                               View Profile
                             </Button>
                             <Stack direction="row" spacing={1}>
-                              <Button
-                                variant="outlined"
-                                size="small"
-                                startIcon={<Chat sx={{ fontSize: 14 }} />}
-                                onClick={() => handleOpenChat(freelancer.address)}
-                                fullWidth
-                              >
-                                Message
-                              </Button>
-                              {myOpenJobs.length > 0 && (
+                              <Tooltip title={!connected ? 'Connect wallet to message' : ''} placement="top">
+                                <span style={{ flex: 1 }}>
+                                  <Button
+                                    variant="outlined"
+                                    size="small"
+                                    startIcon={<Chat sx={{ fontSize: 14 }} />}
+                                    onClick={() => connected ? handleOpenChat(freelancer.address) : setVisible(true)}
+                                    fullWidth
+                                    disabled={!connected}
+                                  >
+                                    Message
+                                  </Button>
+                                </span>
+                              </Tooltip>
+                              {connected && myOpenJobs.length > 0 && (
                                 <Button
                                   variant="outlined"
                                   size="small"
@@ -653,7 +613,7 @@ export default function FindTalent() {
                       <Box>
                         <Typography variant="body2" fontWeight={600}>{job.account.title}</Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {(job.account.budget.toNumber() / 1e9).toFixed(2)} SOL
+                          {formatSol(job.account.budget.toNumber() / 1e9)} SOL
                         </Typography>
                       </Box>
                     </MenuItem>

@@ -97,7 +97,7 @@ const NAV_SECTIONS: NavSection[] = [
   },
   {
     label: 'PLATFORM',
-    requiresAuth: true,
+    requiresAuth: false,
     entries: [
       { path: '/governance',         name: 'Governance',      Icon: HowToVoteIcon },
       { path: '/staking',            name: 'Staking',         Icon: AccountBalanceIcon },
@@ -478,8 +478,8 @@ export default function Layout({ children }: LayoutProps) {
       >
         {showNetworkWarning && connected && (
           <Alert severity="error" icon={<WarningIcon />} sx={{ borderRadius: 0, animation: 'shake 0.5s', '@keyframes shake': { '0%,100%': { transform: 'translateX(0)' }, '10%,30%,50%,70%,90%': { transform: 'translateX(-5px)' }, '20%,40%,60%,80%': { transform: 'translateX(5px)' } } }}>
-            <AlertTitle sx={{ fontWeight: 'bold' }}>Wrong Network — Switch to Devnet!</AlertTitle>
-            Open your wallet → Settings → change network to <strong>Devnet</strong>, then refresh.
+            <AlertTitle sx={{ fontWeight: 'bold' }}>Wrong Network</AlertTitle>
+            Open your wallet → Settings → change network to <strong>Solana Devnet</strong>, then refresh.
           </Alert>
         )}
 

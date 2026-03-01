@@ -39,6 +39,7 @@ import LoadingSpinner from '../../src/components/LoadingSpinner';
 import { useJobs } from '../../src/hooks/useJobs';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { formatSol } from '../../src/types/solana';
 import { SolanaIconSimple } from '../../src/components/SolanaIcon';
 import { fetchFromIPFS, uploadToIPFS } from '../../src/services/ipfs';
 import { deriveEscrowPDA, deriveWorkSubmissionPDA } from '../../src/utils/pda';
@@ -59,6 +60,7 @@ import MilestoneEscrowStatus from '../../src/components/common/MilestoneEscrowSt
 import { useMilestones } from '../../src/hooks/useMilestones';
 import { useNotificationContext } from '../../src/contexts/NotificationContext';
 import { NotificationType } from '../../src/types';
+import RiskAssessmentPanel from '../../src/components/ai/RiskAssessmentPanel';
 
 // Helper functions - defined outside component to avoid TDZ errors
 const formatAddress = (address: any) => {
@@ -659,7 +661,7 @@ export default function JobDetail() {
                   variant="h4" fontWeight={700}
                   sx={{ fontFamily: '"Orbitron", sans-serif', color: '#00ffc3', lineHeight: 1 }}
                 >
-                  {budgetInSol.toFixed(2)}
+                  {formatSol(budgetInSol)}
                 </Typography>
               </Box>
               <Typography variant="caption" color="text.secondary">SOL budget</Typography>
@@ -1179,7 +1181,7 @@ export default function JobDetail() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <SolanaIconSimple sx={{ fontSize: 13, color: '#00ffc3' }} />
                         <Typography variant="body2" fontWeight={700} sx={{ fontFamily: '"Orbitron", monospace', color: '#00ffc3', fontSize: '0.82rem' }}>
-                          {budgetInSol.toFixed(2)}
+                          {formatSol(budgetInSol)}
                         </Typography>
                       </Box>
                     ),
@@ -1189,7 +1191,7 @@ export default function JobDetail() {
                     value: (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <SolanaIconSimple sx={{ fontSize: 13 }} />
-                        <Typography variant="body2" fontWeight={600}>{escrowInSol.toFixed(2)}</Typography>
+                        <Typography variant="body2" fontWeight={600}>{formatSol(escrowInSol)}</Typography>
                       </Box>
                     ),
                   },
@@ -1211,7 +1213,7 @@ export default function JobDetail() {
                 </Typography>
                 <EscrowStatus
                   status={getEscrowStatus()}
-                  amount={`${budgetInSol.toFixed(4)} SOL`}
+                  amount={`${formatSol(budgetInSol)} SOL`}
                   size="medium"
                 />
               </CardContent>
@@ -1279,6 +1281,16 @@ export default function JobDetail() {
                   <MilestoneEscrowStatus jobPda={jobPda} />
                 </CardContent>
               </Card>
+            )}
+
+            {/* AI Risk Assessment */}
+            {getStatusText(job.status) === 'Open' && (
+              <Box sx={{ mt: 2 }}>
+                <RiskAssessmentPanel
+                  jobDescription={`${job.title}\n\n${job.description}${metadata?.skills?.length ? '\n\nRequired skills: ' + metadata.skills.join(', ') : ''}`}
+                  jobTitle={job.title}
+                />
+              </Box>
             )}
 
             {/* IPFS Metadata */}
