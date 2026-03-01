@@ -41,63 +41,72 @@ function computeRiskLevel(matchScore: number, authenticityScore: number): {
  * Fetch file from IPFS via multiple gateways and extract text.
  * Supports PDF (via pdf-parse/lib/pdf-parse — avoids Vercel fs issue)
  * and plain text files.
+ * Never throws — returns '' on any failure.
  */
 async function extractTextFromIpfs(cvUri: string): Promise<string> {
-  const hash = cvUri.replace('ipfs://', '').trim();
-  if (!hash) return '';
+  try {
+    // Normalize: strip ipfs:// prefix and any whitespace
+    const raw = cvUri.replace(/^ipfs:\/\//i, '').trim();
+    if (!raw || raw.length < 8) return '';
 
-  const gateways = [
-    `https://gateway.pinata.cloud/ipfs/${hash}`,
-    `https://ipfs.io/ipfs/${hash}`,
-    `https://cloudflare-ipfs.com/ipfs/${hash}`,
-  ];
+    // If it looks like a full https URL already, use it directly
+    const gateways: string[] = raw.startsWith('http')
+      ? [raw]
+      : [
+          `https://gateway.pinata.cloud/ipfs/${raw}`,
+          `https://ipfs.io/ipfs/${raw}`,
+          `https://cloudflare-ipfs.com/ipfs/${raw}`,
+        ];
 
-  for (const url of gateways) {
-    try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 12000);
+    for (const url of gateways) {
+      // Validate URL before fetching to avoid "Invalid URL" TypeError
+      try { new URL(url); } catch { continue; }
 
-      const response = await fetch(url, {
-        signal: controller.signal,
-        headers: { Accept: 'application/pdf,text/plain,*/*' },
-      });
-      clearTimeout(timer);
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      try {
+        const controller = new AbortController();
+        timer = setTimeout(() => controller.abort(), 12000);
 
-      if (!response.ok) continue;
+        const response = await fetch(url, {
+          signal: controller.signal,
+          headers: { Accept: 'application/pdf,text/plain,*/*' },
+        });
+        if (timer) { clearTimeout(timer); timer = null; }
 
-      const contentType = response.headers.get('content-type') || '';
-      const arrayBuffer = await response.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
+        if (!response.ok) continue;
 
-      const isPdf =
-        contentType.includes('pdf') ||
-        hash.toLowerCase().includes('.pdf') ||
-        // Check PDF magic bytes: %PDF
-        (buffer.length > 4 && buffer.slice(0, 4).toString() === '%PDF');
+        const contentType = response.headers.get('content-type') || '';
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
 
-      if (isPdf) {
-        try {
-          // Use lib path to avoid pdf-parse loading test files (Vercel serverless issue)
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const pdfParse = require('pdf-parse/lib/pdf-parse');
-          const data = await pdfParse(buffer);
-          const text = (data.text || '').trim();
+        const isPdf =
+          contentType.includes('pdf') ||
+          raw.toLowerCase().includes('.pdf') ||
+          (buffer.length > 4 && buffer.slice(0, 4).toString('ascii') === '%PDF');
+
+        if (isPdf) {
+          try {
+            // lib path avoids pdf-parse loading test files (Vercel serverless issue)
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            const pdfParse = require('pdf-parse/lib/pdf-parse');
+            const data = await pdfParse(buffer);
+            const text = (data.text || '').trim();
+            if (text.length > 10) return text;
+          } catch {
+            continue; // image-based PDF or parse error — try next gateway
+          }
+        } else {
+          const text = buffer.toString('utf-8').trim();
           if (text.length > 10) return text;
-        } catch {
-          // PDF parse failed (e.g. image-only PDF) — continue to next gateway
-          continue;
         }
-      } else {
-        // Plain text or unknown — return as UTF-8 string
-        const text = buffer.toString('utf-8').trim();
-        if (text.length > 10) return text;
+      } catch {
+        if (timer) clearTimeout(timer);
+        continue; // gateway timeout, network error, etc.
       }
-    } catch {
-      // Gateway unreachable or timed out — try next
-      continue;
     }
+  } catch {
+    // Top-level guard — never propagate errors from this function
   }
-
   return '';
 }
 
