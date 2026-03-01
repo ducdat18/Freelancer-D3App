@@ -273,7 +273,11 @@ export function useEscrow() {
         const escrow = await program.account.escrow.fetch(escrowPda);
         return escrow as EscrowData;
       } catch (error) {
-        logger.error("Error fetching escrow:", error);
+        const msg = error instanceof Error ? error.message : String(error);
+        // Escrow not created yet (open job, no bid accepted) — completely normal
+        if (!msg.includes('Account does not exist') && !msg.includes('has no data')) {
+          logger.error("Error fetching escrow:", error);
+        }
         return null;
       }
     },

@@ -31,15 +31,24 @@ export function useEscrowDetailQuery(jobPubkey: PublicKey | null) {
     queryFn: async (): Promise<EscrowData | null> => {
       if (!program || !jobPubkey) return null;
 
-      return retryWithBackoff(
-        async () => {
-          const [escrowPda] = deriveEscrowPDA(jobPubkey);
-          // @ts-ignore
-          const escrow = await program.account.escrow.fetch(escrowPda);
-          return escrow as EscrowData;
-        },
-        { maxRetries: 3, baseDelayMs: 1000 }
-      );
+      try {
+        return await retryWithBackoff(
+          async () => {
+            const [escrowPda] = deriveEscrowPDA(jobPubkey);
+            // @ts-ignore
+            const escrow = await program.account.escrow.fetch(escrowPda);
+            return escrow as EscrowData;
+          },
+          { maxRetries: 3, baseDelayMs: 1000 }
+        );
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        // Escrow not created yet — expected for open jobs with no accepted bid
+        if (msg.includes('Account does not exist') || msg.includes('has no data')) {
+          return null;
+        }
+        throw err;
+      }
     },
     enabled: !!program && !!jobPubkey,
     ...escrowCacheConfig,
