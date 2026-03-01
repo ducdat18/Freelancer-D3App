@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import type { JobData } from '../hooks/useJobs';
-import { lamportsToSol, bnToNumber } from '../types/solana';
+import { lamportsToSol, bnToNumber, formatSol } from '../types/solana';
 import { JOB_STATUS } from '../config/constants';
 import type { PublicKey } from '../types/solana';
 import { SolanaIconSimple } from './SolanaIcon';
@@ -90,7 +90,7 @@ export default function JobCard({ job }: JobCardProps) {
               fontWeight={700}
               sx={{ fontFamily: '"Orbitron", sans-serif', color: '#00ffc3', fontSize: '0.85rem' }}
             >
-              {budgetSol.toFixed(2)}
+              {formatSol(budgetSol)}
             </Typography>
           </Box>
         </Box>

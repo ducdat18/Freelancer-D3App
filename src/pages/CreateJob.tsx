@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Container, Box, Typography, Tabs, Tab, Collapse, Button } from '@mui/material';
+import { Container, Box, Typography, Tabs, Tab, Button } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useWallet } from '@solana/wallet-adapter-react';
 import JobForm from '../components/JobForm';
 import type { MilestoneInput } from '../components/JobForm';
 import BrowseFreelancersTab from '../components/client/BrowseFreelancersTab';
-import SampleJobsCreator from '../components/SampleJobsCreator';
 import { useJobs } from '../hooks/useJobs';
 import { useMilestones } from '../hooks/useMilestones';
 import { useIPFS } from '../hooks/useIPFS';
@@ -20,7 +19,6 @@ export default function CreateJob() {
   const { initJobMilestones, createMilestone: createMilestoneOnChain } = useMilestones();
   const { upload, isUploading } = useIPFS();
   const [tabValue, setTabValue] = useState(0);
-  const [showDemoCreator, setShowDemoCreator] = useState(false);
 
   const handleSubmit = async (data: {
     title: string;
@@ -179,53 +177,6 @@ export default function CreateJob() {
             <Box sx={{ p: 3 }}>
               {tabValue === 0 && (
                 <>
-                  {/* Demo Job Seeder */}
-                  <Box
-                    sx={{
-                      mb: 3,
-                      background: 'rgba(7,5,17,0.95)',
-                      border: '1px solid rgba(0,255,195,0.2)',
-                      borderRadius: 2,
-                      overflow: 'hidden',
-                      boxShadow: '0 0 24px rgba(0,255,195,0.05)',
-                    }}
-                  >
-                    <Box
-                      onClick={() => setShowDemoCreator(!showDemoCreator)}
-                      sx={{
-                        px: 2, py: '7px',
-                        display: 'flex', alignItems: 'center', gap: 1,
-                        borderBottom: showDemoCreator ? '1px solid rgba(0,255,195,0.1)' : 'none',
-                        cursor: 'pointer', userSelect: 'none',
-                        '&:hover': { bgcolor: 'rgba(0,255,195,0.03)' },
-                      }}
-                    >
-                      <Box sx={{ display: 'flex', gap: '5px' }}>
-                        {['#ff00ff', '#e04d01', '#00ffc3'].map(c => (
-                          <Box key={c} sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: c, opacity: 0.75 }} />
-                        ))}
-                      </Box>
-                      <Typography sx={{ ml: 1, fontFamily: '"Orbitron", monospace', fontSize: '0.58rem', letterSpacing: '0.12em', color: 'rgba(0,255,195,0.4)', flexGrow: 1 }}>
-                        DEMO JOB SEEDER
-                      </Typography>
-                      <Typography sx={{ fontFamily: '"JetBrains Mono","Courier New",monospace', fontSize: '0.6rem', color: 'rgba(255,255,255,0.2)' }}>
-                        {showDemoCreator ? '▲ collapse' : '▼ expand'}
-                      </Typography>
-                    </Box>
-                    {!showDemoCreator && (
-                      <Box sx={{ px: 2, py: '6px' }}>
-                        <Typography sx={{ fontFamily: '"JetBrains Mono","Courier New",monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.25)' }}>
-                          seed 10 sample jobs on-chain for marketplace testing
-                        </Typography>
-                      </Box>
-                    )}
-                    <Collapse in={showDemoCreator}>
-                      <Box sx={{ p: 2 }}>
-                        <SampleJobsCreator />
-                      </Box>
-                    </Collapse>
-                  </Box>
-
                   {/* Job Form */}
                   <JobForm
                     onSubmit={handleSubmit}

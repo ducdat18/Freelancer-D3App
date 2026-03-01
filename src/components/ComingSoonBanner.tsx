@@ -21,7 +21,7 @@ export default function ComingSoonBanner({ feature, description }: Props) {
     >
       <RocketLaunchIcon sx={{ fontSize: 56, color: 'primary.main', opacity: 0.7 }} />
       <Chip
-        label="COMING SOON"
+        label="IN PROGRESS"
         size="small"
         sx={{
           fontFamily: '"Orbitron", sans-serif',
@@ -37,7 +37,7 @@ export default function ComingSoonBanner({ feature, description }: Props) {
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420 }}>
         {description ||
-          'This feature is under development and will be available after the smart contract is deployed to mainnet.'}
+          'This feature is being rolled out. Check back soon for updates.'}
       </Typography>
     </Box>
   )

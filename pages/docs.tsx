@@ -7,7 +7,7 @@ const sections = [
   {
     icon: AccountBalanceWallet,
     title: 'Getting Started',
-    description: 'Connect your Solana wallet, switch to Devnet, and start using the platform.',
+    description: 'Connect your Solana wallet and start using the platform.',
     link: '/how-it-works',
   },
   {

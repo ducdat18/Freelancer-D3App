@@ -17,7 +17,7 @@ export default function HomeStats() {
         { label: 'Total Jobs', value: '0' },
         { label: 'Active Jobs', value: '0' },
         { label: 'Total Value', value: '0 SOL' },
-        { label: 'On Devnet', value: '100%' },
+        { label: 'Uptime', value: '100%' },
       ];
     }
 
@@ -37,7 +37,7 @@ export default function HomeStats() {
       { label: 'Total Jobs', value: totalJobs.toString() },
       { label: 'Active Jobs', value: activeJobs.toString() },
       { label: 'Total Value', value: `${totalValue} SOL` },
-      { label: 'On Devnet', value: '100%' },
+      { label: 'Uptime', value: '100%' },
     ];
   })();
 

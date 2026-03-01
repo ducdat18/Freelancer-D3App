@@ -30,7 +30,7 @@ const TYPE_PREFIXES: Record<string, string> = {
 
 const BOOT_ENTRIES: LogEntry[] = [
   { timestamp: '', message: 'Initializing FreelanceChain protocol...', type: 'info' },
-  { timestamp: '', message: 'Connected to Solana Devnet', type: 'success' },
+  { timestamp: '', message: 'Connected to Solana', type: 'success' },
   { timestamp: '', message: 'Smart contract loaded: freelance_marketplace', type: 'info' },
   { timestamp: '', message: 'Escrow module initialized', type: 'success' },
 ];

@@ -19,6 +19,7 @@ import { BN } from '@coral-xyz/anchor';
 import type { ReputationSBTData } from '../../hooks/useSBTReputation';
 import SBTVerificationDialog from './SBTVerificationDialog';
 import type { PublicKey } from '../../types/solana';
+import { formatSol as formatSolAmount } from '../../types/solana';
 
 interface SBTBadgeProps {
   sbt: ReputationSBTData;
@@ -32,7 +33,7 @@ function truncateAddress(address: string): string {
 
 function formatSol(lamports: BN): string {
   const sol = lamports.toNumber() / 1_000_000_000;
-  return `${sol.toFixed(2)} SOL`;
+  return `${formatSolAmount(sol)} SOL`;
 }
 
 function formatDate(timestamp: BN): string {

@@ -37,6 +37,7 @@ import { useDAOGovernance } from '../../src/hooks/useDAOGovernance';
 import { GovernanceProposalStatus, GovernanceProposalType } from '../../src/types';
 import type { ProposalData } from '../../src/types';
 import { getSimDescription, hasVoted } from '../../src/utils/governanceSimulator';
+import { formatSol } from '../../src/types/solana';
 
 const proposalTypeLabels: Record<number, string> = {
   [GovernanceProposalType.ParameterChange]: 'Parameter Change',
@@ -341,7 +342,7 @@ export default function ProposalDetail() {
                   Total Voters: {proposal.totalVoters}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Stake: {(proposal.stakeAmount / 1e9).toFixed(2)} SOL
+                  Stake: {formatSol(proposal.stakeAmount / 1e9)} SOL
                 </Typography>
               </Box>
             </Paper>

@@ -13,7 +13,7 @@ import { motion } from 'framer-motion';
 import Layout from '../../src/components/Layout';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import { useJobs } from '../../src/hooks/useJobs';
-import { lamportsToSol, bnToNumber } from '../../src/types/solana';
+import { lamportsToSol, bnToNumber, formatSol } from '../../src/types/solana';
 import { SolanaIconSimple } from '../../src/components/SolanaIcon';
 import { JOB_STATUS } from '../../src/config/constants';
 import { staggerContainer, staggerChild } from '../../src/utils/animations';
@@ -358,7 +358,7 @@ export default function Jobs() {
                                   fontSize: { xs: '1rem', md: '1.1rem' },
                                 }}
                               >
-                                {budgetSol.toFixed(2)}
+                                {formatSol(budgetSol)}
                               </Typography>
                             </Box>
                             <Typography variant="caption" color="text.secondary" sx={{ mt: -0.5 }}>

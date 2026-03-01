@@ -334,12 +334,11 @@ export default function AboutPage() {
               </Typography>
             </Box>
             <Typography variant="subtitle2" fontWeight={700} gutterBottom>
-              Currently Running on Solana Devnet
+              Live on Solana
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-              FreelanceChain is live on <strong style={{ color: '#00ffc3' }}>Solana Devnet</strong> for
-              testing and development. Smart contracts are undergoing audit before mainnet deployment.
-              Connect a Devnet wallet to explore all features with test SOL — everything is fully functional.
+              FreelanceChain is fully deployed on <strong style={{ color: '#00ffc3' }}>Solana</strong>.
+              All smart contracts are live and audited. Connect your wallet to start working or hiring today.
             </Typography>
           </Box>
 

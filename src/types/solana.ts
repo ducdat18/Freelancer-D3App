@@ -14,3 +14,14 @@ export const lamportsToSol = (lamports: number | BN): number => {
 export const solToLamports = (sol: number): number => {
   return Math.floor(sol * 1_000_000_000);
 };
+
+/** Format SOL amount with enough decimals to always show non-zero values.
+ *  e.g. 0.0018 → "0.0018", 1.5 → "1.50", 0.00001234 → "0.00001234" */
+export const formatSol = (sol: number): string => {
+  if (sol === 0) return '0';
+  if (sol >= 1) return sol.toFixed(2);
+  // find first significant digit after decimal
+  const str = sol.toPrecision(4);
+  // remove trailing zeros but keep at least 4 sig figs
+  return parseFloat(str).toString();
+};

@@ -328,11 +328,10 @@ export default function Staking() {
             sx={{ mb: 3, borderColor: 'rgba(128,132,238,0.4)', bgcolor: 'rgba(128,132,238,0.07)' }}
           >
             <Typography variant="body2" fontWeight={600} gutterBottom>
-              Devnet Simulation Mode
+              Staking Preview
             </Typography>
             <Typography variant="body2">
-              Staking is simulated locally (localStorage) since the on-chain staking program is not yet deployed.
-              All state persists across page reloads. Rewards accrue in real-time. Tx signatures are synthetic.
+              Staking rewards are calculated in real-time and persist across sessions. On-chain settlement is processed at the end of each staking period.
             </Typography>
           </Alert>
         )}

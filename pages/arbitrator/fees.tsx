@@ -21,6 +21,7 @@ import LoadingSpinner from '../../src/components/LoadingSpinner';
 import EmptyState from '../../src/components/EmptyState';
 import { useEscrow } from '../../src/hooks/useEscrow';
 import { deriveEscrowPDA } from '../../src/utils/pda';
+import { formatSol } from '../../src/types/solana';
 
 const { LAMPORTS_PER_SOL } = web3;
 
@@ -306,7 +307,7 @@ export default function ArbitratorFees() {
                         {' • '}
                         {disputeData.totalVotes} total votes
                         {' • '}
-                        Escrow: {disputeData.escrowAmount.toFixed(2)} SOL
+                        Escrow: {formatSol(disputeData.escrowAmount)} SOL
                       </Typography>
                     </Box>
 

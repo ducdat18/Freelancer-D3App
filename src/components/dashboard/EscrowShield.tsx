@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import { formatSol } from '../../types/solana';
 
 interface EscrowShieldProps {
   totalLocked: number;
@@ -118,7 +119,7 @@ export default function EscrowShield({
               lineHeight: 1,
             }}
           >
-            {totalLocked.toFixed(2)}
+            {formatSol(totalLocked)}
           </Typography>
           <Typography
             sx={{
@@ -154,7 +155,7 @@ export default function EscrowShield({
               color: '#8084ee',
             }}
           >
-            {totalReleased.toFixed(2)}
+            {formatSol(totalReleased)}
           </Typography>
           <Typography
             sx={{
