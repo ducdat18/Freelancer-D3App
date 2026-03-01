@@ -1,0 +1,267 @@
+@startuml Freelance Marketplace - Complete Class Diagram
+
+title Freelance Marketplace - Class Diagram (Đầy Đủ Properties & Methods)
+
+' ========================
+' MAIN CLASSES
+' ========================
+
+class Job {
+    ==Properties==
+    + client: PublicKey
+    + title: string
+    + description: string
+    + budget: u64
+    + metadata_uri: string
+    + status: JobStatus
+    + selected_freelancer: Option<PublicKey>
+    + created_at: i64
+    + updated_at: i64
+    + bid_count: u32
+    + escrow_amount: u64
+    + bump: u8
+    ==Methods==
+    + create(title, description, budget, metadata_uri): Job
+    + addBid(): void
+    + selectFreelancer(freelancer: PublicKey): void
+    + updateStatus(status: JobStatus): void
+    + cancel(): void
+    + isOpen(): boolean
+    + isInProgress(): boolean
+    + isCompleted(): boolean
+}
+
+class Bid {
+    ==Properties==
+    + job: PublicKey
+    + freelancer: PublicKey
+    + proposed_budget: u64
+    + proposal: string
+    + timeline_days: u16
+    + status: BidStatus
+    + created_at: i64
+    + bump: u8
+    ==Methods==
+    + submit(job, proposed_budget, proposal, timeline_days): Bid
+    + accept(): void
+    + reject(): void
+    + isPending(): boolean
+    + isAccepted(): boolean
+}
+
+class Escrow {
+    ==Properties==
+    + job: PublicKey
+    + client: PublicKey
+    + freelancer: PublicKey
+    + amount: u64
+    + locked: boolean
+    + released: boolean
+    + disputed: boolean
+    + created_at: i64
+    + bump: u8
+    ==Methods==
+    + deposit(job, amount): Escrow
+    + release(): void
+    + refund(): void
+    + openDispute(reason): Dispute
+    + isLocked(): boolean
+    + isReleased(): boolean
+    + isDisputed(): boolean
+}
+
+class WorkSubmission {
+    ==Properties==
+    + job: PublicKey
+    + freelancer: PublicKey
+    + deliverable_uri: string
+    + submitted_at: i64
+    + approved: boolean
+    + bump: u8
+    ==Methods==
+    + submit(job, deliverable_uri): WorkSubmission
+    + approve(): void
+    + reject(): void
+    + getDeliverableUrl(): string
+    + isApproved(): boolean
+}
+
+class Dispute {
+    ==Properties==
+    + job: PublicKey
+    + escrow: PublicKey
+    + client: PublicKey
+    + freelancer: PublicKey
+    + initiator: PublicKey
+    + reason: string
+    + status: DisputeStatus
+    + votes_for_client: u32
+    + votes_for_freelancer: u32
+    + created_at: i64
+    + resolved_at: Option<i64>
+    + bump: u8
+    ==Methods==
+    + open(escrow, reason): Dispute
+    + addVote(voter, vote_for_client): VoteRecord
+    + resolve(): void
+    + getWinner(): PublicKey
+    + isOpen(): boolean
+    + isResolved(): boolean
+    + getVotePercentage(): (u32, u32)
+}
+
+class VoteRecord {
+    ==Properties==
+    + dispute: PublicKey
+    + voter: PublicKey
+    + vote_for_client: boolean
+    + voted_at: i64
+    + bump: u8
+    ==Methods==
+    + create(dispute, voter, vote_for_client): VoteRecord
+    + isForClient(): boolean
+    + isForFreelancer(): boolean
+}
+
+class Reputation {
+    ==Properties==
+    + user: PublicKey
+    + total_reviews: u32
+    + average_rating: f32
+    + completed_jobs: u32
+    + total_earned: u64
+    + bump: u8
+    ==Methods==
+    + initialize(user): Reputation
+    + addReview(rating): void
+    + incrementCompletedJobs(): void
+    + addEarnings(amount): void
+    + getAverageRating(): f32
+    + getTotalReviews(): u32
+}
+
+class Review {
+    ==Properties==
+    + job: PublicKey
+    + reviewer: PublicKey
+    + reviewee: PublicKey
+    + rating: u8
+    + comment: string
+    + created_at: i64
+    + bump: u8
+    ==Methods==
+    + submit(job, reviewee, rating, comment): Review
+    + edit(comment): void
+    + delete(): void
+    + isPositive(): boolean
+}
+
+class UserProfile {
+    ==Properties==
+    + address: PublicKey
+    + name: string
+    + bio: string
+    + avatarUrl: string
+    + skills: string[]
+    + hourlyRate: bigint
+    + reputation: Reputation
+    + isFreelancer: boolean
+    + isClient: boolean
+    ==Methods==
+    + createJob(title, description, budget, metadata_uri): Job
+    + submitBid(job, budget, proposal, days): Bid
+    + getReputation(): Reputation
+    + getJobs(): Job[]
+    + getBids(): Bid[]
+    + updateProfile(name, bio, avatar, skills): void
+}
+
+' ========================
+' ENUMS
+' ========================
+
+enum JobStatus {
+    Open
+    InProgress
+    Completed
+    Disputed
+    Cancelled
+}
+
+enum BidStatus {
+    Pending
+    Accepted
+    Rejected
+}
+
+enum DisputeStatus {
+    Open
+    ResolvedClient
+    ResolvedFreelancer
+}
+
+' ========================
+' RELATIONSHIPS
+' ========================
+
+UserProfile "client" -- "0..*" Job : creates >
+UserProfile "freelancer" -- "0..*" Bid : submits >
+UserProfile "1" -- "1" Reputation : has >
+UserProfile -- "0..*" Review : writes >
+
+Job "1" -- "0..*" Bid : receives >
+Job "1" -- "0..1" Escrow : has >
+Job "1" -- "0..1" WorkSubmission : has >
+Job "1" -- "0..*" Review : receives >
+Job -- JobStatus
+
+Bid -- BidStatus
+Bid --> Job : for
+
+Escrow --> Job : secures
+Escrow "1" -- "0..1" Dispute : may have
+
+Dispute --> Escrow : about
+Dispute "1" -- "0..*" VoteRecord : has votes
+Dispute -- DisputeStatus
+
+WorkSubmission --> Job : delivered to
+
+Review --> Job : about
+Review --> UserProfile : reviewer
+Review --> UserProfile : reviewee
+
+' ========================
+' NOTES
+' ========================
+
+note right of Job
+<b>Luồng Job:</b>
+create() → Open
+selectFreelancer() → InProgress
+complete/dispute() → Completed/Disputed
+cancel() → Cancelled
+end note
+
+note right of Escrow
+<b>Luồng Payment:</b>
+deposit() → locked=true
+release() → released=true, SOL → freelancer
+openDispute() → disputed=true
+end note
+
+note right of Dispute
+<b>Luồng Dispute:</b>
+open() → status=Open
+addVote() → votes++
+resolve() → ResolvedClient/ResolvedFreelancer
+end note
+
+note bottom of Reputation
+<b>Update khi:</b>
+- Job completed → incrementCompletedJobs()
+- Review submitted → addReview()
+- Payment released → addEarnings()
+end note
+
+@enduml

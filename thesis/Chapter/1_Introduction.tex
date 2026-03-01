@@ -1,0 +1,131 @@
+\documentclass[../report.tex]{subfiles}
+
+\begin{document}
+
+\section{Background and Motivation}
+
+The freelance economy has experienced remarkable growth over the past decade, with millions of professionals worldwide offering their services through online platforms. According to recent studies, the global freelance market is projected to reach \$12 billion by 2028, with over 70 million freelancers operating worldwide. Traditional centralized freelance platforms such as Upwork, Fiverr, and Freelancer.com have dominated this market, providing a marketplace where clients can post jobs and freelancers can bid on projects.
+
+However, these centralized platforms face several critical limitations:
+
+\begin{itemize}
+    \item \textbf{High Commission Fees:} Centralized platforms typically charge 10-20\% commission on transactions, significantly reducing freelancer earnings and increasing client costs.
+    \item \textbf{Payment Delays:} Fund transfers can take several days to weeks due to traditional banking systems and platform policies.
+    \item \textbf{Trust Issues:} Disputes between clients and freelancers often require platform intervention, which may not always be fair or transparent.
+    \item \textbf{Centralized Control:} Platforms have complete control over user accounts, funds, and dispute resolutions, creating a single point of failure.
+    \item \textbf{Geographic Restrictions:} Many platforms impose limitations based on user location, excluding significant portions of the global workforce.
+    \item \textbf{Data Privacy Concerns:} Centralized storage of sensitive user data poses security risks.
+\end{itemize}
+
+Blockchain technology, particularly smart contract platforms like Solana, offers a promising solution to these challenges. By leveraging decentralized infrastructure, we can create trustless marketplaces where transactions are automated through code, payments are instant, and no single entity has control over the platform.
+
+\section{Problem Statement}
+
+The primary challenges in current freelance marketplace systems can be categorized into three main areas:
+
+\subsection{Financial Inefficiency}
+
+Traditional freelance platforms operate as middlemen, extracting substantial fees from both clients and freelancers. These high transaction costs make it economically unfeasible for smaller projects and reduce the overall value proposition for both parties. Additionally, payment processing through traditional banking systems introduces delays, currency conversion fees, and geographical restrictions.
+
+\subsection{Trust and Transparency}
+
+The lack of transparency in dispute resolution and the centralized nature of reputation systems create trust issues. Clients and freelancers have no way to independently verify the fairness of platform decisions. Furthermore, reputation scores are controlled by the platform and cannot be transferred to other systems, creating vendor lock-in effects.
+
+\subsection{User Experience and Discoverability}
+
+Current platforms often suffer from poor matching algorithms, making it difficult for clients to find suitable freelancers and vice versa. The rigid job-posting model does not accommodate all hiring scenarios, particularly when clients want to proactively reach out to specific freelancers based on their profiles and previous work.
+
+\section{Research Objectives}
+
+This thesis aims to address the aforementioned challenges by designing and implementing a decentralized freelance marketplace on the Solana blockchain. The specific objectives are:
+
+\begin{enumerate}
+    \item \textbf{Design a trustless escrow system:} Implement smart contracts that automatically manage fund deposits, work verification, and payment releases without requiring centralized intermediaries.
+
+    \item \textbf{Develop a transparent reputation mechanism:} Create an on-chain reputation system where reviews and ratings are immutably stored on the blockchain, ensuring transparency and portability.
+
+    \item \textbf{Implement dual-flow hiring processes:} Support both traditional job-first approaches and innovative freelancer-first approaches to accommodate diverse hiring scenarios.
+
+    \item \textbf{Build an automatic role detection system:} Utilize blockchain data analysis to automatically identify user roles (freelancer, client, or both) without manual input.
+
+    \item \textbf{Apply SOLID architectural principles:} Ensure the system is maintainable, testable, and extensible through proper software engineering practices.
+
+    \item \textbf{Optimize for performance and cost:} Leverage Solana's high-throughput, low-cost infrastructure to provide a superior user experience compared to other blockchain platforms.
+\end{enumerate}
+
+\section{Scope and Limitations}
+
+\subsection{Scope}
+
+This thesis focuses on the following aspects:
+
+\begin{itemize}
+    \item Development of smart contracts for job posting, bidding, escrow management, and reputation tracking
+    \item Implementation of a web-based user interface using modern frontend technologies (Next.js, React, TypeScript)
+    \item Integration with Solana blockchain and wallet adapters
+    \item Design of a notification system for real-time updates
+    \item Creation of advanced search and filtering capabilities
+    \item Implementation of hybrid role detection algorithms
+    \item Application of SOLID design principles and software architecture patterns
+\end{itemize}
+
+\subsection{Limitations}
+
+The following aspects are outside the scope of this thesis:
+
+\begin{itemize}
+    \item Mobile application development (iOS/Android native apps)
+    \item Advanced AI-based matching algorithms
+    \item Cross-chain interoperability with other blockchain networks
+    \item Fiat currency payment gateways
+    \item Video conferencing and real-time collaboration tools
+    \item Advanced project management features (Gantt charts, time tracking, etc.)
+    \item Multi-token support beyond SOL and SPL tokens
+\end{itemize}
+
+\section{Research Methodology}
+
+This thesis follows a systematic development approach:
+
+\begin{enumerate}
+    \item \textbf{Literature Review:} Comprehensive study of existing blockchain platforms, decentralized applications, and software architecture patterns.
+
+    \item \textbf{Requirement Analysis:} Identification of functional and non-functional requirements through analysis of existing platforms and user needs.
+
+    \item \textbf{System Design:} Creation of architectural diagrams, database schemas, and smart contract specifications using UML and other modeling tools.
+
+    \item \textbf{Implementation:} Iterative development of smart contracts and frontend components following agile methodologies.
+
+    \item \textbf{Testing and Evaluation:} Comprehensive testing including unit tests, integration tests, and user acceptance testing on Solana devnet and testnet.
+
+    \item \textbf{Performance Analysis:} Measurement of system performance metrics including transaction throughput, latency, and cost.
+\end{enumerate}
+
+\section{Thesis Structure}
+
+The remainder of this thesis is organized as follows:
+
+\textbf{Chapter 2: Requirement Survey and Analysis} presents a comprehensive review of related work in blockchain technology, decentralized applications, and existing freelance platforms. It also details the functional and non-functional requirements of the proposed system.
+
+\textbf{Chapter 3: Methodology} describes the research approach, development methodologies, and tools used in this project. It explains the choice of Solana blockchain and the Anchor framework.
+
+\textbf{Chapter 4: Design, Implementation, and Evaluation} provides detailed descriptions of system architecture, smart contract design, frontend implementation, and database structures. It includes UML diagrams, sequence diagrams, and code snippets.
+
+\textbf{Chapter 5: Solution and Contribution} discusses the key innovations and contributions of this thesis, including the hybrid hiring system, role detection mechanism, and SOLID architecture implementation.
+
+\textbf{Chapter 6: Conclusion and Future Work} summarizes the achievements of this thesis, discusses limitations, and proposes directions for future research and development.
+
+\section{Expected Contributions}
+
+This thesis makes the following contributions:
+
+\begin{enumerate}
+    \item A fully functional decentralized freelance marketplace built on Solana blockchain
+    \item A hybrid dual-flow hiring mechanism supporting multiple engagement models
+    \item An automatic role detection system based on blockchain data analysis
+    \item A comprehensive implementation of SOLID principles in blockchain application development
+    \item Performance benchmarks and cost analysis for Solana-based marketplace applications
+    \item Open-source codebase that can serve as a reference for future dApp developers
+\end{enumerate}
+
+\end{document}

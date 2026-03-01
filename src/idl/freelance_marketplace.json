@@ -1,0 +1,6559 @@
+{
+  "address": "FStwCj8zLzNkz7gTavooDcqF4FSyDcF9o9SCh96yyP7i",
+  "metadata": {
+    "name": "freelance_marketplace",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Decentralized Freelance Marketplace on Solana"
+  },
+  "instructions": [
+    {
+      "name": "add_dispute_evidence",
+      "docs": [
+        "Add evidence to an existing dispute (client or freelancer only)"
+      ],
+      "discriminator": [
+        154,
+        54,
+        114,
+        31,
+        211,
+        6,
+        111,
+        187
+      ],
+      "accounts": [
+        {
+          "name": "dispute",
+          "writable": true
+        },
+        {
+          "name": "uploader",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "evidence_uri",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "approve_milestone",
+      "docs": [
+        "Approve a milestone and release payment"
+      ],
+      "discriminator": [
+        145,
+        85,
+        92,
+        60,
+        50,
+        130,
+        219,
+        106
+      ],
+      "accounts": [
+        {
+          "name": "milestone",
+          "writable": true
+        },
+        {
+          "name": "milestone_escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  115,
+                  45,
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "milestone"
+              }
+            ]
+          }
+        },
+        {
+          "name": "milestone_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  111,
+                  98,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "client",
+          "signer": true
+        },
+        {
+          "name": "freelancer",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "approve_work",
+      "docs": [
+        "Client approves submitted work and releases payment",
+        "Separate from complete_job - this is the happy path after review"
+      ],
+      "discriminator": [
+        181,
+        118,
+        45,
+        143,
+        204,
+        88,
+        237,
+        109
+      ],
+      "accounts": [
+        {
+          "name": "work_submission",
+          "writable": true
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "escrow",
+          "writable": true
+        },
+        {
+          "name": "client",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "freelancer",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "cancel_job",
+      "docs": [
+        "Cancel a job and refund escrow if applicable",
+        "CRITICAL: Can only cancel if work has NOT been submitted"
+      ],
+      "discriminator": [
+        126,
+        241,
+        155,
+        241,
+        50,
+        236,
+        83,
+        118
+      ],
+      "accounts": [
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "client",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "cast_staked_vote",
+      "docs": [
+        "Cast a staked vote on a dispute"
+      ],
+      "discriminator": [
+        249,
+        156,
+        185,
+        85,
+        138,
+        246,
+        81,
+        228
+      ],
+      "accounts": [
+        {
+          "name": "staked_vote_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  101,
+                  100,
+                  45,
+                  118,
+                  111,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "juror_selection.dispute",
+                "account": "DisputeJurorSelection"
+              },
+              {
+                "kind": "account",
+                "path": "juror"
+              }
+            ]
+          }
+        },
+        {
+          "name": "juror_selection",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  114,
+                  111,
+                  114,
+                  45,
+                  115,
+                  101,
+                  108,
+                  101,
+                  99,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "juror_selection.dispute",
+                "account": "DisputeJurorSelection"
+              }
+            ]
+          }
+        },
+        {
+          "name": "juror_stake",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  114,
+                  111,
+                  114,
+                  45,
+                  115,
+                  116,
+                  97,
+                  107,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "juror"
+              }
+            ]
+          }
+        },
+        {
+          "name": "dispute",
+          "writable": true
+        },
+        {
+          "name": "dispute_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  115,
+                  112,
+                  117,
+                  116,
+                  101,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "juror",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "vote_for_client",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "claim_arbitrator_fee",
+      "docs": [
+        "Claim arbitrator fee for voting on a dispute"
+      ],
+      "discriminator": [
+        206,
+        193,
+        14,
+        41,
+        7,
+        45,
+        237,
+        207
+      ],
+      "accounts": [
+        {
+          "name": "dispute"
+        },
+        {
+          "name": "vote_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  111,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "dispute"
+              },
+              {
+                "kind": "account",
+                "path": "arbitrator"
+              }
+            ]
+          }
+        },
+        {
+          "name": "escrow_fee_vault",
+          "writable": true
+        },
+        {
+          "name": "arbitrator",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim_staking_reward",
+      "docs": [
+        "Claim staking reward after dispute resolution"
+      ],
+      "discriminator": [
+        8,
+        224,
+        186,
+        28,
+        8,
+        163,
+        172,
+        183
+      ],
+      "accounts": [
+        {
+          "name": "juror_selection",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  114,
+                  111,
+                  114,
+                  45,
+                  115,
+                  101,
+                  108,
+                  101,
+                  99,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "dispute"
+              }
+            ]
+          }
+        },
+        {
+          "name": "dispute"
+        },
+        {
+          "name": "staked_vote_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  101,
+                  100,
+                  45,
+                  118,
+                  111,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "dispute"
+              },
+              {
+                "kind": "account",
+                "path": "juror"
+              }
+            ]
+          }
+        },
+        {
+          "name": "juror_stake",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  114,
+                  111,
+                  114,
+                  45,
+                  115,
+                  116,
+                  97,
+                  107,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "juror"
+              }
+            ]
+          }
+        },
+        {
+          "name": "dispute_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  115,
+                  112,
+                  117,
+                  116,
+                  101,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "jury_vault",
+          "writable": true
+        },
+        {
+          "name": "juror_token_account",
+          "writable": true
+        },
+        {
+          "name": "juror",
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "complete_job",
+      "docs": [
+        "Complete a job (client marks work as complete and releases payment)"
+      ],
+      "discriminator": [
+        221,
+        216,
+        225,
+        72,
+        101,
+        250,
+        3,
+        11
+      ],
+      "accounts": [
+        {
+          "name": "escrow",
+          "writable": true
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "freelancer",
+          "writable": true
+        },
+        {
+          "name": "client",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_job",
+      "docs": [
+        "Create a new job posting"
+      ],
+      "discriminator": [
+        178,
+        130,
+        217,
+        110,
+        100,
+        27,
+        82,
+        119
+      ],
+      "accounts": [
+        {
+          "name": "job",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  111,
+                  98
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "client"
+              },
+              {
+                "kind": "arg",
+                "path": "job_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "client",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "_job_id",
+          "type": "u64"
+        },
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "budget",
+          "type": "u64"
+        },
+        {
+          "name": "metadata_uri",
+          "type": "string"
+        },
+        {
+          "name": "token_mint",
+          "type": {
+            "option": "pubkey"
+          }
+        }
+      ]
+    },
+    {
+      "name": "create_milestone",
+      "docs": [
+        "Create a single milestone for a job"
+      ],
+      "discriminator": [
+        239,
+        58,
+        201,
+        28,
+        40,
+        186,
+        173,
+        48
+      ],
+      "accounts": [
+        {
+          "name": "milestone",
+          "writable": true
+        },
+        {
+          "name": "milestone_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  111,
+                  98,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job"
+        },
+        {
+          "name": "client",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "milestone_index",
+          "type": "u8"
+        },
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "deposit_escrow",
+      "docs": [
+        "Deposit funds into escrow for a job"
+      ],
+      "discriminator": [
+        226,
+        112,
+        158,
+        176,
+        178,
+        118,
+        153,
+        128
+      ],
+      "accounts": [
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "client",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "deposit_token_escrow",
+      "docs": [
+        "Deposit SPL tokens into escrow"
+      ],
+      "discriminator": [
+        135,
+        136,
+        233,
+        97,
+        98,
+        211,
+        57,
+        38
+      ],
+      "accounts": [
+        {
+          "name": "token_escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  45,
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "token_mint"
+        },
+        {
+          "name": "client_token_account",
+          "writable": true
+        },
+        {
+          "name": "escrow_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119,
+                  45,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "client",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "dispute_milestone",
+      "docs": [
+        "Open dispute for a specific milestone"
+      ],
+      "discriminator": [
+        199,
+        209,
+        70,
+        146,
+        136,
+        43,
+        179,
+        41
+      ],
+      "accounts": [
+        {
+          "name": "milestone_dispute",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  115,
+                  45,
+                  100,
+                  105,
+                  115,
+                  112,
+                  117,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "milestone"
+              }
+            ]
+          }
+        },
+        {
+          "name": "milestone",
+          "writable": true
+        },
+        {
+          "name": "milestone_escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  115,
+                  45,
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "milestone"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "initiator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "reason",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "distribute_arbitrator_fees",
+      "docs": [
+        "Distribute fees to arbitrators after dispute resolution"
+      ],
+      "discriminator": [
+        182,
+        23,
+        218,
+        34,
+        192,
+        117,
+        221,
+        78
+      ],
+      "accounts": [
+        {
+          "name": "dispute",
+          "writable": true
+        },
+        {
+          "name": "escrow_account"
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "fund_milestone",
+      "docs": [
+        "Fund a specific milestone escrow"
+      ],
+      "discriminator": [
+        104,
+        130,
+        72,
+        76,
+        84,
+        58,
+        37,
+        181
+      ],
+      "accounts": [
+        {
+          "name": "milestone_escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  115,
+                  45,
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "milestone"
+              }
+            ]
+          }
+        },
+        {
+          "name": "milestone",
+          "writable": true
+        },
+        {
+          "name": "milestone_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  111,
+                  98,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job"
+        },
+        {
+          "name": "client",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "init_dispute_config",
+      "docs": [
+        "Initialize dispute configuration"
+      ],
+      "discriminator": [
+        144,
+        150,
+        117,
+        123,
+        67,
+        52,
+        218,
+        198
+      ],
+      "accounts": [
+        {
+          "name": "dispute_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  115,
+                  112,
+                  117,
+                  116,
+                  101,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "staking_token_mint"
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "min_stake_amount",
+          "type": "u64"
+        },
+        {
+          "name": "juror_count",
+          "type": "u8"
+        },
+        {
+          "name": "voting_period",
+          "type": "i64"
+        },
+        {
+          "name": "slash_percentage",
+          "type": "u8"
+        },
+        {
+          "name": "reward_percentage",
+          "type": "u8"
+        },
+        {
+          "name": "quorum_percentage",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "init_job_milestones",
+      "docs": [
+        "Initialize milestone configuration for a job"
+      ],
+      "discriminator": [
+        182,
+        93,
+        55,
+        160,
+        141,
+        45,
+        175,
+        205
+      ],
+      "accounts": [
+        {
+          "name": "milestone_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  111,
+                  98,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job"
+        },
+        {
+          "name": "client",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "total_milestones",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "init_juror_registry",
+      "docs": [
+        "Initialize juror registry"
+      ],
+      "discriminator": [
+        194,
+        198,
+        195,
+        139,
+        226,
+        241,
+        24,
+        15
+      ],
+      "accounts": [
+        {
+          "name": "juror_registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  114,
+                  111,
+                  114,
+                  45,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "init_sbt_counter",
+      "docs": [
+        "Initialize SBT counter for a user"
+      ],
+      "discriminator": [
+        54,
+        94,
+        193,
+        239,
+        221,
+        69,
+        245,
+        211
+      ],
+      "accounts": [
+        {
+          "name": "sbt_counter",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  98,
+                  116,
+                  45,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_reputation",
+      "docs": [
+        "Initialize reputation for a user"
+      ],
+      "discriminator": [
+        150,
+        240,
+        109,
+        53,
+        147,
+        42,
+        152,
+        162
+      ],
+      "accounts": [
+        {
+          "name": "reputation",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "mark_message_read",
+      "docs": [
+        "Mark a message as read"
+      ],
+      "discriminator": [
+        32,
+        201,
+        168,
+        44,
+        6,
+        21,
+        227,
+        204
+      ],
+      "accounts": [
+        {
+          "name": "message",
+          "writable": true
+        },
+        {
+          "name": "recipient",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "mint_achievement_nft",
+      "docs": [
+        "Mint achievement NFT for reaching milestones"
+      ],
+      "discriminator": [
+        215,
+        35,
+        8,
+        179,
+        20,
+        237,
+        118,
+        82
+      ],
+      "accounts": [
+        {
+          "name": "achievement_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  99,
+                  104,
+                  105,
+                  101,
+                  118,
+                  101,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "arg",
+                "path": "achievement_type"
+              }
+            ]
+          }
+        },
+        {
+          "name": "reputation",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "achievement_type",
+          "type": {
+            "defined": {
+              "name": "AchievementType"
+            }
+          }
+        },
+        {
+          "name": "metadata_uri",
+          "type": "string"
+        },
+        {
+          "name": "nft_mint",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "mint_job_completion_nft",
+      "docs": [
+        "Mint job completion NFT as proof of work"
+      ],
+      "discriminator": [
+        192,
+        254,
+        92,
+        33,
+        84,
+        43,
+        50,
+        105
+      ],
+      "accounts": [
+        {
+          "name": "job_nft_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  111,
+                  98,
+                  45,
+                  110,
+                  102,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              },
+              {
+                "kind": "account",
+                "path": "freelancer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job"
+        },
+        {
+          "name": "freelancer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "job_title",
+          "type": "string"
+        },
+        {
+          "name": "metadata_uri",
+          "type": "string"
+        },
+        {
+          "name": "nft_mint",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "mint_reputation_sbt",
+      "docs": [
+        "Mint a reputation SBT after job completion"
+      ],
+      "discriminator": [
+        241,
+        228,
+        53,
+        173,
+        135,
+        118,
+        121,
+        130
+      ],
+      "accounts": [
+        {
+          "name": "reputation_sbt",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  98,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "reviewee"
+              },
+              {
+                "kind": "account",
+                "path": "sbt_counter.count",
+                "account": "UserSBTCounter"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sbt_counter",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  98,
+                  116,
+                  45,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "reviewee"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job"
+        },
+        {
+          "name": "reputation",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "reviewee"
+              }
+            ]
+          }
+        },
+        {
+          "name": "reviewer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "reviewee"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "rating",
+          "type": "u8"
+        },
+        {
+          "name": "comment",
+          "type": "string"
+        },
+        {
+          "name": "job_title",
+          "type": "string"
+        },
+        {
+          "name": "metadata_uri",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "open_dispute",
+      "docs": [
+        "Open a dispute"
+      ],
+      "discriminator": [
+        137,
+        25,
+        99,
+        119,
+        23,
+        223,
+        161,
+        42
+      ],
+      "accounts": [
+        {
+          "name": "dispute",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  115,
+                  112,
+                  117,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "escrow",
+          "writable": true
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "initiator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "reason",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "open_token_dispute",
+      "docs": [
+        "Open dispute for token escrow"
+      ],
+      "discriminator": [
+        70,
+        69,
+        39,
+        57,
+        77,
+        241,
+        167,
+        225
+      ],
+      "accounts": [
+        {
+          "name": "token_dispute",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  45,
+                  100,
+                  105,
+                  115,
+                  112,
+                  117,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_escrow",
+          "writable": true
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "initiator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "reason",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "raise_dispute",
+      "docs": [
+        "Freelancer raises dispute after work rejection",
+        "Opens the DAO voting mechanism"
+      ],
+      "discriminator": [
+        41,
+        243,
+        1,
+        51,
+        150,
+        95,
+        246,
+        73
+      ],
+      "accounts": [
+        {
+          "name": "dispute",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  115,
+                  112,
+                  117,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "escrow",
+          "writable": true
+        },
+        {
+          "name": "freelancer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "reason",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "reject_milestone",
+      "docs": [
+        "Reject a milestone work submission"
+      ],
+      "discriminator": [
+        243,
+        48,
+        66,
+        165,
+        237,
+        41,
+        116,
+        249
+      ],
+      "accounts": [
+        {
+          "name": "milestone",
+          "writable": true
+        },
+        {
+          "name": "job"
+        },
+        {
+          "name": "client",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "reason",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "reject_work",
+      "docs": [
+        "Client rejects submitted work",
+        "CRITICAL: Funds stay in escrow, freelancer can raise dispute"
+      ],
+      "discriminator": [
+        129,
+        238,
+        59,
+        133,
+        63,
+        148,
+        130,
+        54
+      ],
+      "accounts": [
+        {
+          "name": "work_submission"
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "escrow"
+        },
+        {
+          "name": "client",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "reason",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "release_escrow",
+      "docs": [
+        "Release escrow payment to freelancer (client approves work)"
+      ],
+      "discriminator": [
+        146,
+        253,
+        129,
+        233,
+        20,
+        145,
+        181,
+        206
+      ],
+      "accounts": [
+        {
+          "name": "escrow",
+          "writable": true
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "freelancer",
+          "writable": true
+        },
+        {
+          "name": "client",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "release_token_escrow",
+      "docs": [
+        "Release SPL token escrow to freelancer"
+      ],
+      "discriminator": [
+        29,
+        158,
+        153,
+        156,
+        235,
+        117,
+        59,
+        61
+      ],
+      "accounts": [
+        {
+          "name": "token_escrow",
+          "writable": true
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "escrow_token_account",
+          "writable": true
+        },
+        {
+          "name": "freelancer_token_account",
+          "writable": true
+        },
+        {
+          "name": "client",
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "resolve_dispute",
+      "docs": [
+        "Resolve dispute based on votes"
+      ],
+      "discriminator": [
+        231,
+        6,
+        202,
+        6,
+        96,
+        103,
+        12,
+        230
+      ],
+      "accounts": [
+        {
+          "name": "dispute",
+          "writable": true
+        },
+        {
+          "name": "escrow",
+          "writable": true
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "client",
+          "writable": true
+        },
+        {
+          "name": "freelancer",
+          "writable": true
+        },
+        {
+          "name": "resolver",
+          "docs": [
+            "Anyone involved in the dispute (client, freelancer, or a voter) must sign"
+          ],
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "resolve_staked_dispute",
+      "docs": [
+        "Resolve a staked dispute after voting period ends"
+      ],
+      "discriminator": [
+        101,
+        193,
+        171,
+        0,
+        55,
+        192,
+        145,
+        113
+      ],
+      "accounts": [
+        {
+          "name": "juror_selection",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  114,
+                  111,
+                  114,
+                  45,
+                  115,
+                  101,
+                  108,
+                  101,
+                  99,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "dispute"
+              }
+            ]
+          }
+        },
+        {
+          "name": "dispute",
+          "writable": true
+        },
+        {
+          "name": "escrow",
+          "writable": true
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "client",
+          "writable": true
+        },
+        {
+          "name": "freelancer",
+          "writable": true
+        },
+        {
+          "name": "resolver",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "resolve_token_dispute",
+      "docs": [
+        "Resolve token dispute"
+      ],
+      "discriminator": [
+        42,
+        3,
+        244,
+        169,
+        158,
+        178,
+        251,
+        10
+      ],
+      "accounts": [
+        {
+          "name": "token_dispute",
+          "writable": true
+        },
+        {
+          "name": "token_escrow",
+          "writable": true
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "escrow_token_account",
+          "writable": true
+        },
+        {
+          "name": "client_token_account",
+          "writable": true
+        },
+        {
+          "name": "freelancer_token_account",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "revoke_sbt",
+      "docs": [
+        "Revoke an SBT (admin action for fraud)"
+      ],
+      "discriminator": [
+        31,
+        186,
+        137,
+        169,
+        73,
+        192,
+        28,
+        201
+      ],
+      "accounts": [
+        {
+          "name": "reputation_sbt",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "select_bid",
+      "docs": [
+        "Select a winning bid and assign freelancer"
+      ],
+      "discriminator": [
+        237,
+        159,
+        214,
+        70,
+        104,
+        96,
+        28,
+        70
+      ],
+      "accounts": [
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "bid",
+          "writable": true
+        },
+        {
+          "name": "client",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "select_jurors",
+      "docs": [
+        "Select random jurors for a dispute"
+      ],
+      "discriminator": [
+        184,
+        221,
+        180,
+        115,
+        136,
+        228,
+        130,
+        117
+      ],
+      "accounts": [
+        {
+          "name": "juror_selection",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  114,
+                  111,
+                  114,
+                  45,
+                  115,
+                  101,
+                  108,
+                  101,
+                  99,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "dispute"
+              }
+            ]
+          }
+        },
+        {
+          "name": "dispute"
+        },
+        {
+          "name": "dispute_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  115,
+                  112,
+                  117,
+                  116,
+                  101,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "juror_registry",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  114,
+                  111,
+                  114,
+                  45,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "send_message",
+      "docs": [
+        "Send a message to another user"
+      ],
+      "discriminator": [
+        57,
+        40,
+        34,
+        178,
+        189,
+        10,
+        65,
+        26
+      ],
+      "accounts": [
+        {
+          "name": "message",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  104,
+                  97,
+                  116,
+                  95,
+                  109,
+                  101,
+                  115,
+                  115,
+                  97,
+                  103,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sender"
+              },
+              {
+                "kind": "arg",
+                "path": "recipient"
+              },
+              {
+                "kind": "arg",
+                "path": "message_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sender",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "recipient",
+          "type": "pubkey"
+        },
+        {
+          "name": "content",
+          "type": "string"
+        },
+        {
+          "name": "message_id",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "stake_for_jury",
+      "docs": [
+        "Stake tokens to become eligible as a juror"
+      ],
+      "discriminator": [
+        105,
+        122,
+        90,
+        107,
+        123,
+        18,
+        224,
+        240
+      ],
+      "accounts": [
+        {
+          "name": "juror_stake",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  114,
+                  111,
+                  114,
+                  45,
+                  115,
+                  116,
+                  97,
+                  107,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "juror"
+              }
+            ]
+          }
+        },
+        {
+          "name": "dispute_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  115,
+                  112,
+                  117,
+                  116,
+                  101,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "juror_registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  114,
+                  111,
+                  114,
+                  45,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "juror_token_account",
+          "writable": true
+        },
+        {
+          "name": "jury_vault",
+          "writable": true
+        },
+        {
+          "name": "juror",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "submit_bid",
+      "docs": [
+        "Submit a bid for a job"
+      ],
+      "discriminator": [
+        19,
+        164,
+        237,
+        254,
+        64,
+        139,
+        237,
+        93
+      ],
+      "accounts": [
+        {
+          "name": "bid",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  105,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              },
+              {
+                "kind": "account",
+                "path": "freelancer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "freelancer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "proposed_budget",
+          "type": "u64"
+        },
+        {
+          "name": "proposal",
+          "type": "string"
+        },
+        {
+          "name": "timeline_days",
+          "type": "u16"
+        },
+        {
+          "name": "cv_uri",
+          "type": {
+            "option": "string"
+          }
+        }
+      ]
+    },
+    {
+      "name": "submit_milestone_work",
+      "docs": [
+        "Submit work for a specific milestone"
+      ],
+      "discriminator": [
+        227,
+        255,
+        252,
+        135,
+        51,
+        214,
+        142,
+        12
+      ],
+      "accounts": [
+        {
+          "name": "milestone",
+          "writable": true
+        },
+        {
+          "name": "job"
+        },
+        {
+          "name": "freelancer",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "deliverable_uri",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "submit_review",
+      "docs": [
+        "Submit a review/rating after job completion"
+      ],
+      "discriminator": [
+        106,
+        30,
+        50,
+        83,
+        89,
+        46,
+        213,
+        239
+      ],
+      "accounts": [
+        {
+          "name": "review",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  118,
+                  105,
+                  101,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              },
+              {
+                "kind": "account",
+                "path": "reviewer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job"
+        },
+        {
+          "name": "reviewee_reputation",
+          "writable": true
+        },
+        {
+          "name": "reviewer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "reviewee"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "rating",
+          "type": "u8"
+        },
+        {
+          "name": "comment",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "submit_work",
+      "docs": [
+        "Submit work deliverables",
+        "Freelancer submits work deliverables",
+        "CRITICAL: Changes job status to WaitingForReview, preventing cancellation"
+      ],
+      "discriminator": [
+        158,
+        80,
+        101,
+        51,
+        114,
+        130,
+        101,
+        253
+      ],
+      "accounts": [
+        {
+          "name": "work_submission",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  111,
+                  114,
+                  107
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "job"
+              }
+            ]
+          }
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "freelancer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "deliverable_uri",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "unstake_from_jury",
+      "docs": [
+        "Unstake tokens and leave the juror pool"
+      ],
+      "discriminator": [
+        192,
+        223,
+        71,
+        134,
+        13,
+        241,
+        10,
+        147
+      ],
+      "accounts": [
+        {
+          "name": "juror_stake",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  114,
+                  111,
+                  114,
+                  45,
+                  115,
+                  116,
+                  97,
+                  107,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "juror"
+              }
+            ]
+          }
+        },
+        {
+          "name": "dispute_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  105,
+                  115,
+                  112,
+                  117,
+                  116,
+                  101,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "juror_registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  114,
+                  111,
+                  114,
+                  45,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "juror_token_account",
+          "writable": true
+        },
+        {
+          "name": "jury_vault",
+          "writable": true
+        },
+        {
+          "name": "juror",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "vote_dispute",
+      "docs": [
+        "Vote on dispute (arbitrators with high reputation)",
+        "AUTO-RESOLVES when 2 votes are reached"
+      ],
+      "discriminator": [
+        23,
+        190,
+        211,
+        170,
+        65,
+        223,
+        4,
+        243
+      ],
+      "accounts": [
+        {
+          "name": "dispute",
+          "writable": true
+        },
+        {
+          "name": "vote_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  111,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "dispute"
+              },
+              {
+                "kind": "account",
+                "path": "voter"
+              }
+            ]
+          }
+        },
+        {
+          "name": "voter_reputation",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "voter"
+              }
+            ]
+          }
+        },
+        {
+          "name": "voter",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "escrow",
+          "writable": true
+        },
+        {
+          "name": "job",
+          "writable": true
+        },
+        {
+          "name": "client",
+          "writable": true
+        },
+        {
+          "name": "freelancer",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "vote_for_client",
+          "type": "bool"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "AchievementRecord",
+      "discriminator": [
+        29,
+        250,
+        170,
+        244,
+        20,
+        202,
+        134,
+        155
+      ]
+    },
+    {
+      "name": "Bid",
+      "discriminator": [
+        143,
+        246,
+        48,
+        245,
+        42,
+        145,
+        180,
+        88
+      ]
+    },
+    {
+      "name": "ChatMessage",
+      "discriminator": [
+        248,
+        136,
+        252,
+        235,
+        151,
+        180,
+        75,
+        242
+      ]
+    },
+    {
+      "name": "Dispute",
+      "discriminator": [
+        36,
+        49,
+        241,
+        67,
+        40,
+        36,
+        241,
+        74
+      ]
+    },
+    {
+      "name": "DisputeConfig",
+      "discriminator": [
+        230,
+        88,
+        200,
+        99,
+        12,
+        93,
+        56,
+        156
+      ]
+    },
+    {
+      "name": "DisputeJurorSelection",
+      "discriminator": [
+        100,
+        90,
+        0,
+        14,
+        30,
+        238,
+        205,
+        198
+      ]
+    },
+    {
+      "name": "Escrow",
+      "discriminator": [
+        31,
+        213,
+        123,
+        187,
+        186,
+        22,
+        218,
+        155
+      ]
+    },
+    {
+      "name": "Job",
+      "discriminator": [
+        75,
+        124,
+        80,
+        203,
+        161,
+        180,
+        202,
+        80
+      ]
+    },
+    {
+      "name": "JobMilestoneConfig",
+      "discriminator": [
+        78,
+        69,
+        11,
+        213,
+        12,
+        204,
+        16,
+        78
+      ]
+    },
+    {
+      "name": "JobNFTRecord",
+      "discriminator": [
+        24,
+        45,
+        181,
+        4,
+        252,
+        37,
+        17,
+        71
+      ]
+    },
+    {
+      "name": "JurorRegistry",
+      "discriminator": [
+        155,
+        172,
+        97,
+        99,
+        65,
+        160,
+        139,
+        28
+      ]
+    },
+    {
+      "name": "JurorStake",
+      "discriminator": [
+        139,
+        114,
+        205,
+        73,
+        247,
+        175,
+        133,
+        122
+      ]
+    },
+    {
+      "name": "Milestone",
+      "discriminator": [
+        38,
+        210,
+        239,
+        177,
+        85,
+        184,
+        10,
+        44
+      ]
+    },
+    {
+      "name": "MilestoneDispute",
+      "discriminator": [
+        68,
+        30,
+        95,
+        25,
+        121,
+        134,
+        229,
+        65
+      ]
+    },
+    {
+      "name": "MilestoneEscrow",
+      "discriminator": [
+        6,
+        184,
+        172,
+        193,
+        121,
+        69,
+        20,
+        175
+      ]
+    },
+    {
+      "name": "Reputation",
+      "discriminator": [
+        55,
+        148,
+        90,
+        71,
+        68,
+        183,
+        193,
+        28
+      ]
+    },
+    {
+      "name": "ReputationSBT",
+      "discriminator": [
+        20,
+        152,
+        94,
+        142,
+        122,
+        35,
+        4,
+        250
+      ]
+    },
+    {
+      "name": "Review",
+      "discriminator": [
+        124,
+        63,
+        203,
+        215,
+        226,
+        30,
+        222,
+        15
+      ]
+    },
+    {
+      "name": "StakedVoteRecord",
+      "discriminator": [
+        121,
+        176,
+        55,
+        136,
+        247,
+        2,
+        170,
+        146
+      ]
+    },
+    {
+      "name": "TokenDispute",
+      "discriminator": [
+        26,
+        117,
+        208,
+        123,
+        39,
+        38,
+        255,
+        197
+      ]
+    },
+    {
+      "name": "TokenEscrow",
+      "discriminator": [
+        186,
+        189,
+        94,
+        9,
+        54,
+        146,
+        36,
+        165
+      ]
+    },
+    {
+      "name": "UserSBTCounter",
+      "discriminator": [
+        28,
+        166,
+        197,
+        240,
+        204,
+        177,
+        225,
+        100
+      ]
+    },
+    {
+      "name": "VoteRecord",
+      "discriminator": [
+        112,
+        9,
+        123,
+        165,
+        234,
+        9,
+        157,
+        167
+      ]
+    },
+    {
+      "name": "WorkSubmission",
+      "discriminator": [
+        21,
+        113,
+        190,
+        19,
+        220,
+        78,
+        32,
+        119
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "AchievementMinted",
+      "discriminator": [
+        14,
+        166,
+        49,
+        61,
+        103,
+        113,
+        17,
+        178
+      ]
+    },
+    {
+      "name": "ArbitratorFeeClaimed",
+      "discriminator": [
+        182,
+        86,
+        140,
+        44,
+        229,
+        98,
+        99,
+        106
+      ]
+    },
+    {
+      "name": "ArbitratorFeesDistributed",
+      "discriminator": [
+        3,
+        81,
+        123,
+        93,
+        178,
+        68,
+        247,
+        94
+      ]
+    },
+    {
+      "name": "BidAccepted",
+      "discriminator": [
+        19,
+        140,
+        36,
+        175,
+        195,
+        5,
+        55,
+        193
+      ]
+    },
+    {
+      "name": "BidSubmitted",
+      "discriminator": [
+        116,
+        72,
+        108,
+        240,
+        175,
+        70,
+        56,
+        22
+      ]
+    },
+    {
+      "name": "ClientNotification",
+      "discriminator": [
+        244,
+        230,
+        63,
+        143,
+        65,
+        87,
+        21,
+        74
+      ]
+    },
+    {
+      "name": "CommunityNotification",
+      "discriminator": [
+        20,
+        137,
+        180,
+        174,
+        40,
+        226,
+        125,
+        63
+      ]
+    },
+    {
+      "name": "DisputeConfigInitialized",
+      "discriminator": [
+        234,
+        204,
+        168,
+        253,
+        33,
+        206,
+        35,
+        172
+      ]
+    },
+    {
+      "name": "DisputeEvidenceAdded",
+      "discriminator": [
+        178,
+        205,
+        80,
+        45,
+        79,
+        231,
+        182,
+        72
+      ]
+    },
+    {
+      "name": "DisputeOpened",
+      "discriminator": [
+        239,
+        222,
+        102,
+        235,
+        193,
+        85,
+        1,
+        214
+      ]
+    },
+    {
+      "name": "DisputeResolved",
+      "discriminator": [
+        121,
+        64,
+        249,
+        153,
+        139,
+        128,
+        236,
+        187
+      ]
+    },
+    {
+      "name": "DisputeVoted",
+      "discriminator": [
+        246,
+        199,
+        201,
+        173,
+        194,
+        194,
+        97,
+        73
+      ]
+    },
+    {
+      "name": "EscrowDeposited",
+      "discriminator": [
+        28,
+        193,
+        105,
+        27,
+        40,
+        101,
+        65,
+        211
+      ]
+    },
+    {
+      "name": "EscrowReleased",
+      "discriminator": [
+        131,
+        7,
+        138,
+        104,
+        166,
+        190,
+        113,
+        112
+      ]
+    },
+    {
+      "name": "FreelancerNotification",
+      "discriminator": [
+        58,
+        58,
+        34,
+        47,
+        43,
+        119,
+        13,
+        228
+      ]
+    },
+    {
+      "name": "JobCancelled",
+      "discriminator": [
+        203,
+        84,
+        143,
+        130,
+        48,
+        134,
+        74,
+        191
+      ]
+    },
+    {
+      "name": "JobCompleted",
+      "discriminator": [
+        176,
+        207,
+        246,
+        115,
+        95,
+        179,
+        9,
+        132
+      ]
+    },
+    {
+      "name": "JobCompletionNFTMinted",
+      "discriminator": [
+        114,
+        44,
+        122,
+        149,
+        119,
+        11,
+        40,
+        218
+      ]
+    },
+    {
+      "name": "JobCreated",
+      "discriminator": [
+        48,
+        110,
+        162,
+        177,
+        67,
+        74,
+        159,
+        131
+      ]
+    },
+    {
+      "name": "JurorStaked",
+      "discriminator": [
+        208,
+        14,
+        146,
+        223,
+        12,
+        40,
+        63,
+        222
+      ]
+    },
+    {
+      "name": "JurorUnstaked",
+      "discriminator": [
+        75,
+        4,
+        227,
+        180,
+        94,
+        213,
+        54,
+        23
+      ]
+    },
+    {
+      "name": "JurorsSelected",
+      "discriminator": [
+        248,
+        30,
+        212,
+        32,
+        119,
+        83,
+        182,
+        87
+      ]
+    },
+    {
+      "name": "MessageRead",
+      "discriminator": [
+        205,
+        123,
+        96,
+        143,
+        58,
+        206,
+        10,
+        198
+      ]
+    },
+    {
+      "name": "MessageSent",
+      "discriminator": [
+        116,
+        70,
+        224,
+        76,
+        128,
+        28,
+        110,
+        55
+      ]
+    },
+    {
+      "name": "MilestoneApproved",
+      "discriminator": [
+        40,
+        109,
+        159,
+        144,
+        169,
+        230,
+        35,
+        229
+      ]
+    },
+    {
+      "name": "MilestoneConfigCreated",
+      "discriminator": [
+        26,
+        151,
+        184,
+        11,
+        37,
+        91,
+        142,
+        245
+      ]
+    },
+    {
+      "name": "MilestoneCreated",
+      "discriminator": [
+        151,
+        154,
+        159,
+        254,
+        50,
+        174,
+        22,
+        209
+      ]
+    },
+    {
+      "name": "MilestoneDisputed",
+      "discriminator": [
+        83,
+        106,
+        229,
+        228,
+        159,
+        61,
+        122,
+        16
+      ]
+    },
+    {
+      "name": "MilestoneFunded",
+      "discriminator": [
+        133,
+        223,
+        85,
+        235,
+        56,
+        36,
+        238,
+        240
+      ]
+    },
+    {
+      "name": "MilestoneRejected",
+      "discriminator": [
+        194,
+        242,
+        80,
+        147,
+        56,
+        228,
+        195,
+        245
+      ]
+    },
+    {
+      "name": "MilestoneWorkSubmitted",
+      "discriminator": [
+        253,
+        8,
+        24,
+        97,
+        97,
+        36,
+        35,
+        25
+      ]
+    },
+    {
+      "name": "ReputationSBTMinted",
+      "discriminator": [
+        186,
+        138,
+        86,
+        230,
+        13,
+        35,
+        211,
+        133
+      ]
+    },
+    {
+      "name": "ReputationSBTRevoked",
+      "discriminator": [
+        65,
+        190,
+        96,
+        230,
+        185,
+        242,
+        9,
+        11
+      ]
+    },
+    {
+      "name": "ReviewSubmitted",
+      "discriminator": [
+        249,
+        106,
+        213,
+        117,
+        243,
+        187,
+        214,
+        166
+      ]
+    },
+    {
+      "name": "SBTCounterInitialized",
+      "discriminator": [
+        99,
+        68,
+        230,
+        175,
+        75,
+        201,
+        181,
+        80
+      ]
+    },
+    {
+      "name": "StakedDisputeResolved",
+      "discriminator": [
+        104,
+        222,
+        121,
+        184,
+        122,
+        170,
+        220,
+        178
+      ]
+    },
+    {
+      "name": "StakedVoteCast",
+      "discriminator": [
+        228,
+        46,
+        189,
+        88,
+        77,
+        85,
+        177,
+        222
+      ]
+    },
+    {
+      "name": "StakingRewardClaimed",
+      "discriminator": [
+        39,
+        3,
+        161,
+        85,
+        27,
+        49,
+        103,
+        208
+      ]
+    },
+    {
+      "name": "TokenDisputeOpened",
+      "discriminator": [
+        227,
+        135,
+        80,
+        54,
+        86,
+        80,
+        81,
+        10
+      ]
+    },
+    {
+      "name": "TokenDisputeResolved",
+      "discriminator": [
+        190,
+        71,
+        146,
+        35,
+        65,
+        86,
+        204,
+        115
+      ]
+    },
+    {
+      "name": "TokenEscrowDeposited",
+      "discriminator": [
+        253,
+        128,
+        225,
+        207,
+        226,
+        68,
+        218,
+        47
+      ]
+    },
+    {
+      "name": "TokenEscrowReleased",
+      "discriminator": [
+        242,
+        222,
+        139,
+        134,
+        149,
+        202,
+        54,
+        124
+      ]
+    },
+    {
+      "name": "WorkRejected",
+      "discriminator": [
+        155,
+        17,
+        186,
+        185,
+        27,
+        160,
+        202,
+        169
+      ]
+    },
+    {
+      "name": "WorkSubmitted",
+      "discriminator": [
+        136,
+        185,
+        210,
+        174,
+        216,
+        140,
+        64,
+        125
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidStakeAmount",
+      "msg": "Invalid stake amount"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidJurorCount",
+      "msg": "Juror count must be between 3 and 11"
+    },
+    {
+      "code": 6002,
+      "name": "VotingPeriodTooShort",
+      "msg": "Voting period must be at least 1 hour"
+    },
+    {
+      "code": 6003,
+      "name": "SlashPercentageTooHigh",
+      "msg": "Slash percentage must not exceed 50%"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidRewardPercentage",
+      "msg": "Invalid reward percentage"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidQuorumPercentage",
+      "msg": "Invalid quorum percentage (must be 50-100)"
+    },
+    {
+      "code": 6006,
+      "name": "InsufficientStakeAmount",
+      "msg": "Insufficient stake amount"
+    },
+    {
+      "code": 6007,
+      "name": "RegistryFull",
+      "msg": "Juror registry is full (max 100)"
+    },
+    {
+      "code": 6008,
+      "name": "StakeNotActive",
+      "msg": "Stake is not active"
+    },
+    {
+      "code": 6009,
+      "name": "ActiveDisputesPending",
+      "msg": "Cannot unstake with active disputes pending"
+    },
+    {
+      "code": 6010,
+      "name": "NotEnoughJurors",
+      "msg": "Not enough jurors in registry"
+    },
+    {
+      "code": 6011,
+      "name": "JurorSelectionFailed",
+      "msg": "Juror selection failed"
+    },
+    {
+      "code": 6012,
+      "name": "NotSelectedJuror",
+      "msg": "Not a selected juror for this dispute"
+    },
+    {
+      "code": 6013,
+      "name": "DisputeAlreadyResolved",
+      "msg": "Dispute already resolved"
+    },
+    {
+      "code": 6014,
+      "name": "VotingPeriodExpired",
+      "msg": "Voting period has expired"
+    },
+    {
+      "code": 6015,
+      "name": "CalculationOverflow",
+      "msg": "Calculation overflow"
+    },
+    {
+      "code": 6016,
+      "name": "QuorumNotMet",
+      "msg": "Quorum not met"
+    },
+    {
+      "code": 6017,
+      "name": "VotingPeriodNotEnded",
+      "msg": "Voting period has not ended"
+    },
+    {
+      "code": 6018,
+      "name": "DisputeNotYetResolved",
+      "msg": "Dispute not yet resolved"
+    },
+    {
+      "code": 6019,
+      "name": "RewardAlreadyClaimed",
+      "msg": "Reward already claimed"
+    }
+  ],
+  "types": [
+    {
+      "name": "AchievementMinted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "nft_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "achievement_type",
+            "type": {
+              "defined": {
+                "name": "AchievementType"
+              }
+            }
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AchievementRecord",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "nft_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "achievement_type",
+            "type": {
+              "defined": {
+                "name": "AchievementType"
+              }
+            }
+          },
+          {
+            "name": "metadata_uri",
+            "type": "string"
+          },
+          {
+            "name": "minted_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AchievementType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "FirstJob"
+          },
+          {
+            "name": "TenJobs"
+          },
+          {
+            "name": "FiftyJobs"
+          },
+          {
+            "name": "HundredJobs"
+          },
+          {
+            "name": "TopRated"
+          },
+          {
+            "name": "HighEarner"
+          },
+          {
+            "name": "TrustedArbitrator"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ArbitratorFeeClaimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "dispute",
+            "type": "pubkey"
+          },
+          {
+            "name": "arbitrator",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ArbitratorFeesDistributed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "dispute",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_fee",
+            "type": "u64"
+          },
+          {
+            "name": "num_voters",
+            "type": "u32"
+          },
+          {
+            "name": "share_per_voter",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Bid",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "proposed_budget",
+            "type": "u64"
+          },
+          {
+            "name": "proposal",
+            "type": "string"
+          },
+          {
+            "name": "timeline_days",
+            "type": "u16"
+          },
+          {
+            "name": "cv_uri",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "BidStatus"
+              }
+            }
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BidAccepted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bid",
+            "type": "pubkey"
+          },
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BidStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Accepted"
+          },
+          {
+            "name": "Rejected"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BidSubmitted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bid",
+            "type": "pubkey"
+          },
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "proposed_budget",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ChatMessage",
+      "docs": [
+        "Chat message account - stores individual messages on-chain"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "sender",
+            "docs": [
+              "Sender's wallet address"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "recipient",
+            "docs": [
+              "Recipient's wallet address"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "content",
+            "docs": [
+              "Encrypted message content (max 280 chars like Twitter)"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "docs": [
+              "Unix timestamp when message was sent"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "read",
+            "docs": [
+              "Whether message has been read"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "message_id",
+            "docs": [
+              "Message ID (unique per conversation)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed for PDA"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ClientNotification",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "client",
+            "type": "pubkey"
+          },
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "notification_type",
+            "type": {
+              "defined": {
+                "name": "NotificationType"
+              }
+            }
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CommunityNotification",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "dispute",
+            "type": "pubkey"
+          },
+          {
+            "name": "notification_type",
+            "type": {
+              "defined": {
+                "name": "NotificationType"
+              }
+            }
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Dispute",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "escrow",
+            "type": "pubkey"
+          },
+          {
+            "name": "client",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "initiator",
+            "type": "pubkey"
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "DisputeStatus"
+              }
+            }
+          },
+          {
+            "name": "votes_for_client",
+            "type": "u32"
+          },
+          {
+            "name": "votes_for_freelancer",
+            "type": "u32"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "resolved_at",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "evidence_uris",
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DisputeConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "staking_token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "min_stake_amount",
+            "type": "u64"
+          },
+          {
+            "name": "juror_count",
+            "type": "u8"
+          },
+          {
+            "name": "voting_period",
+            "type": "i64"
+          },
+          {
+            "name": "slash_percentage",
+            "type": "u8"
+          },
+          {
+            "name": "reward_percentage",
+            "type": "u8"
+          },
+          {
+            "name": "quorum_percentage",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DisputeConfigInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "staking_token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "min_stake_amount",
+            "type": "u64"
+          },
+          {
+            "name": "juror_count",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DisputeEvidenceAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "dispute",
+            "type": "pubkey"
+          },
+          {
+            "name": "uploader",
+            "type": "pubkey"
+          },
+          {
+            "name": "evidence_uri",
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DisputeJurorSelection",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "dispute",
+            "type": "pubkey"
+          },
+          {
+            "name": "selected_jurors",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "selection_seed",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "voting_deadline",
+            "type": "i64"
+          },
+          {
+            "name": "votes_cast",
+            "type": "u8"
+          },
+          {
+            "name": "quorum_met",
+            "type": "bool"
+          },
+          {
+            "name": "resolved",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DisputeOpened",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "dispute",
+            "type": "pubkey"
+          },
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "initiator",
+            "type": "pubkey"
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DisputeResolved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "dispute",
+            "type": "pubkey"
+          },
+          {
+            "name": "winner_is_client",
+            "type": "bool"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DisputeStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Open"
+          },
+          {
+            "name": "ResolvedClient"
+          },
+          {
+            "name": "ResolvedFreelancer"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DisputeVoted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "dispute",
+            "type": "pubkey"
+          },
+          {
+            "name": "voter",
+            "type": "pubkey"
+          },
+          {
+            "name": "vote_for_client",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Escrow",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "client",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "locked",
+            "type": "bool"
+          },
+          {
+            "name": "released",
+            "type": "bool"
+          },
+          {
+            "name": "disputed",
+            "type": "bool"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EscrowDeposited",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "escrow",
+            "type": "pubkey"
+          },
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EscrowReleased",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "escrow",
+            "type": "pubkey"
+          },
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FreelancerNotification",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "notification_type",
+            "type": {
+              "defined": {
+                "name": "NotificationType"
+              }
+            }
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Job",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "client",
+            "type": "pubkey"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "budget",
+            "type": "u64"
+          },
+          {
+            "name": "metadata_uri",
+            "type": "string"
+          },
+          {
+            "name": "token_mint",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "JobStatus"
+              }
+            }
+          },
+          {
+            "name": "selected_freelancer",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "updated_at",
+            "type": "i64"
+          },
+          {
+            "name": "bid_count",
+            "type": "u32"
+          },
+          {
+            "name": "escrow_amount",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JobCancelled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "client",
+            "type": "pubkey"
+          },
+          {
+            "name": "refund_amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JobCompleted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "client",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JobCompletionNFTMinted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "nft_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JobCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "client",
+            "type": "pubkey"
+          },
+          {
+            "name": "budget",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JobMilestoneConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "client",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_milestones",
+            "type": "u8"
+          },
+          {
+            "name": "created_count",
+            "type": "u8"
+          },
+          {
+            "name": "funded_count",
+            "type": "u8"
+          },
+          {
+            "name": "approved_count",
+            "type": "u8"
+          },
+          {
+            "name": "total_funded",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JobNFTRecord",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "nft_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "job_title",
+            "type": "string"
+          },
+          {
+            "name": "metadata_uri",
+            "type": "string"
+          },
+          {
+            "name": "minted_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JobStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Open"
+          },
+          {
+            "name": "InProgress"
+          },
+          {
+            "name": "WaitingForReview"
+          },
+          {
+            "name": "Rejected"
+          },
+          {
+            "name": "Completed"
+          },
+          {
+            "name": "Disputed"
+          },
+          {
+            "name": "Cancelled"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JurorRegistry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_jurors",
+            "type": "u32"
+          },
+          {
+            "name": "juror_list",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JurorStake",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "juror",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "staked_at",
+            "type": "i64"
+          },
+          {
+            "name": "active",
+            "type": "bool"
+          },
+          {
+            "name": "disputes_participated",
+            "type": "u32"
+          },
+          {
+            "name": "disputes_correct",
+            "type": "u32"
+          },
+          {
+            "name": "active_dispute_count",
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JurorStaked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "juror",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JurorUnstaked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "juror",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JurorsSelected",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "dispute",
+            "type": "pubkey"
+          },
+          {
+            "name": "juror_count",
+            "type": "u8"
+          },
+          {
+            "name": "voting_deadline",
+            "type": "i64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MessageRead",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "message",
+            "type": "pubkey"
+          },
+          {
+            "name": "reader",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MessageSent",
+      "docs": [
+        "Chat events"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "sender",
+            "type": "pubkey"
+          },
+          {
+            "name": "recipient",
+            "type": "pubkey"
+          },
+          {
+            "name": "message_id",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Milestone",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone_index",
+            "type": "u8"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "MilestoneStatus"
+              }
+            }
+          },
+          {
+            "name": "deliverable_uri",
+            "type": "string"
+          },
+          {
+            "name": "submitted_at",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "approved_at",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneApproved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneConfigCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "client",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_milestones",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone_index",
+            "type": "u8"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneDispute",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone",
+            "type": "pubkey"
+          },
+          {
+            "name": "escrow",
+            "type": "pubkey"
+          },
+          {
+            "name": "client",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "initiator",
+            "type": "pubkey"
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "DisputeStatus"
+              }
+            }
+          },
+          {
+            "name": "votes_for_client",
+            "type": "u32"
+          },
+          {
+            "name": "votes_for_freelancer",
+            "type": "u32"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "resolved_at",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneDisputed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone",
+            "type": "pubkey"
+          },
+          {
+            "name": "initiator",
+            "type": "pubkey"
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneEscrow",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone",
+            "type": "pubkey"
+          },
+          {
+            "name": "client",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "locked",
+            "type": "bool"
+          },
+          {
+            "name": "released",
+            "type": "bool"
+          },
+          {
+            "name": "disputed",
+            "type": "bool"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneFunded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneRejected",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Funded"
+          },
+          {
+            "name": "InProgress"
+          },
+          {
+            "name": "Submitted"
+          },
+          {
+            "name": "Approved"
+          },
+          {
+            "name": "Disputed"
+          },
+          {
+            "name": "Cancelled"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneWorkSubmitted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "deliverable_uri",
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "NotificationType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "JobAssigned"
+          },
+          {
+            "name": "WorkSubmitted"
+          },
+          {
+            "name": "WorkApproved"
+          },
+          {
+            "name": "WorkRejected"
+          },
+          {
+            "name": "PaymentReceived"
+          },
+          {
+            "name": "DisputeRaised"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Reputation",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_reviews",
+            "type": "u32"
+          },
+          {
+            "name": "average_rating",
+            "type": "f32"
+          },
+          {
+            "name": "completed_jobs",
+            "type": "u32"
+          },
+          {
+            "name": "total_earned",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReputationSBT",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "rater",
+            "type": "pubkey"
+          },
+          {
+            "name": "rating",
+            "type": "u8"
+          },
+          {
+            "name": "comment",
+            "type": "string"
+          },
+          {
+            "name": "job_amount",
+            "type": "u64"
+          },
+          {
+            "name": "job_title",
+            "type": "string"
+          },
+          {
+            "name": "metadata_uri",
+            "type": "string"
+          },
+          {
+            "name": "issued_at",
+            "type": "i64"
+          },
+          {
+            "name": "sbt_index",
+            "type": "u32"
+          },
+          {
+            "name": "verification_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "revoked",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReputationSBTMinted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "rater",
+            "type": "pubkey"
+          },
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "sbt",
+            "type": "pubkey"
+          },
+          {
+            "name": "rating",
+            "type": "u8"
+          },
+          {
+            "name": "sbt_index",
+            "type": "u32"
+          },
+          {
+            "name": "verification_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReputationSBTRevoked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "sbt",
+            "type": "pubkey"
+          },
+          {
+            "name": "sbt_index",
+            "type": "u32"
+          },
+          {
+            "name": "revoked_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Review",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "reviewer",
+            "type": "pubkey"
+          },
+          {
+            "name": "reviewee",
+            "type": "pubkey"
+          },
+          {
+            "name": "rating",
+            "type": "u8"
+          },
+          {
+            "name": "comment",
+            "type": "string"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReviewSubmitted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "review",
+            "type": "pubkey"
+          },
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "reviewer",
+            "type": "pubkey"
+          },
+          {
+            "name": "reviewee",
+            "type": "pubkey"
+          },
+          {
+            "name": "rating",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SBTCounterInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StakedDisputeResolved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "dispute",
+            "type": "pubkey"
+          },
+          {
+            "name": "winner_is_client",
+            "type": "bool"
+          },
+          {
+            "name": "votes_for_client",
+            "type": "u32"
+          },
+          {
+            "name": "votes_for_freelancer",
+            "type": "u32"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StakedVoteCast",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "dispute",
+            "type": "pubkey"
+          },
+          {
+            "name": "juror",
+            "type": "pubkey"
+          },
+          {
+            "name": "vote_for_client",
+            "type": "bool"
+          },
+          {
+            "name": "stake_locked",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StakedVoteRecord",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "dispute",
+            "type": "pubkey"
+          },
+          {
+            "name": "juror",
+            "type": "pubkey"
+          },
+          {
+            "name": "vote_for_client",
+            "type": "bool"
+          },
+          {
+            "name": "voted_at",
+            "type": "i64"
+          },
+          {
+            "name": "stake_locked",
+            "type": "u64"
+          },
+          {
+            "name": "reward_claimed",
+            "type": "bool"
+          },
+          {
+            "name": "slashed",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StakingRewardClaimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "dispute",
+            "type": "pubkey"
+          },
+          {
+            "name": "juror",
+            "type": "pubkey"
+          },
+          {
+            "name": "reward_amount",
+            "type": "u64"
+          },
+          {
+            "name": "slashed",
+            "type": "bool"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenDispute",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "escrow",
+            "type": "pubkey"
+          },
+          {
+            "name": "client",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "initiator",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "DisputeStatus"
+              }
+            }
+          },
+          {
+            "name": "votes_for_client",
+            "type": "u32"
+          },
+          {
+            "name": "votes_for_freelancer",
+            "type": "u32"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "resolved_at",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenDisputeOpened",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "dispute",
+            "type": "pubkey"
+          },
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "initiator",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenDisputeResolved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "dispute",
+            "type": "pubkey"
+          },
+          {
+            "name": "winner_is_client",
+            "type": "bool"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenEscrow",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "client",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "locked",
+            "type": "bool"
+          },
+          {
+            "name": "released",
+            "type": "bool"
+          },
+          {
+            "name": "disputed",
+            "type": "bool"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenEscrowDeposited",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "escrow",
+            "type": "pubkey"
+          },
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenEscrowReleased",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "escrow",
+            "type": "pubkey"
+          },
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UserSBTCounter",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "count",
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VoteRecord",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "dispute",
+            "type": "pubkey"
+          },
+          {
+            "name": "voter",
+            "type": "pubkey"
+          },
+          {
+            "name": "vote_for_client",
+            "type": "bool"
+          },
+          {
+            "name": "voted_at",
+            "type": "i64"
+          },
+          {
+            "name": "fee_claimed",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WorkRejected",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "client",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WorkSubmission",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "deliverable_uri",
+            "type": "string"
+          },
+          {
+            "name": "submitted_at",
+            "type": "i64"
+          },
+          {
+            "name": "approved",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WorkSubmitted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "job",
+            "type": "pubkey"
+          },
+          {
+            "name": "freelancer",
+            "type": "pubkey"
+          },
+          {
+            "name": "deliverable_uri",
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    }
+  ]
+}

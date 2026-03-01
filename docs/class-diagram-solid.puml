@@ -1,0 +1,511 @@
+@startuml Freelance Marketplace - SOLID Class Diagram
+
+!define ENTITY_COLOR #E8F5E9
+!define SERVICE_COLOR #E3F2FD
+!define INTERFACE_COLOR #FFF3E0
+!define REPOSITORY_COLOR #F3E5F5
+
+title Freelance Marketplace dApp - SOLID Architecture
+
+' ========================
+' DOMAIN LAYER - Entities
+' ========================
+package "Domain Layer" ENTITY_COLOR {
+
+    abstract class BaseEntity {
+        # publicKey: PublicKey
+        # createdAt: number
+        # updatedAt: number
+        + validate(): boolean
+        + toJSON(): object
+    }
+
+    class Job extends BaseEntity {
+        - id: PublicKey
+        - title: string
+        - description: string
+        - budget: number
+        - deadline: number
+        - client: PublicKey
+        - freelancer?: PublicKey
+        - status: JobStatus
+        - ipfsHash?: string
+        - completedAt?: number
+        --
+        + isOpen(): boolean
+        + isCompleted(): boolean
+        + canReceiveBids(): boolean
+        + assignFreelancer(freelancer: PublicKey): void
+        + updateStatus(status: JobStatus): void
+    }
+
+    class Bid extends BaseEntity {
+        - id: PublicKey
+        - job: PublicKey
+        - bidder: PublicKey
+        - amount: number
+        - timeline: number
+        - proposal: string
+        - status: BidStatus
+        --
+        + isAccepted(): boolean
+        + isPending(): boolean
+        + accept(): void
+        + reject(): void
+    }
+
+    class Escrow extends BaseEntity {
+        - id: PublicKey
+        - job: PublicKey
+        - client: PublicKey
+        - freelancer: PublicKey
+        - amount: number
+        - deposited: boolean
+        - released: boolean
+        - disputed: boolean
+        --
+        + canDeposit(): boolean
+        + canRelease(): boolean
+        + deposit(): void
+        + release(): void
+        + dispute(): void
+    }
+
+    class WorkSubmission extends BaseEntity {
+        - id: PublicKey
+        - escrow: PublicKey
+        - freelancer: PublicKey
+        - ipfsHash: string
+        - description: string
+        - submittedAt: number
+        --
+        + getIPFSUrl(): string
+        + isValid(): boolean
+    }
+
+    class Dispute extends BaseEntity {
+        - id: PublicKey
+        - escrow: PublicKey
+        - initiator: PublicKey
+        - reason: string
+        - status: DisputeStatus
+        - votesClient: number
+        - votesFreelancer: number
+        - resolvedAt?: number
+        --
+        + addVote(voter: PublicKey, forClient: boolean): void
+        + canResolve(): boolean
+        + resolve(): void
+        + getWinner(): PublicKey
+    }
+
+    class Reputation extends BaseEntity {
+        - user: PublicKey
+        - totalRating: number
+        - reviewCount: number
+        - completedJobs: number
+        - totalEarned: number
+        --
+        + getAverageRating(): number
+        + addReview(rating: number): void
+        + incrementJobsCompleted(): void
+        + addEarnings(amount: number): void
+    }
+
+    class Review extends BaseEntity {
+        - id: PublicKey
+        - job: PublicKey
+        - reviewer: PublicKey
+        - reviewee: PublicKey
+        - rating: number
+        - comment: string
+        --
+        + isPositive(): boolean
+        + validate(): boolean
+    }
+
+    enum JobStatus {
+        OPEN
+        IN_PROGRESS
+        COMPLETED
+        DISPUTED
+        CANCELLED
+    }
+
+    enum BidStatus {
+        PENDING
+        ACCEPTED
+        REJECTED
+    }
+
+    enum DisputeStatus {
+        OPEN
+        RESOLVED_CLIENT
+        RESOLVED_FREELANCER
+    }
+}
+
+' ========================
+' INTERFACES - DIP & ISP
+' ========================
+package "Interfaces" INTERFACE_COLOR {
+
+    ' Interface Segregation - Split into specific interfaces
+    interface IJobRepository {
+        + create(job: Job): Promise<PublicKey>
+        + findById(id: PublicKey): Promise<Job>
+        + findAll(): Promise<Job[]>
+        + update(job: Job): Promise<void>
+    }
+
+    interface IBidRepository {
+        + create(bid: Bid): Promise<PublicKey>
+        + findById(id: PublicKey): Promise<Bid>
+        + findByJob(jobId: PublicKey): Promise<Bid[]>
+        + update(bid: Bid): Promise<void>
+    }
+
+    interface IEscrowRepository {
+        + create(escrow: Escrow): Promise<PublicKey>
+        + findById(id: PublicKey): Promise<Escrow>
+        + findByJob(jobId: PublicKey): Promise<Escrow>
+        + update(escrow: Escrow): Promise<void>
+    }
+
+    interface IReputationRepository {
+        + create(reputation: Reputation): Promise<PublicKey>
+        + findByUser(user: PublicKey): Promise<Reputation>
+        + update(reputation: Reputation): Promise<void>
+    }
+
+    interface IStorageProvider {
+        + upload(data: any): Promise<string>
+        + fetch(hash: string): Promise<any>
+    }
+
+    interface INotificationService {
+        + send(userId: PublicKey, message: string): void
+        + subscribe(userId: PublicKey, callback: Function): void
+    }
+
+    interface IPDADerivation {
+        + deriveJobPDA(client: PublicKey, jobId: number): Promise<PublicKey>
+        + deriveBidPDA(job: PublicKey, bidder: PublicKey): Promise<PublicKey>
+        + deriveEscrowPDA(job: PublicKey): Promise<PublicKey>
+        + deriveReputationPDA(user: PublicKey): Promise<PublicKey>
+    }
+
+    ' Strategy Pattern - OCP
+    interface IDisputeResolutionStrategy {
+        + resolve(dispute: Dispute): Promise<PublicKey>
+    }
+
+    interface IPaymentStrategy {
+        + processPayment(from: PublicKey, to: PublicKey, amount: number): Promise<void>
+    }
+}
+
+' ========================
+' SERVICE LAYER - SRP
+' ========================
+package "Service Layer" SERVICE_COLOR {
+
+    ' Single Responsibility - Each service handles one domain
+    class JobService {
+        - jobRepo: IJobRepository
+        - bidRepo: IBidRepository
+        - notificationService: INotificationService
+        --
+        + createJob(data: JobData): Promise<Job>
+        + getAllJobs(): Promise<Job[]>
+        + getJobById(id: PublicKey): Promise<Job>
+        + updateJobStatus(id: PublicKey, status: JobStatus): Promise<void>
+    }
+
+    class BidService {
+        - bidRepo: IBidRepository
+        - jobRepo: IJobRepository
+        - notificationService: INotificationService
+        --
+        + submitBid(data: BidData): Promise<Bid>
+        + acceptBid(bidId: PublicKey): Promise<void>
+        + rejectBid(bidId: PublicKey): Promise<void>
+        + getBidsForJob(jobId: PublicKey): Promise<Bid[]>
+    }
+
+    class EscrowService {
+        - escrowRepo: IEscrowRepository
+        - jobRepo: IJobRepository
+        - paymentStrategy: IPaymentStrategy
+        --
+        + depositFunds(jobId: PublicKey, amount: number): Promise<Escrow>
+        + releaseFunds(escrowId: PublicKey): Promise<void>
+        + refundFunds(escrowId: PublicKey): Promise<void>
+    }
+
+    class WorkSubmissionService {
+        - storageProvider: IStorageProvider
+        - notificationService: INotificationService
+        --
+        + submitWork(escrowId: PublicKey, files: File[]): Promise<WorkSubmission>
+        + getSubmission(escrowId: PublicKey): Promise<WorkSubmission>
+    }
+
+    class DisputeService {
+        - escrowRepo: IEscrowRepository
+        - resolutionStrategy: IDisputeResolutionStrategy
+        - notificationService: INotificationService
+        --
+        + openDispute(escrowId: PublicKey, reason: string): Promise<Dispute>
+        + voteOnDispute(disputeId: PublicKey, forClient: boolean): Promise<void>
+        + resolveDispute(disputeId: PublicKey): Promise<void>
+    }
+
+    class ReputationService {
+        - reputationRepo: IReputationRepository
+        --
+        + initializeReputation(user: PublicKey): Promise<Reputation>
+        + submitReview(data: ReviewData): Promise<void>
+        + getReputation(user: PublicKey): Promise<Reputation>
+        + updateReputation(user: PublicKey, rating: number): Promise<void>
+    }
+
+    ' Open/Closed Principle - Can add new strategies without modifying
+    class VotingDisputeStrategy implements IDisputeResolutionStrategy {
+        - minimumVotes: number
+        --
+        + resolve(dispute: Dispute): Promise<PublicKey>
+    }
+
+    class ArbitratorDisputeStrategy implements IDisputeResolutionStrategy {
+        - arbitratorKey: PublicKey
+        --
+        + resolve(dispute: Dispute): Promise<PublicKey>
+    }
+
+    class SolanaPaymentStrategy implements IPaymentStrategy {
+        - connection: Connection
+        --
+        + processPayment(from: PublicKey, to: PublicKey, amount: number): Promise<void>
+    }
+}
+
+' ========================
+' REPOSITORY LAYER - DIP
+' ========================
+package "Repository Layer" REPOSITORY_COLOR {
+
+    class SolanaJobRepository implements IJobRepository {
+        - program: Program
+        - pdaDerivation: IPDADerivation
+        --
+        + create(job: Job): Promise<PublicKey>
+        + findById(id: PublicKey): Promise<Job>
+        + findAll(): Promise<Job[]>
+        + update(job: Job): Promise<void>
+        - fetchAccount(address: PublicKey): Promise<Account>
+    }
+
+    class SolanaBidRepository implements IBidRepository {
+        - program: Program
+        - pdaDerivation: IPDADerivation
+        --
+        + create(bid: Bid): Promise<PublicKey>
+        + findById(id: PublicKey): Promise<Bid>
+        + findByJob(jobId: PublicKey): Promise<Bid[]>
+        + update(bid: Bid): Promise<void>
+    }
+
+    class SolanaEscrowRepository implements IEscrowRepository {
+        - program: Program
+        - pdaDerivation: IPDADerivation
+        --
+        + create(escrow: Escrow): Promise<PublicKey>
+        + findById(id: PublicKey): Promise<Escrow>
+        + findByJob(jobId: PublicKey): Promise<Escrow>
+        + update(escrow: Escrow): Promise<void>
+    }
+
+    class SolanaReputationRepository implements IReputationRepository {
+        - program: Program
+        - pdaDerivation: IPDADerivation
+        --
+        + create(reputation: Reputation): Promise<PublicKey>
+        + findByUser(user: PublicKey): Promise<Reputation>
+        + update(reputation: Reputation): Promise<void>
+    }
+
+    class IPFSStorageProvider implements IStorageProvider {
+        - pinataApiKey: string
+        - pinataSecretKey: string
+        --
+        + upload(data: any): Promise<string>
+        + fetch(hash: string): Promise<any>
+        - uploadToPinata(data: any): Promise<string>
+    }
+
+    class PDADerivationService implements IPDADerivation {
+        - programId: PublicKey
+        --
+        + deriveJobPDA(client: PublicKey, jobId: number): Promise<PublicKey>
+        + deriveBidPDA(job: PublicKey, bidder: PublicKey): Promise<PublicKey>
+        + deriveEscrowPDA(job: PublicKey): Promise<PublicKey>
+        + deriveReputationPDA(user: PublicKey): Promise<PublicKey>
+    }
+
+    class NotificationServiceImpl implements INotificationService {
+        - subscribers: Map<PublicKey, Function[]>
+        --
+        + send(userId: PublicKey, message: string): void
+        + subscribe(userId: PublicKey, callback: Function): void
+        - notify(userId: PublicKey, message: string): void
+    }
+}
+
+' ========================
+' APPLICATION LAYER (Hooks)
+' ========================
+package "Application Layer (React Hooks)" #FCE4EC {
+
+    class useJobs {
+        - jobService: JobService
+        --
+        + createJob(data): Promise<PublicKey>
+        + getAllJobs(): Promise<Job[]>
+        + getJobById(id): Promise<Job>
+    }
+
+    class useBids {
+        - bidService: BidService
+        --
+        + submitBid(data): Promise<PublicKey>
+        + acceptBid(id): Promise<void>
+        + getBidsForJob(jobId): Promise<Bid[]>
+    }
+
+    class useEscrow {
+        - escrowService: EscrowService
+        - workSubmissionService: WorkSubmissionService
+        - disputeService: DisputeService
+        --
+        + depositEscrow(jobId, amount): Promise<void>
+        + submitWork(files): Promise<void>
+        + releaseEscrow(escrowId): Promise<void>
+        + openDispute(escrowId, reason): Promise<void>
+    }
+
+    class useReputation {
+        - reputationService: ReputationService
+        --
+        + getReputation(user): Promise<Reputation>
+        + submitReview(data): Promise<void>
+    }
+
+    class useIPFS {
+        - storageProvider: IStorageProvider
+        --
+        + upload(data): Promise<string>
+        + fetch(hash): Promise<any>
+    }
+}
+
+' ========================
+' RELATIONSHIPS
+' ========================
+
+' Dependency Injection - Services depend on interfaces
+JobService ..> IJobRepository : depends on
+JobService ..> IBidRepository : depends on
+JobService ..> INotificationService : depends on
+
+BidService ..> IBidRepository : depends on
+BidService ..> IJobRepository : depends on
+BidService ..> INotificationService : depends on
+
+EscrowService ..> IEscrowRepository : depends on
+EscrowService ..> IJobRepository : depends on
+EscrowService ..> IPaymentStrategy : depends on
+
+WorkSubmissionService ..> IStorageProvider : depends on
+WorkSubmissionService ..> INotificationService : depends on
+
+DisputeService ..> IEscrowRepository : depends on
+DisputeService ..> IDisputeResolutionStrategy : depends on
+DisputeService ..> INotificationService : depends on
+
+ReputationService ..> IReputationRepository : depends on
+
+' Repositories implement interfaces
+SolanaJobRepository ..|> IJobRepository
+SolanaBidRepository ..|> IBidRepository
+SolanaEscrowRepository ..|> IEscrowRepository
+SolanaReputationRepository ..|> IReputationRepository
+IPFSStorageProvider ..|> IStorageProvider
+PDADerivationService ..|> IPDADerivation
+NotificationServiceImpl ..|> INotificationService
+
+' Strategies implement interfaces
+VotingDisputeStrategy ..|> IDisputeResolutionStrategy
+ArbitratorDisputeStrategy ..|> IDisputeResolutionStrategy
+SolanaPaymentStrategy ..|> IPaymentStrategy
+
+' Repositories use PDA derivation
+SolanaJobRepository ..> IPDADerivation : uses
+SolanaBidRepository ..> IPDADerivation : uses
+SolanaEscrowRepository ..> IPDADerivation : uses
+SolanaReputationRepository ..> IPDADerivation : uses
+
+' Hooks use services
+useJobs ..> JobService : uses
+useBids ..> BidService : uses
+useEscrow ..> EscrowService : uses
+useEscrow ..> WorkSubmissionService : uses
+useEscrow ..> DisputeService : uses
+useReputation ..> ReputationService : uses
+useIPFS ..> IStorageProvider : uses
+
+' Domain relationships
+Job --> JobStatus
+Bid --> BidStatus
+Bid --> Job : belongs to
+Escrow --> Job : secures
+WorkSubmission --> Escrow : delivered to
+Dispute --> Escrow : concerns
+Dispute --> DisputeStatus
+Review --> Job : about
+Reputation --> Review : aggregates
+
+' Notes explaining SOLID
+note right of IJobRepository
+  <b>Interface Segregation</b>
+  Each repository has a
+  focused, specific interface
+end note
+
+note bottom of JobService
+  <b>Single Responsibility</b>
+  Each service handles only
+  one domain concern
+end note
+
+note right of VotingDisputeStrategy
+  <b>Open/Closed Principle</b>
+  New resolution strategies
+  can be added without
+  modifying existing code
+end note
+
+note bottom of SolanaJobRepository
+  <b>Dependency Inversion</b>
+  Services depend on abstractions
+  (interfaces), not concrete
+  implementations
+end note
+
+note left of BaseEntity
+  <b>Liskov Substitution</b>
+  All entities extend BaseEntity
+  and can be used polymorphically
+end note
+
+@enduml
