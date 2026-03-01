@@ -270,7 +270,7 @@ export default function Layout({ children }: LayoutProps) {
           {isExpanded && (
             <Box sx={{ overflow: 'hidden' }}>
               <Typography noWrap sx={{ fontFamily: '"Orbitron", sans-serif', fontWeight: 700, fontSize: '0.82rem', letterSpacing: '0.04em', background: 'linear-gradient(135deg, #00ffc3 0%, #8084ee 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                FreelanceChain
+                Lancer Lab
               </Typography>
               <Typography sx={{ fontFamily: '"Rajdhani", sans-serif', fontSize: '0.58rem', letterSpacing: '0.12em', color: 'rgba(0,255,195,0.35)', textTransform: 'uppercase' }}>
                 Decentralized

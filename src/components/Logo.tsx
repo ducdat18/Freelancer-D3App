@@ -62,14 +62,10 @@ export default function Logo({ size = 40, showText = true }: LogoProps) {
             fill="rgba(0, 255, 195, 0.06)"
           />
 
-          {/* Chain link - left */}
-          <circle cx="35" cy="50" r="8" stroke="#00ffc3" strokeWidth="2" fill="none" filter="url(#neonGlow)" />
-
-          {/* Chain link - right */}
-          <circle cx="65" cy="50" r="8" stroke="#8084ee" strokeWidth="2" fill="none" filter="url(#neonGlow)" />
-
-          {/* Connection line */}
-          <line x1="43" y1="50" x2="57" y2="50" stroke="url(#logoGradient)" strokeWidth="2" filter="url(#neonGlow)" />
+          {/* L letter */}
+          <text x="26" y="63" fontFamily="monospace" fontSize="36" fontWeight="900" fill="url(#logoGradient)" filter="url(#neonGlow)">L</text>
+          {/* L letter second */}
+          <text x="50" y="63" fontFamily="monospace" fontSize="36" fontWeight="900" fill="#8084ee" filter="url(#neonGlow)" opacity="0.85">L</text>
         </svg>
       </Box>
 
@@ -95,7 +91,7 @@ export default function Logo({ size = 40, showText = true }: LogoProps) {
               backgroundClip: 'text',
             }}
           >
-            FreelanceChain
+            Lancer Lab
           </Box>
           <Box
             component="span"

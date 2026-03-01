@@ -38,7 +38,7 @@ export default function DocsPage() {
           Documentation
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          Learn how to use FreelanceChain - the decentralized freelance marketplace on Solana.
+          Learn how to use Lancer Lab - the decentralized freelance marketplace on Solana.
         </Typography>
 
         <Grid container spacing={3}>

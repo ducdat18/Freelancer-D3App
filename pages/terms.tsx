@@ -10,7 +10,7 @@ export default function TermsPage() {
         </Typography>
         <Paper sx={{ p: 4, mt: 3 }}>
           <Typography variant="body1" color="text.secondary">
-            This page is under construction. Terms of service for the FreelanceChain
+            This page is under construction. Terms of service for the Lancer Lab
             decentralized marketplace will be published here.
           </Typography>
           <Box sx={{ mt: 4, p: 3, bgcolor: 'background.default', borderRadius: 1 }}>

@@ -110,7 +110,7 @@ export default function Dashboard({ forceRole }: DashboardProps) {
                 lineHeight: 1.2, mb: 0.5,
               }}
             >
-              Welcome to FreelanceChain
+              Welcome to Lancer Lab
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Choose your path to get started on-chain

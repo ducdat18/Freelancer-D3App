@@ -85,7 +85,7 @@ const whyCards = [
   {
     icon: PaidIcon,
     title: '0% Platform Fee',
-    desc: 'Traditional platforms take 10–20% of earnings. FreelanceChain takes nothing — the protocol is the middleman.',
+    desc: 'Traditional platforms take 10–20% of earnings. Lancer Lab takes nothing — the protocol is the middleman.',
   },
   {
     icon: ShieldIcon,
@@ -186,7 +186,7 @@ export default function HowItWorks() {
             The Escrow Flow
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-            Funds are held by the smart contract — not by FreelanceChain, not by any third party.
+            Funds are held by the smart contract — not by Lancer Lab, not by any third party.
           </Typography>
           <Box
             sx={{

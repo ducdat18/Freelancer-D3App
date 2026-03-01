@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00ffc3"/>
+      <stop offset="100%" stop-color="#8084ee"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  <!-- Background -->
+  <rect width="100" height="100" rx="18" fill="#07051a"/>
+  <!-- Hexagon border -->
+  <path d="M50 6 L88 27 L88 73 L50 94 L12 73 L12 27 Z"
+        stroke="url(#g)" stroke-width="2.5" fill="rgba(0,255,195,0.05)" filter="url(#glow)"/>
+  <!-- LL monogram -->
+  <text x="16" y="70" font-family="monospace" font-size="44" font-weight="900"
+        fill="#00ffc3" filter="url(#glow)">L</text>
+  <text x="50" y="70" font-family="monospace" font-size="44" font-weight="900"
+        fill="#8084ee" filter="url(#glow)" opacity="0.9">L</text>
+</svg>

@@ -103,7 +103,7 @@ export default function AboutPage() {
                 fontSize: { xs: '2rem', md: '3rem' },
               }}
             >
-              About FreelanceChain
+              About Lancer Lab
             </Typography>
             <Typography
               variant="h6"
@@ -196,7 +196,7 @@ export default function AboutPage() {
                   THE SOLUTION
                 </Typography>
                 <Typography variant="body1" color="text.secondary" paragraph sx={{ lineHeight: 1.8 }}>
-                  FreelanceChain removes the middleman entirely. Smart contracts handle escrow, dispute
+                  Lancer Lab removes the middleman entirely. Smart contracts handle escrow, dispute
                   resolution, and payments — all verifiable on-chain.
                 </Typography>
                 <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
@@ -337,7 +337,7 @@ export default function AboutPage() {
               Live on Solana
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-              FreelanceChain is fully deployed on <strong style={{ color: '#00ffc3' }}>Solana</strong>.
+              Lancer Lab is fully deployed on <strong style={{ color: '#00ffc3' }}>Solana</strong>.
               All smart contracts are live and audited. Connect your wallet to start working or hiring today.
             </Typography>
           </Box>
