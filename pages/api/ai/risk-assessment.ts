@@ -45,18 +45,31 @@ function computeRiskLevel(matchScore: number, authenticityScore: number): {
  */
 async function extractTextFromIpfs(cvUri: string): Promise<string> {
   try {
-    // Normalize: strip ipfs:// prefix and any whitespace
-    const raw = cvUri.replace(/^ipfs:\/\//i, '').trim();
-    if (!raw || raw.length < 8) return '';
+    const uri = cvUri.trim();
+    if (!uri || uri.length < 8) return '';
 
-    // If it looks like a full https URL already, use it directly
-    const gateways: string[] = raw.startsWith('http')
-      ? [raw]
-      : [
-          `https://gateway.pinata.cloud/ipfs/${raw}`,
-          `https://ipfs.io/ipfs/${raw}`,
-          `https://cloudflare-ipfs.com/ipfs/${raw}`,
-        ];
+    let gateways: string[];
+
+    if (uri.startsWith('http')) {
+      // Full URL supplied — sanitize any accidental double /ipfs/ segments
+      const cleanUrl = uri.replace(/\/ipfs\/+\/ipfs\//g, '/ipfs/');
+      gateways = [cleanUrl];
+    } else {
+      // Strip ipfs:// prefix (case-insensitive)
+      let cid = uri.replace(/^ipfs:\/\//i, '');
+      // Strip any remaining leading slashes: "/ipfs/Qm" → "ipfs/Qm"
+      cid = cid.replace(/^\/+/, '');
+      // Strip ipfs/ path segment if present: "ipfs/Qm" → "Qm"
+      cid = cid.replace(/^ipfs\//i, '');
+      cid = cid.trim();
+      if (!cid || cid.length < 8) return '';
+
+      gateways = [
+        `https://gateway.pinata.cloud/ipfs/${cid}`,
+        `https://ipfs.io/ipfs/${cid}`,
+        `https://cloudflare-ipfs.com/ipfs/${cid}`,
+      ];
+    }
 
     for (const url of gateways) {
       // Validate URL before fetching to avoid "Invalid URL" TypeError
@@ -81,7 +94,7 @@ async function extractTextFromIpfs(cvUri: string): Promise<string> {
 
         const isPdf =
           contentType.includes('pdf') ||
-          raw.toLowerCase().includes('.pdf') ||
+          url.toLowerCase().includes('.pdf') ||
           (buffer.length > 4 && buffer.slice(0, 4).toString('ascii') === '%PDF');
 
         if (isPdf) {

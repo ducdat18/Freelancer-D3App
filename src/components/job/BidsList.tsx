@@ -161,8 +161,9 @@ export default function BidsList({ jobPda, clientAddress, jobBudgetSol = 0, jobT
   };
 
   const handleViewCV = (cvUri: string, freelancerAddress: string) => {
-    // CV URI format: "ipfs://QmHash" or just "QmHash"
-    const cvHash = cvUri.replace('ipfs://', '');
+    if (!cvUri) return;
+    // Normalize: strip ipfs:// prefix; CVViewer.getIPFSUrl handles the rest
+    const cvHash = cvUri.replace(/^ipfs:\/\//i, '').trim();
     if (cvHash) {
       setSelectedCVHash(cvHash);
       setSelectedFreelancer(freelancerAddress);

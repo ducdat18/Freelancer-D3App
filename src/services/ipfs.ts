@@ -72,12 +72,15 @@ export function isGarbageMetadataUri(uri: string | null | undefined): boolean {
 function normalizeCID(hash: string): string {
   let clean = hash.trim()
 
+  // Strip ipfs:// scheme
   if (clean.startsWith('ipfs://')) {
     clean = clean.slice(7)
   }
 
+  // Strip all leading/trailing slashes
   clean = clean.replace(/^\/+|\/+$/g, '')
 
+  // Strip any /ipfs/ or ipfs/ path prefix (e.g. from full gateway URLs or malformed URIs)
   const gatewayPrefixes = ['/ipfs/', 'ipfs/']
   for (const prefix of gatewayPrefixes) {
     if (clean.includes(prefix)) {
@@ -92,8 +95,10 @@ function normalizeCID(hash: string): string {
  * Build gateway URL without double slashes
  */
 function buildGatewayUrl(gateway: string, cid: string): string {
-  const cleanGateway = gateway.endsWith('/') ? gateway.slice(0, -1) : gateway
-  const cleanCid = cid.startsWith('/') ? cid.slice(1) : cid
+  // Strip ALL trailing slashes from gateway
+  const cleanGateway = gateway.replace(/\/+$/, '')
+  // Strip ALL leading slashes from cid
+  const cleanCid = cid.replace(/^\/+/, '')
 
   if (cleanGateway.endsWith('/ipfs')) {
     return `${cleanGateway}/${cleanCid}`
