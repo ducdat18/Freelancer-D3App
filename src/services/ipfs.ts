@@ -243,8 +243,8 @@ export async function fetchJobMetadata(hash: string): Promise<JobMetadata | null
 export function getIPFSUrl(hash: string): string {
   const cleanHash = normalizeCID(hash)
   const url = buildGatewayUrl(PRIMARY_GATEWAY, cleanHash)
-  // Final safety: collapse any accidental double slashes (preserving https://)
-  return url.replace(/([^:])\/\/+/g, '$1/')
+  // Final safety: collapse duplicate /ipfs/ path segments (/ipfs//ipfs/ or /ipfs/ipfs/ → /ipfs/)
+  return url.replace(/\/ipfs\/+ipfs\//g, '/ipfs/')
 }
 
 /**
