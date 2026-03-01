@@ -181,13 +181,13 @@ export default function BidsList({ jobPda, clientAddress, jobBudgetSol = 0, jobT
     setRiskResult(null);
     setRiskError('');
     try {
-      const cvText = getCleanProposal(bid.account.proposal);
       const res = await fetch('/api/ai/risk-assessment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           jobDescription: jobDescription || jobTitle || 'Freelance job',
-          cvText,
+          cvText: getCleanProposal(bid.account.proposal),
+          cvUri: bid.account.cvUri || undefined,
           jobTitle,
         }),
       });

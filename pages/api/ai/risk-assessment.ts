@@ -3,7 +3,8 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export interface RiskAssessmentRequest {
   jobDescription: string;
-  cvText: string;
+  cvText?: string;
+  cvUri?: string;   // IPFS hash or "ipfs://..." for uploaded PDF/file CV
   jobTitle?: string;
 }
 
@@ -36,6 +37,58 @@ function computeRiskLevel(matchScore: number, authenticityScore: number): {
   return { riskLevel, riskScore };
 }
 
+/**
+ * Fetch file from IPFS via multiple gateways and extract text.
+ * Supports PDF (via pdf-parse) and plain text files.
+ */
+async function extractTextFromIpfs(cvUri: string): Promise<string> {
+  const hash = cvUri.replace('ipfs://', '').trim();
+  if (!hash) return '';
+
+  const gateways = [
+    `https://gateway.pinata.cloud/ipfs/${hash}`,
+    `https://ipfs.io/ipfs/${hash}`,
+    `https://cloudflare-ipfs.com/ipfs/${hash}`,
+  ];
+
+  for (const url of gateways) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 12000);
+
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: { Accept: 'application/pdf,text/plain,*/*' },
+      });
+      clearTimeout(timer);
+
+      if (!response.ok) continue;
+
+      const contentType = response.headers.get('content-type') || '';
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      if (contentType.includes('pdf') || hash.toLowerCase().endsWith('.pdf')) {
+        // Dynamic require to avoid build-time issues with pdf-parse
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const pdfParse = require('pdf-parse');
+        const data = await pdfParse(buffer);
+        const text = (data.text || '').trim();
+        if (text.length > 10) return text;
+      } else {
+        // Plain text or unknown — return as UTF-8 string
+        const text = buffer.toString('utf-8').trim();
+        if (text.length > 10) return text;
+      }
+    } catch {
+      // Try next gateway
+      continue;
+    }
+  }
+
+  return '';
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<RiskAssessmentResult | ErrorResponse>
@@ -44,13 +97,10 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { jobDescription, cvText, jobTitle }: RiskAssessmentRequest = req.body;
+  const { jobDescription, cvText = '', cvUri, jobTitle }: RiskAssessmentRequest = req.body;
 
-  if (!jobDescription || typeof jobDescription !== 'string' || jobDescription.trim().length < 20) {
-    return res.status(400).json({ error: 'jobDescription is required (min 20 chars)' });
-  }
-  if (!cvText || typeof cvText !== 'string' || cvText.trim().length < 20) {
-    return res.status(400).json({ error: 'cvText is required (min 20 chars)' });
+  if (!jobDescription || typeof jobDescription !== 'string' || jobDescription.trim().length < 10) {
+    return res.status(400).json({ error: 'jobDescription is required (min 10 chars)' });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
@@ -60,6 +110,27 @@ export default async function handler(
     });
   }
 
+  // ── Build combined CV text ────────────────────────────────────────────────
+  let ipfsText = '';
+  if (cvUri && cvUri.trim()) {
+    ipfsText = await extractTextFromIpfs(cvUri.trim());
+  }
+
+  // Combine IPFS-extracted text + manually provided proposal/CV text
+  const parts: string[] = [];
+  if (ipfsText) parts.push(ipfsText);
+  if (cvText && cvText.trim()) parts.push(cvText.trim());
+  const fullCvText = parts.join('\n\n--- Proposal ---\n\n');
+
+  if (fullCvText.trim().length < 10) {
+    return res.status(400).json({
+      error: cvUri
+        ? 'Could not extract text from the uploaded CV file. The file may be image-based or corrupted.'
+        : 'Proposal/CV text is too short for analysis.',
+    });
+  }
+
+  // ── Build prompt ──────────────────────────────────────────────────────────
   const prompt = `You are an expert HR analyst and risk assessor for a decentralized freelance marketplace on Solana blockchain.
 
 Analyze the following job description and freelancer CV/resume to assess:
@@ -73,7 +144,7 @@ Job Title: ${jobTitle || 'Not specified'}
 ${jobDescription.slice(0, 3000)}
 
 === FREELANCER CV / RESUME ===
-${cvText.slice(0, 3000)}
+${fullCvText.slice(0, 3000)}
 
 Respond ONLY with valid JSON, no markdown, no extra text:
 {
