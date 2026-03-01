@@ -39,7 +39,8 @@ function computeRiskLevel(matchScore: number, authenticityScore: number): {
 
 /**
  * Fetch file from IPFS via multiple gateways and extract text.
- * Supports PDF (via pdf-parse) and plain text files.
+ * Supports PDF (via pdf-parse/lib/pdf-parse — avoids Vercel fs issue)
+ * and plain text files.
  */
 async function extractTextFromIpfs(cvUri: string): Promise<string> {
   const hash = cvUri.replace('ipfs://', '').trim();
@@ -68,20 +69,31 @@ async function extractTextFromIpfs(cvUri: string): Promise<string> {
       const arrayBuffer = await response.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      if (contentType.includes('pdf') || hash.toLowerCase().endsWith('.pdf')) {
-        // Dynamic require to avoid build-time issues with pdf-parse
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const pdfParse = require('pdf-parse');
-        const data = await pdfParse(buffer);
-        const text = (data.text || '').trim();
-        if (text.length > 10) return text;
+      const isPdf =
+        contentType.includes('pdf') ||
+        hash.toLowerCase().includes('.pdf') ||
+        // Check PDF magic bytes: %PDF
+        (buffer.length > 4 && buffer.slice(0, 4).toString() === '%PDF');
+
+      if (isPdf) {
+        try {
+          // Use lib path to avoid pdf-parse loading test files (Vercel serverless issue)
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const pdfParse = require('pdf-parse/lib/pdf-parse');
+          const data = await pdfParse(buffer);
+          const text = (data.text || '').trim();
+          if (text.length > 10) return text;
+        } catch {
+          // PDF parse failed (e.g. image-only PDF) — continue to next gateway
+          continue;
+        }
       } else {
         // Plain text or unknown — return as UTF-8 string
         const text = buffer.toString('utf-8').trim();
         if (text.length > 10) return text;
       }
     } catch {
-      // Try next gateway
+      // Gateway unreachable or timed out — try next
       continue;
     }
   }
@@ -112,23 +124,29 @@ export default async function handler(
 
   // ── Build combined CV text ────────────────────────────────────────────────
   let ipfsText = '';
+  let ipfsFailed = false;
   if (cvUri && cvUri.trim()) {
     ipfsText = await extractTextFromIpfs(cvUri.trim());
+    if (!ipfsText) ipfsFailed = true;
   }
 
-  // Combine IPFS-extracted text + manually provided proposal/CV text
+  // Combine: IPFS/PDF text first, then proposal text as supplement
   const parts: string[] = [];
   if (ipfsText) parts.push(ipfsText);
   if (cvText && cvText.trim()) parts.push(cvText.trim());
-  const fullCvText = parts.join('\n\n--- Proposal ---\n\n');
+  const fullCvText = parts.join('\n\n--- Bid Proposal ---\n\n');
 
-  if (fullCvText.trim().length < 10) {
+  // Only hard-fail if there is literally nothing to analyze
+  if (!fullCvText.trim()) {
     return res.status(400).json({
-      error: cvUri
-        ? 'Could not extract text from the uploaded CV file. The file may be image-based or corrupted.'
-        : 'Proposal/CV text is too short for analysis.',
+      error: 'No CV content found. The freelancer has not submitted a proposal or readable CV file.',
     });
   }
+
+  // If PDF/IPFS failed but we have proposal text, note it for the AI
+  const cvNote = ipfsFailed && cvText?.trim()
+    ? '\n[Note: The uploaded CV file could not be parsed — analysis is based on the text proposal only.]'
+    : '';
 
   // ── Build prompt ──────────────────────────────────────────────────────────
   const prompt = `You are an expert HR analyst and risk assessor for a decentralized freelance marketplace on Solana blockchain.
@@ -144,7 +162,7 @@ Job Title: ${jobTitle || 'Not specified'}
 ${jobDescription.slice(0, 3000)}
 
 === FREELANCER CV / RESUME ===
-${fullCvText.slice(0, 3000)}
+${fullCvText.slice(0, 3000)}${cvNote}
 
 Respond ONLY with valid JSON, no markdown, no extra text:
 {
