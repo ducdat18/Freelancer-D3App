@@ -36,12 +36,14 @@
     "bs58": "^6.0.0",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.24",
+    "groq-sdk": "^0.37.0",
     "next": "^14.2.0",
     "pdf-parse": "^2.4.5",
     "react": "^18.3.1",
     "react-confetti": "^6.4.0",
     "react-dom": "^18.3.1",
-    "tweetnacl": "^1.0.3"
+    "tweetnacl": "^1.0.3",
+    "unpdf": "^1.4.0"
   },
   "devDependencies": {
     "@coral-xyz/anchor-cli": "^0.30.1",

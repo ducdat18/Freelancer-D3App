@@ -23,14 +23,29 @@ export default function CVViewer({ open, onClose, cvHash, freelancerName }: CVVi
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Extract bare CID then build a clean URL with exactly one /ipfs/ segment
+  // Extract bare CID (strip any URI prefix / path)
   const cid = (() => {
     const m = cvHash.match(/(Qm[1-9A-HJ-NP-Za-km-z]{44}|b[a-z2-7]{58,})/i);
-    return m ? m[1] : cvHash.replace(/^ipfs:\/\//i, '').replace(/^\/+/, '').replace(/^ipfs\//i, '').trim();
+    if (m) return m[1];
+    return cvHash
+      .replace(/^ipfs:\/\//i, '')
+      .replace(/^\/+/, '')
+      .replace(/^ipfs\//i, '')
+      .trim();
   })();
-  const gatewayBase = (process.env.NEXT_PUBLIC_IPFS_GATEWAY || 'https://gateway.pinata.cloud/ipfs/')
-    .replace(/\/+$/, '').replace(/\/ipfs$/, '');
-  const gatewayUrl = `${gatewayBase}/ipfs/${cid}`;
+  // Proxy route: forces Content-Disposition: inline so browser renders instead of downloading
+  const proxyUrl = `/api/cv-proxy?cid=${encodeURIComponent(cid)}`;
+  // Direct URL for "Open in New Tab" (user can choose to download from there)
+  const gatewayOrigin = (() => {
+    try {
+      return new URL(
+        process.env.NEXT_PUBLIC_IPFS_GATEWAY || 'https://gateway.pinata.cloud/ipfs/'
+      ).origin;
+    } catch {
+      return 'https://gateway.pinata.cloud';
+    }
+  })();
+  const gatewayUrl = `${gatewayOrigin}/ipfs/${cid}`;
 
   const isMockHash = cid.startsWith('QmMock');
 
@@ -48,7 +63,7 @@ export default function CVViewer({ open, onClose, cvHash, freelancerName }: CVVi
   };
 
   const handleDownload = () => {
-    window.open(gatewayUrl, '_blank');
+    window.open(proxyUrl, '_blank');
   };
 
   return (
@@ -71,7 +86,7 @@ export default function CVViewer({ open, onClose, cvHash, freelancerName }: CVVi
               CV/Resume {freelancerName ? `- ${freelancerName}` : ''}
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ wordBreak: 'break-all' }}>
-              IPFS: {cvHash}
+              {gatewayUrl}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 1 }}>
@@ -133,7 +148,7 @@ export default function CVViewer({ open, onClose, cvHash, freelancerName }: CVVi
           </Box>
         ) : !isMockHash ? (
           <iframe
-            src={gatewayUrl}
+            src={proxyUrl}
             style={{
               width: '100%',
               height: '100%',

@@ -1,0 +1,108 @@
+This appendix provides detailed specifications for the use cases of FreelanceChain that were not covered in Chapter 2. Together with the use cases specified in Section \ref{section:2.3}, these descriptions constitute a complete functional specification of the system.
+
+\section*{UC-08: Register Referral}
+
+\begin{table}[H]
+\centering
+\caption{Use case: Register Referral}
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Use case name} & Register Referral \\ \hline
+\textbf{Actor} & New User (referred), Existing User (referrer) \\ \hline
+\textbf{Preconditions} & New user accesses FreelanceChain via a referral URL (\texttt{?ref=WALLET\_ADDRESS}). \\ \hline
+\textbf{Main flow} & \begin{enumerate}[noitemsep]
+    \item New user navigates to FreelanceChain with referral parameter.
+    \item Frontend captures referrer wallet address from URL and stores in localStorage (\texttt{referral\_from}).
+    \item New user connects their wallet and calls \texttt{register\_referral} on-chain.
+    \item Smart contract validates that referrer $\neq$ new user (prevents self-referral).
+    \item A \texttt{ReferralAccount} PDA is created linking the new user to the referrer.
+    \item On future job completions, commissions are distributed automatically.
+\end{enumerate} \\ \hline
+\textbf{Alternative flow} & If the referral address is invalid or self-referential, the contract rejects the instruction. \\ \hline
+\textbf{Postconditions} & Referral relationship is recorded on-chain; referrer is eligible for commission on new user's completed jobs. \\ \hline
+\end{tabular}
+\end{table}
+
+\section*{UC-09: Setup Social Recovery Guardians}
+
+\begin{table}[H]
+\centering
+\caption{Use case: Setup Social Recovery Guardians}
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Use case name} & Setup Social Recovery Guardians \\ \hline
+\textbf{Actor} & User \\ \hline
+\textbf{Preconditions} & User wallet is connected. \\ \hline
+\textbf{Main flow} & \begin{enumerate}[noitemsep]
+    \item User navigates to the Social Recovery settings page.
+    \item User enters 2--5 trusted wallet addresses as guardians.
+    \item User sets an approval threshold (e.g., 3 of 5 guardians must approve).
+    \item User sets a timelock period (1--90 days).
+    \item User calls \texttt{setup\_recovery} on-chain.
+    \item A \texttt{RecoveryConfig} PDA is created with guardian list and threshold.
+\end{enumerate} \\ \hline
+\textbf{Postconditions} & Recovery configuration is stored on-chain; guardians are notified off-chain. \\ \hline
+\end{tabular}
+\end{table}
+
+\section*{UC-10: Submit Zero-Knowledge Credential}
+
+\begin{table}[H]
+\centering
+\caption{Use case: Submit Zero-Knowledge Credential}
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Use case name} & Submit Zero-Knowledge Credential \\ \hline
+\textbf{Actor} & User (prover), ZK Oracle (verifier) \\ \hline
+\textbf{Preconditions} & User has generated a ZKP for a private credential claim off-chain. \\ \hline
+\textbf{Main flow} & \begin{enumerate}[noitemsep]
+    \item User calls \texttt{submit\_zk\_credential} with: credential type, Pedersen commitment, proof hash, public inputs hash, expiry timestamp, and index.
+    \item A \texttt{ZkCredential} PDA is created with status \texttt{Pending}.
+    \item An authorized ZK oracle verifies the proof off-chain.
+    \item Oracle calls \texttt{verify\_zk\_credential} on-chain.
+    \item Credential status transitions to \texttt{Verified} with oracle signature.
+\end{enumerate} \\ \hline
+\textbf{Postconditions} & Verified credential is available on-chain for smart contract queries; no underlying private data is exposed. \\ \hline
+\end{tabular}
+\end{table}
+
+\section*{UC-11: Create AI Oracle Verification}
+
+\begin{table}[H]
+\centering
+\caption{Use case: Create AI Oracle Verification}
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Use case name} & Create AI Oracle Verification \\ \hline
+\textbf{Actor} & AI Oracle Node \\ \hline
+\textbf{Preconditions} & Oracle node is authorized (listed in \texttt{AiOracleConfig}); verification target exists on-chain. \\ \hline
+\textbf{Main flow} & \begin{enumerate}[noitemsep]
+    \item Oracle node completes off-chain verification (e.g., grades a coding challenge).
+    \item Oracle calls \texttt{submit\_ai\_verification} with: verification type (0--5), score (0--100), confidence (1--100), result URI, and details hash.
+    \item System records the oracle's submission.
+    \item When minimum oracle consensus count is reached, verification is finalized.
+\end{enumerate} \\ \hline
+\textbf{Postconditions} & AI verification result is recorded on-chain with oracle consensus; accessible to smart contract logic. \\ \hline
+\end{tabular}
+\end{table}
+
+\section*{UC-12: Browse Freelancers (Guest)}
+
+\begin{table}[H]
+\centering
+\caption{Use case: Browse Freelancers as Guest}
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Use case name} & Browse Freelancers (Guest Access) \\ \hline
+\textbf{Actor} & Anonymous Visitor \\ \hline
+\textbf{Preconditions} & No wallet required; browser has internet access. \\ \hline
+\textbf{Main flow} & \begin{enumerate}[noitemsep]
+    \item Visitor navigates to \texttt{/freelancers} without connecting a wallet.
+    \item System loads freelancer profiles from on-chain data (no auth required).
+    \item Visitor sees \texttt{VerifiedBadge} indicators for KYC-verified freelancers.
+    \item Visitor attempts to message a freelancer.
+    \item System displays ``Connect wallet to message'' tooltip; action is disabled.
+\end{enumerate} \\ \hline
+\textbf{Postconditions} & Visitor has browsed freelancer profiles; no on-chain state was modified. \\ \hline
+\end{tabular}
+\end{table}

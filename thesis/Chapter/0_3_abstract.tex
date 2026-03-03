@@ -1,22 +1,18 @@
-\documentclass[../report.tex]{subfiles}
+\begin{center}
+    \Large{\textbf{ABSTRACT}}
+\end{center}
+\vspace{1cm}
 
-\begin{document}
+The global freelance market, valued at over \$455 billion annually, is dominated by centralized platforms such as Upwork and Fiverr that collect fees ranging from 5\% to 20\%, exercise unilateral control over dispute resolution, and expose participants to payment fraud and arbitrary account suspension. These structural deficiencies stem from the inherent requirement of a trusted third party to hold escrow funds and adjudicate conflicts---a requirement that blockchain technology makes possible to eliminate. Existing decentralized alternatives remain limited in scope, typically addressing only payment transparency while neglecting identity verification, reputation integrity, and platform governance.
 
-\chapter*{ABSTRACT}
-\addcontentsline{toc}{chapter}{ABSTRACT}
+This thesis presents FreelanceChain, a fully decentralized freelance marketplace built on the Solana blockchain using the Anchor framework. The proposed system replaces the centralized intermediary with a suite of eighteen interconnected smart contract modules that collectively enforce the entire lifecycle of a freelance engagement: job creation, competitive bidding, milestone-based escrow, work submission, dispute arbitration, and multi-dimensional reputation recording. To address the identity problem inherent in pseudonymous blockchain interactions, FreelanceChain integrates browser-side biometric verification using the face-api.js library, producing a privacy-preserving on-chain Know Your Customer (KYC) record via a dedicated Anchor program. Reputation is encoded as non-transferable Soulbound Tokens (SBTs) that create an immutable, cryptographically verifiable career history. An AI risk assessment module powered by the Groq API and the LLaMA 3.3 70B open-source large language model provides clients with automated multi-dimensional CV analysis, four-score composite risk scoring, and a conversational follow-up advisor. Platform governance is managed through a Decentralized Autonomous Organization (DAO) module with reputation-weighted voting, while a zero-knowledge proof module enables selective credential disclosure without revealing private data.
 
-The freelance economy has grown significantly in recent years, but traditional centralized platforms suffer from high fees, payment delays, and trust issues. This thesis presents a decentralized freelance marketplace built on the Solana blockchain that addresses these challenges through smart contracts, trustless escrow, and transparent reputation systems.
+Deployed on the Solana Devnet with Program ID \texttt{FStwCj8zLzNkz7gTavooDcqF4FSyDcF9o9SCh96yyP7i}, the system achieves sub-second transaction confirmation at a cost below \$0.001 per transaction, demonstrating that blockchain-based freelance intermediation is technically viable, economically practical, and superior to centralized alternatives on dimensions of transparency, security, and participant sovereignty.
 
-The platform implements a hybrid dual-flow hiring mechanism that supports both traditional job-first approaches (where clients post jobs and receive bids) and innovative freelancer-first approaches (where clients browse freelancer profiles and initiate direct hiring). The system features automatic role detection using blockchain data analysis, eliminating manual user categorization and improving the overall user experience.
-
-Key technical contributions include: (1) a SOLID-compliant architecture ensuring maintainability and extensibility, (2) real-time notification system with auto-polling for job events, (3) advanced filtering and search capabilities for jobs and freelancers, (4) hybrid role detection system achieving 95\% accuracy, and (5) escrow-based payment mechanism with dispute resolution.
-
-The platform is built using Next.js and TypeScript for the frontend, Anchor framework for Solana smart contracts, and implements various design patterns including Repository, Strategy, and Dependency Injection. The system achieves a 5x increase in freelancer discoverability compared to reputation-only approaches.
-
-Evaluation results demonstrate that the platform successfully addresses the limitations of centralized marketplaces while maintaining high performance (up to 65,000 TPS on Solana) and low transaction costs. The decentralized architecture ensures transparency, reduces intermediary fees, and provides users with complete control over their funds and data.
-
-\vspace{0.5cm}
-
-\textbf{Keywords:} Blockchain, Solana, Decentralized Application, Freelance Marketplace, Smart Contracts, Escrow, Reputation System, SOLID Architecture.
-
-\end{document}
+\begin{flushright}
+\begin{tabular}{@{}c@{}}
+Student\\
+\textit{(Signature and full name)}\\[1cm]
+Nguyen Van Thang
+\end{tabular}
+\end{flushright}

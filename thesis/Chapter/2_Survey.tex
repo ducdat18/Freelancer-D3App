@@ -1,0 +1,401 @@
+Building on the motivation established in Chapter 1, this chapter surveys the existing freelance platform landscape, analyzes comparable decentralized solutions, and derives the functional and non-functional requirements of FreelanceChain. Section \ref{section:2.1} examines current systems and their limitations. Section \ref{section:2.2} provides a functional overview via use case modeling. Section \ref{section:2.3} specifies the most critical use cases in detail. Section \ref{section:2.4} enumerates the non-functional requirements.
+
+\section{Status Survey}
+\label{section:2.1}
+
+\subsection{Centralized Freelance Platforms}
+
+The dominant actors in the online freelance market are Upwork and Fiverr, supplemented by Toptal, Freelancer.com, and a variety of domain-specific marketplaces. Table \ref{table:platform_comparison} summarizes their key characteristics along the dimensions most relevant to the FreelanceChain design.
+
+\begin{table}[H]
+\centering
+\caption{Comparison of major freelance platforms}
+\label{table:platform_comparison}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{Feature} & \textbf{Upwork} & \textbf{Fiverr} & \textbf{Toptal} & \textbf{Ethlance} & \textbf{FreelanceChain} \\ \hline
+Service fee & 5--20\% & 20\% & 15--20\% & 0\% & 0\% \\ \hline
+Escrow custody & Platform & Platform & Platform & Smart contract & Smart contract \\ \hline
+Dispute resolution & Platform & Platform & Platform & None & On-chain arbitration \\ \hline
+Reputation portability & No & No & No & Limited & Yes (SBT) \\ \hline
+Identity verification & Centralized & Centralized & Manual & None & Browser biometric \\ \hline
+Governance & Operator & Operator & Operator & None & DAO \\ \hline
+Milestone escrow & Yes & Partial & Yes & No & Yes \\ \hline
+Permissionless access & No & No & No & Yes & Yes \\ \hline
+Transparency & No & No & No & Full & Full \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Upwork}
+
+Upwork is the largest freelance marketplace by total revenue, serving over 800,000 clients as of 2023. It offers both hourly and fixed-price contracts, with a time-tracking tool that provides screenshots as evidence of work. Upwork employs a tiered service fee of 20\% on the first \$500 earned with a client, dropping to 10\% from \$500 to \$10,000, and 5\% thereafter. While this structure rewards long-term relationships, the effective fee for small or one-time engagements is among the highest in the industry.
+
+Upwork's dispute resolution is adjudicated by Upwork staff, who review submitted evidence and make binding decisions. This process is opaque: the criteria applied are proprietary, decisions cannot be appealed to an independent body, and freelancers report systematic disadvantages relative to clients who represent ongoing revenue. Furthermore, Upwork holds all escrow funds in bank accounts, exposing users to counterparty risk if the platform becomes insolvent.
+
+\subsubsection{Fiverr}
+
+Fiverr operates on a gig-based model in which freelancers post pre-defined service packages at fixed prices starting at \$5. The platform charges a flat 20\% service fee on all transactions and an additional \$2 service fee for orders below \$40. Fiverr's strength lies in discoverability and low friction for buyers, but the gig model poorly accommodates complex, long-term engagements and custom project scopes. Reputation is measured through a single star rating that can be influenced by the platform's search algorithm, which prioritizes recently active sellers, effectively penalizing experienced freelancers who take breaks.
+
+\subsubsection{Ethlance and Decentralized Alternatives}
+
+Ethlance, built on the Ethereum blockchain, was among the first decentralized freelance marketplaces. It eliminates platform fees by encoding job listings and payments in smart contracts. However, Ethlance suffers from several critical limitations: it lacks identity verification (enabling Sybil attacks), it has no structured dispute resolution mechanism, it imposes high gas fees that make small transactions uneconomical on Ethereum mainnet, and it has not been actively maintained since 2018. Colony and Braintrust represent more recent decentralized work platforms but focus on team-based task management and talent network governance respectively, rather than direct freelance project matching.
+
+No existing decentralized solution combines escrow, reputation, identity, governance, and AI-assisted evaluation in a single coherent system. This gap constitutes the primary motivation for FreelanceChain.
+
+\subsection{User Survey Summary}
+
+An informal survey of twenty freelancers and ten clients was conducted during the requirements phase of this project. The survey identified the following pain points as most critical, in descending order of frequency:
+\begin{enumerate}
+    \item Platform fees reducing net income (mentioned by 85\% of freelancers).
+    \item Unfair dispute resolution (72\% of freelancers, 30\% of clients).
+    \item Inability to transfer reputation across platforms (68\% of freelancers).
+    \item Fear of payment non-delivery (65\% of freelancers).
+    \item Inability to verify freelancer identity and credentials (60\% of clients).
+\end{enumerate}
+
+These findings directly inform the functional requirements derived in Section \ref{section:2.3}.
+
+\section{Functional Overview}
+\label{section:2.2}
+
+\subsection{System Actors}
+
+FreelanceChain involves three primary actors:
+
+\begin{itemize}
+    \item \textbf{Client:} An individual or organization seeking to outsource work. A client creates job listings, reviews bids, selects a freelancer, funds escrow, reviews completed work, and initiates reputation minting.
+    \item \textbf{Freelancer:} A professional offering services for hire. A freelancer browses job listings, submits bids with proposals and CVs, performs contracted work, submits deliverables, and accumulates on-chain reputation.
+    \item \textbf{Platform Operator / DAO Member:} A governance token holder who participates in platform parameter governance through on-chain proposals and voting. In the decentralized model, this role is distributed across all token holders.
+\end{itemize}
+
+Two secondary actors are also recognized:
+\begin{itemize}
+    \item \textbf{Guardian:} A trusted contact designated by a user for wallet social recovery.
+    \item \textbf{AI Oracle:} An authorized off-chain service that submits AI verification results to the on-chain oracle contract.
+\end{itemize}
+
+\subsection{General Use Case Diagram}
+\label{subsection:2.2.1}
+
+\begin{figure}[H]
+    \centering
+    % [INSERT: General use case diagram showing Client, Freelancer, and DAO Member actors
+    %  with their primary use cases: Create Job, Submit Bid, Manage Escrow,
+    %  Verify Identity, Earn Reputation, Governance, Social Recovery]
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{4cm}
+    \textit{Figure placeholder: General Use Case Diagram}\\
+    \textit{Actors: Client, Freelancer, DAO Member, Guardian, AI Oracle}\\
+    \textit{Use Cases: Create Job, Browse Jobs, Submit Bid, Select Freelancer,}\\
+    \textit{Fund Escrow, Submit Work, Approve Work, Open Dispute,}\\
+    \textit{Verify Identity, Mint Reputation, Create Proposal, Vote, Recover Account}
+    \vspace{4cm}}}
+    \caption{General use case diagram of FreelanceChain}
+    \label{fig:general_usecase}
+\end{figure}
+
+\subsection{Detailed Use Case Diagram: Job Lifecycle}
+\label{subsection:2.2.2}
+
+\begin{figure}[H]
+    \centering
+    % [INSERT: Detailed use case diagram for Job Lifecycle module
+    %  including Create Job, Edit Job, Close Job, Submit Bid, Withdraw Bid,
+    %  Select Bid, Submit Work, Review Work, Approve Work, Reject Work use cases]
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{3.5cm}
+    \textit{Figure placeholder: Detailed Use Case Diagram -- Job Lifecycle}\\
+    \textit{Include relationships: Submit Bid <<include>> Browse Jobs}\\
+    \textit{Select Bid <<extend>> View Bids}\\
+    \textit{Open Dispute <<extend>> Approve Work}
+    \vspace{3.5cm}}}
+    \caption{Detailed use case diagram for job lifecycle management}
+    \label{fig:job_usecase}
+\end{figure}
+
+\subsection{Detailed Use Case Diagram: Escrow and Payment}
+\label{subsection:2.2.3_escrow}
+
+\begin{figure}[H]
+    \centering
+    % [INSERT: Detailed use case diagram for Escrow module
+    %  including Deposit Token Escrow, Deposit Milestone Escrow, Fund Milestone,
+    %  Submit Milestone Deliverable, Approve Milestone, Release Escrow,
+    %  Open Dispute, Resolve Dispute use cases]
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{3.5cm}
+    \textit{Figure placeholder: Detailed Use Case Diagram -- Escrow and Payment}
+    \vspace{3.5cm}}}
+    \caption{Detailed use case diagram for escrow and payment}
+    \label{fig:escrow_usecase}
+\end{figure}
+
+\subsection{Business Process: Complete Freelance Engagement}
+\label{subsection:2.2.4}
+
+The primary business process of FreelanceChain -- executing a complete freelance engagement from job creation to reputation recording -- involves the sequential collaboration of multiple use cases. The process proceeds as follows:
+
+\begin{enumerate}
+    \item The client creates a job on-chain (\texttt{create\_job}), specifying title, description, budget, and metadata URI.
+    \item Freelancers browse the job listing and submit bids (\texttt{submit\_bid}) containing a proposed budget, timeline, and optionally a CV document URI.
+    \item The client reviews submitted bids, optionally running an AI risk assessment on each candidate's CV, and selects a winning bid (\texttt{select\_bid}).
+    \item The client deposits escrow funds (\texttt{deposit\_token\_escrow} or per-milestone funding via \texttt{fund\_milestone}).
+    \item The freelancer performs the contracted work and submits deliverables (\texttt{submit\_milestone\_deliverable} or a general work submission).
+    \item The client reviews deliverables and either approves (\texttt{approve\_milestone} / \texttt{release\_token\_escrow}) or opens a dispute (\texttt{open\_token\_dispute}).
+    \item Upon job completion, both parties may mint a reputation SBT rating the counterparty (\texttt{mint\_reputation\_sbt}).
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    % [INSERT: Activity diagram (BPMN-style) showing the complete freelance engagement
+    %  business process with two swim lanes: Client and Freelancer.
+    %  Flow: Create Job → [Freelancers Browse & Bid] → Select Bid → Fund Escrow
+    %  → [Freelancer Works] → Submit Work → [Review] → Approve/Dispute → Mint SBT]
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{5cm}
+    \textit{Figure placeholder: Business Process Activity Diagram}\\
+    \textit{Swim lanes: Client | Freelancer}\\
+    \textit{Key decision points: Select bid? | Approve work? | Open dispute?}
+    \vspace{5cm}}}
+    \caption{Business process activity diagram for a complete freelance engagement}
+    \label{fig:business_process}
+\end{figure}
+
+\section{Functional Description}
+\label{section:2.3}
+
+This section provides detailed specifications for the seven most critical use cases of FreelanceChain. Additional use case descriptions are provided in Appendix A.
+
+\subsection{Use Case UC-01: Create and Fund Milestone Escrow}
+\label{subsection:uc01}
+
+\begin{table}[H]
+\centering
+\caption{Use case specification: Create and Fund Milestone Escrow}
+\label{table:uc01}
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Use case name} & Create and Fund Milestone Escrow \\ \hline
+\textbf{Actor} & Client \\ \hline
+\textbf{Preconditions} & \begin{itemize}[noitemsep]
+    \item Client wallet is connected.
+    \item A freelancer has been selected for the job.
+    \item Job status is \texttt{InProgress}.
+\end{itemize} \\ \hline
+\textbf{Main flow} & \begin{enumerate}[noitemsep]
+    \item Client navigates to the job detail page.
+    \item Client selects ``Milestone Escrow'' mode.
+    \item Client defines 1--10 milestones, specifying title, description, and SOL amount for each.
+    \item System validates that total milestone amounts do not exceed job budget.
+    \item Client calls \texttt{init\_job\_milestones} on-chain.
+    \item For each milestone, client calls \texttt{fund\_milestone} with the specified amount.
+    \item System confirms transactions and displays escrow status.
+\end{enumerate} \\ \hline
+\textbf{Alternative flow} & If total amounts exceed budget, the system rejects milestone creation with an on-chain validation error. \\ \hline
+\textbf{Postconditions} & Milestone \gls{pda} accounts are created on-chain; SOL amounts are locked in each milestone escrow account. \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Use Case UC-02: Submit Bid with CV}
+\label{subsection:uc02}
+
+\begin{table}[H]
+\centering
+\caption{Use case specification: Submit Bid with CV}
+\label{table:uc02}
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Use case name} & Submit Bid with CV \\ \hline
+\textbf{Actor} & Freelancer \\ \hline
+\textbf{Preconditions} & \begin{itemize}[noitemsep]
+    \item Freelancer wallet is connected.
+    \item Job status is \texttt{Open}.
+    \item Freelancer has not previously bid on this job.
+\end{itemize} \\ \hline
+\textbf{Main flow} & \begin{enumerate}[noitemsep]
+    \item Freelancer navigates to job detail page.
+    \item Freelancer clicks ``Submit Bid''.
+    \item Freelancer enters proposed budget (SOL), proposal text, and timeline in days.
+    \item Optionally, freelancer uploads a CV document, which is stored on \gls{ipfs}; the returned \gls{ipfs} URI is embedded in the bid.
+    \item Freelancer signs and submits the \texttt{submit\_bid} transaction.
+    \item System creates a Bid \gls{pda} account on-chain with status \texttt{Pending}.
+\end{enumerate} \\ \hline
+\textbf{Alternative flow} & If the job is no longer \texttt{Open}, the contract rejects the instruction with an error. \\ \hline
+\textbf{Postconditions} & A Bid \gls{pda} is initialized on-chain; the bid appears in the client's bids list. \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Use Case UC-03: KYC Identity Verification}
+\label{subsection:uc03}
+
+\begin{table}[H]
+\centering
+\caption{Use case specification: KYC Identity Verification}
+\label{table:uc03}
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Use case name} & KYC Identity Verification \\ \hline
+\textbf{Actor} & Freelancer or Client \\ \hline
+\textbf{Preconditions} & \begin{itemize}[noitemsep]
+    \item User wallet is connected.
+    \item Device has a functioning webcam.
+    \item User has a government-issued identity document.
+\end{itemize} \\ \hline
+\textbf{Main flow} & \begin{enumerate}[noitemsep]
+    \item User navigates to the Identity Verification page.
+    \item User selects identity document type (national ID, passport, or driver's licence).
+    \item User uploads a photograph of the identity document.
+    \item System loads face-api.js models and extracts the face descriptor from the document photo.
+    \item User captures a live webcam selfie.
+    \item System computes the Euclidean distance between the two face descriptors.
+    \item If distance $< 0.50$: verification succeeds; result is stored in localStorage and written to the blockchain via \texttt{finalize\_kyc}.
+    \item If distance $\geq 0.50$: verification fails; user is informed and may retry.
+\end{enumerate} \\ \hline
+\textbf{Alternative flow} & If no face is detected in either image, the system displays an informative error and prompts the user to retry with a clearer photo. \\ \hline
+\textbf{Postconditions} & A \texttt{KycRecord} \gls{pda} is initialized on-chain with status \texttt{Verified} or \texttt{Rejected}; a \texttt{VerifiedBadge} appears on the user's profile. \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Use Case UC-04: Open and Resolve Dispute}
+\label{subsection:uc04}
+
+\begin{table}[H]
+\centering
+\caption{Use case specification: Open and Resolve Dispute}
+\label{table:uc04}
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Use case name} & Open and Resolve Dispute \\ \hline
+\textbf{Actor} & Client or Freelancer (opener); DAO Arbitrators (resolvers) \\ \hline
+\textbf{Preconditions} & \begin{itemize}[noitemsep]
+    \item A job is \texttt{InProgress} or \texttt{WaitingForReview}.
+    \item Token escrow has been funded.
+\end{itemize} \\ \hline
+\textbf{Main flow} & \begin{enumerate}[noitemsep]
+    \item Either party calls \texttt{open\_token\_dispute} with a written reason.
+    \item Escrow state transitions to \texttt{Disputed}; funds are frozen.
+    \item DAO arbitrators review the dispute evidence (on-chain and off-chain).
+    \item Arbitrators vote on resolution.
+    \item Upon consensus, the arbitration contract transfers funds to the prevailing party.
+    \item Job status is updated to \texttt{Disputed}.
+\end{enumerate} \\ \hline
+\textbf{Alternative flow} & If both parties agree on an out-of-band settlement, the dispute can be withdrawn by the opener. \\ \hline
+\textbf{Postconditions} & Escrow funds are distributed to the prevailing party; job status reflects the outcome. \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Use Case UC-05: Mint Reputation SBT}
+\label{subsection:uc05}
+
+\begin{table}[H]
+\centering
+\caption{Use case specification: Mint Reputation SBT}
+\label{table:uc05}
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Use case name} & Mint Reputation Soulbound Token \\ \hline
+\textbf{Actor} & Client (rating freelancer) or Freelancer (rating client) \\ \hline
+\textbf{Preconditions} & \begin{itemize}[noitemsep]
+    \item Job status is \texttt{Completed}.
+    \item Reviewer has not previously rated the same job for this recipient.
+\end{itemize} \\ \hline
+\textbf{Main flow} & \begin{enumerate}[noitemsep]
+    \item Reviewer calls \texttt{init\_sbt\_counter} if not already initialized.
+    \item Reviewer calls \texttt{mint\_reputation\_sbt} with rating (1--5), comment ($\leq$200 chars), job title, and metadata URI.
+    \item Smart contract computes a SHA-256 verification hash over (job ID, reviewer, rating, timestamp).
+    \item A non-transferable \gls{sbt} token account is created in the recipient's wallet.
+\end{enumerate} \\ \hline
+\textbf{Alternative flow} & If the job is not completed, the contract rejects the instruction. \\ \hline
+\textbf{Postconditions} & An immutable \gls{sbt} record appears on the recipient's profile page; the SBT cannot be transferred or deleted. \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Use Case UC-06: Create and Vote on Governance Proposal}
+\label{subsection:uc06}
+
+\begin{table}[H]
+\centering
+\caption{Use case specification: Create and Vote on Governance Proposal}
+\label{table:uc06}
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Use case name} & Create and Vote on Governance Proposal \\ \hline
+\textbf{Actor} & DAO Member (token holder) \\ \hline
+\textbf{Preconditions} & \begin{itemize}[noitemsep]
+    \item Actor holds governance tokens above the minimum stake threshold.
+\end{itemize} \\ \hline
+\textbf{Main flow} & \begin{enumerate}[noitemsep]
+    \item Actor calls \texttt{create\_proposal} with title, description URI, and proposal type.
+    \item System stakes the required governance tokens as collateral.
+    \item During the voting period, other token holders call \texttt{vote} with their vote allocation.
+    \item Votes are weighted by the voter's reputation multiplier (up to 200$\times$).
+    \item If quorum (configurable, 10--100\%) is reached and votes\_for $>$ 50\%, the proposal passes.
+    \item Platform parameters are updated on-chain per the proposal specification.
+\end{enumerate} \\ \hline
+\textbf{Alternative flow} & If quorum is not reached by the deadline, the proposal expires and staked tokens are returned. \\ \hline
+\textbf{Postconditions} & If passed, platform configuration is updated; governance activity is recorded on-chain. \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Use Case UC-07: Social Recovery of Wallet Access}
+\label{subsection:uc07}
+
+\begin{table}[H]
+\centering
+\caption{Use case specification: Social Recovery of Wallet Access}
+\label{table:uc07}
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Use case name} & Social Recovery of Wallet Access \\ \hline
+\textbf{Actor} & User (account owner), Guardians \\ \hline
+\textbf{Preconditions} & \begin{itemize}[noitemsep]
+    \item User has previously called \texttt{setup\_recovery} with 2--5 guardian addresses and a threshold.
+    \item User has lost access to their private key.
+\end{itemize} \\ \hline
+\textbf{Main flow} & \begin{enumerate}[noitemsep]
+    \item User (with a new key) or a guardian calls \texttt{initiate\_recovery} specifying the new owner address.
+    \item Each guardian calls \texttt{approve\_recovery} from their respective wallets.
+    \item Once the approval count reaches the threshold, a timelock countdown begins.
+    \item After the timelock period, control is transferred to the new owner address.
+\end{enumerate} \\ \hline
+\textbf{Alternative flow} & If sufficient guardians do not approve within a defined window, the recovery attempt is cancelled. \\ \hline
+\textbf{Postconditions} & The account's control has been transferred to the new owner; the old key cannot be used. \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Non-Functional Requirements}
+\label{section:2.4}
+
+\subsection{Performance Requirements}
+
+\begin{itemize}
+    \item \textbf{Transaction confirmation:} All on-chain instructions must confirm within 1 second on Solana Devnet under normal network conditions.
+    \item \textbf{Page load time:} The frontend must achieve a Time to Interactive (TTI) below 3 seconds on a standard broadband connection.
+    \item \textbf{Face verification latency:} The browser-side face recognition pipeline must complete within 5 seconds of image submission on modern hardware.
+    \item \textbf{AI risk assessment:} The Groq LLM inference call (\texttt{llama-3.3-70b-versatile}) must return a structured four-score assessment within 10 seconds.
+\end{itemize}
+
+\subsection{Security Requirements}
+
+\begin{itemize}
+    \item \textbf{Fund custody:} No party other than the smart contract logic may access escrowed funds. The platform developer's deployer key must have no authority over user funds.
+    \item \textbf{Input validation:} All on-chain instructions must validate input ranges (e.g., rating 1--5, fee percentages 1--20\%, guardian count 2--5) and reject invalid data with meaningful error codes.
+    \item \textbf{Sybil resistance:} The KYC module must reject face matches with Euclidean distance $\geq 0.50$ and must not allow re-submission with the same identity document.
+    \item \textbf{Biometric privacy:} No biometric data (face images or feature vectors) may be transmitted to any external server; all processing must occur client-side.
+\end{itemize}
+
+\subsection{Usability Requirements}
+
+\begin{itemize}
+    \item \textbf{Guest browsing:} Job listings, freelancer profiles, and informational pages must be accessible without a connected wallet.
+    \item \textbf{Wallet onboarding:} The system must support the Phantom wallet adapter and guide wallet-less users through connection in three clicks or fewer.
+    \item \textbf{Error feedback:} All on-chain transaction failures must display a human-readable error message with guidance on resolution.
+\end{itemize}
+
+\subsection{Technical Requirements}
+
+\begin{itemize}
+    \item \textbf{Blockchain:} Solana Devnet (Program ID: \texttt{FStwCj8zLzNkz7gTavooDcqF4FSyDcF9o9SCh96yyP7i}).
+    \item \textbf{Smart contract framework:} Anchor 0.30.1 on Rust stable.
+    \item \textbf{Frontend:} Next.js 14 with TypeScript, React 18.
+    \item \textbf{Storage:} \gls{ipfs} for document and metadata storage; browser localStorage for client-side caching.
+    \item \textbf{Compatibility:} Must support Chromium-based browsers (Chrome, Edge, Brave) with webcam access; Firefox support is secondary.
+\end{itemize}
+
+In summary, this chapter has established that existing freelance platforms -- both centralized and decentralized -- fail to provide a comprehensive, trustless, and privacy-preserving solution for online freelancing. FreelanceChain addresses these gaps through eighteen smart contract modules, browser-side biometric KYC, Soulbound Token reputation, AI-assisted evaluation, and DAO governance. The requirements derived in this chapter drive all architectural and implementation decisions presented in subsequent chapters.

@@ -1,0 +1,54 @@
+\section{Conclusion}
+\label{section:6.1}
+
+This thesis has presented FreelanceChain, a fully decentralized freelance marketplace built on the Solana blockchain using the Anchor framework. The work addresses a clear and well-documented structural failure in the online freelance industry: the concentration of trust, payment custody, dispute resolution, identity verification, and platform governance in a single private intermediary. By systematically replacing each of these centralized functions with smart contract logic, FreelanceChain demonstrates that trustless, fee-free, and privacy-preserving online freelancing is technically achievable with current blockchain technology.
+
+\textbf{Comparison with existing systems.} Against the principal existing systems:
+\begin{itemize}
+    \item \textit{vs. Upwork and Fiverr:} FreelanceChain eliminates the 5--20\% service fee, replaces opaque dispute resolution with on-chain arbitration, and provides portable, non-forgeable reputation through Soulbound Tokens. The trade-off is a steeper onboarding friction (requiring a Phantom wallet) and reliance on Devnet for the current implementation.
+    \item \textit{vs. Ethlance:} FreelanceChain provides a significantly more comprehensive feature set including milestone escrow, biometric KYC, SBT reputation, DAO governance, ZK credential proofs, AI risk assessment, social recovery, and an AI oracle. Furthermore, by building on Solana rather than Ethereum, FreelanceChain achieves transaction costs below \$0.001 versus Ethereum's fees that can exceed \$50, making the platform economically viable for small-scale freelance work. The Groq-powered AI risk assessment (LLaMA 3.3 70B) and conversational advisor are features absent from Ethlance entirely.
+    \item \textit{vs. Colony and Braintrust:} These platforms focus on team and DAO treasury management rather than individual freelance project matching. FreelanceChain provides a complete individual freelancer workflow with per-project escrow and per-job reputation.
+\end{itemize}
+
+\textbf{What was achieved.} The following objectives set in Section \ref{section:1.2} were fully achieved:
+\begin{enumerate}
+    \item Eighteen Anchor smart contract modules were designed, implemented, and deployed to Solana Devnet, collectively covering the complete freelance engagement lifecycle.
+    \item A production-quality Next.js frontend was built with 53 React components, providing a polished user experience for clients and freelancers.
+    \item A browser-side biometric KYC pipeline was implemented and integrated, verifying face matches without transmitting any biometric data.
+    \item The system was deployed to Solana Devnet and 38 test cases were executed, all passing, confirming the correctness of the core smart contract logic.
+\end{enumerate}
+
+\textbf{What was not achieved.} The following items were not completed within the scope of this thesis:
+\begin{enumerate}
+    \item Mainnet deployment was not pursued due to the cost (approximately 11 SOL $\approx$ \$1,800) and the scope constraint of a research/development thesis on Devnet.
+    \item A formal large-scale user study was not conducted; user feedback was limited to informal evaluation by peers.
+    \item The zero-knowledge proof module implements the on-chain commitment storage but does not include a full ZKP circuit (e.g., using Circom or Groth16); the ZK verification relies on trusted off-chain oracle nodes rather than fully trustless proof verification.
+    \item The governance module's staking rewards distribution was not implemented; only the voting mechanism was completed.
+\end{enumerate}
+
+\textbf{Key lessons learned.}
+\begin{itemize}
+    \item Solana's account model (separation of code and state) requires more upfront design discipline than Ethereum's combined model, but produces programs that are more parallelizable and cheaper to query.
+    \item Anchor's constraint macro system eliminates a class of common smart contract vulnerabilities but requires careful attention to the order of account validation checks in complex multi-account instructions.
+    \item Browser-side machine learning (face-api.js) is feasible for production-grade biometric verification when model size is managed carefully (~6.5 MB) and is a compelling architecture choice for privacy-preserving applications.
+    \item Integrating an LLM API into a Web3 application requires careful design of the trust boundary: the AI output must be treated as advisory (displayed to the user) rather than authoritative (used to automatically block or approve actions) to avoid the AI becoming a new centralized point of failure.
+\end{itemize}
+
+\section{Future Work}
+\label{section:6.2}
+
+Several directions for future development and research are identified:
+
+\textbf{Mainnet deployment and economic modeling.} The most pressing practical next step is deployment on Solana Mainnet Beta. This requires careful economic modeling of the governance token supply, DAO treasury funding mechanism, and referral commission distribution. A token generation event (TGE) strategy and regulatory compliance analysis (particularly regarding whether the governance token constitutes a security under applicable law) would be necessary prerequisites.
+
+\textbf{Full ZKP circuit implementation.} The current ZK proof module stores commitments but does not verify Groth16 or PLONK proofs on-chain. A future implementation using the Bellman or Gnark ZKP library to generate proofs client-side, with on-chain verification using a Solana-native verifier (such as the Light Protocol), would enable fully trustless credential proofs without oracle dependencies. This would allow users to prove credential claims (e.g., ``I have a verified university degree in Computer Science'') without revealing the underlying documents or relying on trusted oracle nodes.
+
+\textbf{Decentralized dispute arbitration network.} The current dispute module opens a dispute and freezes funds, but the arbitration decision is not yet fully automated. Future work should implement a staking-based jury selection mechanism (inspired by Kleros) where token holders stake to serve as arbitrators, and their stake is at risk if they vote against the majority. This would make arbitration credibly neutral and resistant to bribery.
+
+\textbf{Cross-chain identity portability.} The KYC record stored on Solana could be extended to support cross-chain attestation using the W3C Decentralized Identifiers (\gls{did}) standard. A user who has verified on FreelanceChain's Solana program could present their KYC attestation to a compliant Ethereum-based contract without re-verifying, using a bridge or cross-chain messaging protocol.
+
+\textbf{AI skill verification oracle network.} The current AI risk assessment is advisory and manual (requires client to paste CV text). A future implementation could automate skill verification through standardized challenge-response tests graded by a consensus of AI oracle nodes. Candidates would take a timed, proctored coding challenge; the oracle network would grade the submission; and the result would be written to the \texttt{ai\_oracle} module as a verifiable on-chain credential.
+
+\textbf{Mobile wallet support and progressive web app.} The current implementation requires a browser extension wallet (Phantom). Future work should integrate WalletConnect v2 to support mobile Phantom, Solflare, and other mobile wallets, and convert the frontend to a Progressive Web App (PWA) with offline caching for low-bandwidth environments in emerging markets --- the demographic with the most to gain from eliminating platform intermediary fees.
+
+In conclusion, FreelanceChain demonstrates that a comprehensive, trustless, and privacy-preserving online freelance marketplace is achievable on current public blockchain infrastructure. The five core technical contributions --- dual-track escrow, SBT reputation, browser-side biometric KYC, Groq/LLaMA-powered AI risk assessment with conversational advisor, and DAO governance --- collectively address the structural deficiencies of centralized freelance platforms. The work opens multiple avenues for future research at the intersection of blockchain systems, privacy-preserving computation, decentralized governance, and AI-augmented economic coordination.

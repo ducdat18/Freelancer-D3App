@@ -1,45 +1,135 @@
-\makeglossaries
+%\makeglossaries
+\makenoidxglossaries
 
-% Blockchain Terms
-\newacronym{dapp}{DApp}{Decentralized Application}
-\newacronym{sol}{SOL}{Solana Native Token}
-\newacronym{pda}{PDA}{Program Derived Address}
-\newacronym{rpc}{RPC}{Remote Procedure Call}
-\newacronym{spl}{SPL}{Solana Program Library}
-
-% Technology Stack
-\newacronym{api}{API}{Application Programming Interface}
-\newacronym{ui}{UI}{User Interface}
-\newacronym{ux}{UX}{User Experience}
-\newacronym{ipfs}{IPFS}{InterPlanetary File System}
-\newacronym{tps}{TPS}{Transactions Per Second}
-
-% Architecture & Design
-\newacronym{solid}{SOLID}{Single Responsibility, Open-Closed, Liskov Substitution, Interface Segregation, Dependency Inversion}
-\newacronym{srp}{SRP}{Single Responsibility Principle}
-\newacronym{ocp}{OCP}{Open-Closed Principle}
-\newacronym{lsp}{LSP}{Liskov Substitution Principle}
-\newacronym{isp}{ISP}{Interface Segregation Principle}
-\newacronym{dip}{DIP}{Dependency Inversion Principle}
-\newacronym{mvc}{MVC}{Model-View-Controller}
-\newacronym{di}{DI}{Dependency Injection}
-
-% Programming
-\newacronym{ts}{TypeScript}{TypeScript Programming Language}
-\newacronym{js}{JavaScript}{JavaScript Programming Language}
-\newacronym{react}{React}{React JavaScript Library}
-\newacronym{nextjs}{Next.js}{Next.js React Framework}
-\newacronym{mui}{MUI}{Material-UI Component Library}
-\newacronym{json}{JSON}{JavaScript Object Notation}
-
-% Development Tools
-\newacronym{git}{Git}{Version Control System}
-\newacronym{npm}{NPM}{Node Package Manager}
-\newacronym{cli}{CLI}{Command Line Interface}
-\newacronym{ide}{IDE}{Integrated Development Environment}
-
-% Project Specific
-\newacronym{kyc}{KYC}{Know Your Customer}
-\newacronym{usdc}{USDC}{USD Coin Stablecoin}
-\newacronym{ai}{AI}{Artificial Intelligence}
-\newacronym{dao}{DAO}{Decentralized Autonomous Organization}
+\newglossaryentry{dapp}{
+    type=\acronymtype,
+    name={D-App},
+    description={Decentralized Application --- a software application that runs on a distributed network (blockchain) rather than centralized servers},
+    first={Decentralized Application (D-App)}
+}
+\newglossaryentry{defi}{
+    type=\acronymtype,
+    name={DeFi},
+    description={Decentralized Finance --- financial services and instruments built on public blockchains without central intermediaries},
+    first={Decentralized Finance (DeFi)}
+}
+\newglossaryentry{dao}{
+    type=\acronymtype,
+    name={DAO},
+    description={Decentralized Autonomous Organization --- a blockchain-based governance structure where rules are encoded in smart contracts},
+    first={Decentralized Autonomous Organization (DAO)}
+}
+\newglossaryentry{kyc}{
+    type=\acronymtype,
+    name={KYC},
+    description={Know Your Customer --- identity verification process to confirm a user's identity},
+    first={Know Your Customer (KYC)}
+}
+\newglossaryentry{sbt}{
+    type=\acronymtype,
+    name={SBT},
+    description={Soulbound Token --- a non-transferable blockchain token permanently bound to a wallet, used for identity and reputation},
+    first={Soulbound Token (SBT)}
+}
+\newglossaryentry{zkp}{
+    type=\acronymtype,
+    name={ZKP},
+    description={Zero-Knowledge Proof --- a cryptographic method allowing one party to prove knowledge without revealing the underlying data},
+    first={Zero-Knowledge Proof (ZKP)}
+}
+\newglossaryentry{pda}{
+    type=\acronymtype,
+    name={PDA},
+    description={Program Derived Address --- a deterministic Solana account address generated from seeds, owned by a program},
+    first={Program Derived Address (PDA)}
+}
+\newglossaryentry{nft}{
+    type=\acronymtype,
+    name={NFT},
+    description={Non-Fungible Token --- a unique, indivisible blockchain token representing ownership of a digital asset},
+    first={Non-Fungible Token (NFT)}
+}
+\newglossaryentry{api}{
+    type=\acronymtype,
+    name={API},
+    description={Application Programming Interface --- a set of protocols defining how software components communicate},
+    first={Application Programming Interface (API)}
+}
+\newglossaryentry{ipfs}{
+    type=\acronymtype,
+    name={IPFS},
+    description={InterPlanetary File System --- a distributed, peer-to-peer file storage protocol using content-addressed hashing},
+    first={InterPlanetary File System (IPFS)}
+}
+\newglossaryentry{rpc}{
+    type=\acronymtype,
+    name={RPC},
+    description={Remote Procedure Call --- a protocol for executing functions on a remote server as if they were local calls},
+    first={Remote Procedure Call (RPC)}
+}
+\newglossaryentry{idl}{
+    type=\acronymtype,
+    name={IDL},
+    description={Interface Definition Language --- a schema describing the instructions, accounts, and types of an Anchor program},
+    first={Interface Definition Language (IDL)}
+}
+\newglossaryentry{poc}{
+    type=\acronymtype,
+    name={PoC},
+    description={Proof of Concept --- an implementation demonstrating the feasibility of an idea or approach},
+    first={Proof of Concept (PoC)}
+}
+\newglossaryentry{did}{
+    type=\acronymtype,
+    name={DID},
+    description={Decentralized Identifier --- a W3C standard for self-sovereign, verifiable digital identities on blockchains},
+    first={Decentralized Identifier (DID)}
+}
+\newglossaryentry{sol}{
+    type=\acronymtype,
+    name={SOL},
+    description={The native cryptocurrency of the Solana blockchain network},
+    first={SOL (Solana native token)}
+}
+\newglossaryentry{spl}{
+    type=\acronymtype,
+    name={SPL},
+    description={Solana Program Library --- a collection of on-chain programs and token standards for the Solana ecosystem},
+    first={Solana Program Library (SPL)}
+}
+\newglossaryentry{ai}{
+    type=\acronymtype,
+    name={AI},
+    description={Artificial Intelligence --- simulation of human intelligence processes by computer systems},
+    first={Artificial Intelligence (AI)}
+}
+\newglossaryentry{llm}{
+    type=\acronymtype,
+    name={LLM},
+    description={Large Language Model --- a neural network trained on massive text corpora capable of generating and reasoning about natural language},
+    first={Large Language Model (LLM)}
+}
+\newglossaryentry{tps}{
+    type=\acronymtype,
+    name={TPS},
+    description={Transactions Per Second --- a measure of blockchain throughput capacity},
+    first={Transactions Per Second (TPS)}
+}
+\newglossaryentry{ui}{
+    type=\acronymtype,
+    name={UI},
+    description={User Interface --- the visual and interactive layer through which users interact with software},
+    first={User Interface (UI)}
+}
+\newglossaryentry{ux}{
+    type=\acronymtype,
+    name={UX},
+    description={User Experience --- the overall experience of a person interacting with a product or system},
+    first={User Experience (UX)}
+}
+\newglossaryentry{sdk}{
+    type=\acronymtype,
+    name={SDK},
+    description={Software Development Kit --- a collection of tools, libraries, and documentation for building applications},
+    first={Software Development Kit (SDK)}
+}

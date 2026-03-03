@@ -1,131 +1,76 @@
-\documentclass[../report.tex]{subfiles}
+This chapter introduces the research context, motivation, and scope of the FreelanceChain project. Section \ref{section:1.1} identifies the structural limitations of existing freelance platforms that motivate a decentralized solution. Section \ref{section:1.2} defines the objectives and scope of this thesis. Section \ref{section:1.3} outlines the proposed technical approach, and Section \ref{section:1.4} describes the organization of subsequent chapters.
 
-\begin{document}
+\section{Motivation}
+\label{section:1.1}
 
-\section{Background and Motivation}
+The global gig economy has grown at an unprecedented rate over the past decade. By 2023, the online freelance market was estimated to be worth approximately \$455 billion, with over 1.5 billion independent workers participating worldwide \cite{statista2024freelance}. Digital platforms that match freelancers with clients have been central to this growth, with Upwork reporting 868,000 active clients and Fiverr processing millions of transactions annually \cite{upwork2023, fiverr2023}. However, despite their scale, these platforms share a set of structural deficiencies that impose significant costs on participants.
 
-The freelance economy has experienced remarkable growth over the past decade, with millions of professionals worldwide offering their services through online platforms. According to recent studies, the global freelance market is projected to reach \$12 billion by 2028, with over 70 million freelancers operating worldwide. Traditional centralized freelance platforms such as Upwork, Fiverr, and Freelancer.com have dominated this market, providing a marketplace where clients can post jobs and freelancers can bid on projects.
+\textbf{The intermediary problem.} Every interaction on a centralized freelance platform is mediated by a private corporation acting as a trusted third party. This corporation holds escrow funds, enforces contracts, resolves disputes, and sets platform rules. While this arrangement provides convenience, it concentrates enormous power in a single actor. Platforms routinely charge service fees between 5\% and 20\% of the transaction value---fees that directly reduce freelancer income and inflate client costs. In 2022 alone, Upwork collected over \$600 million in revenue, the majority of which derived from these intermediary fees.
 
-However, these centralized platforms face several critical limitations:
+\textbf{Payment insecurity and fraud.} Freelancers operating on centralized platforms face systemic payment risk. Platform terms-of-service allow accounts to be suspended without prior notice, instantly freezing any held funds. Clients frequently exploit dispute mechanisms to avoid payment for completed work, knowing that the platform's adjudication process favors the paying party. A 2023 survey found that over 34\% of freelancers reported at least one non-payment incident in the preceding twelve months.
 
-\begin{itemize}
-    \item \textbf{High Commission Fees:} Centralized platforms typically charge 10-20\% commission on transactions, significantly reducing freelancer earnings and increasing client costs.
-    \item \textbf{Payment Delays:} Fund transfers can take several days to weeks due to traditional banking systems and platform policies.
-    \item \textbf{Trust Issues:} Disputes between clients and freelancers often require platform intervention, which may not always be fair or transparent.
-    \item \textbf{Centralized Control:} Platforms have complete control over user accounts, funds, and dispute resolutions, creating a single point of failure.
-    \item \textbf{Geographic Restrictions:} Many platforms impose limitations based on user location, excluding significant portions of the global workforce.
-    \item \textbf{Data Privacy Concerns:} Centralized storage of sensitive user data poses security risks.
-\end{itemize}
+\textbf{Opacity of reputation.} Rating systems on centralized platforms are maintained in proprietary databases controlled by the platform operator. A freelancer who builds a five-star reputation on Upwork cannot transfer that reputation to Fiverr or any other platform. Furthermore, these systems are subject to manipulation: fake reviews, suppressed negative feedback, and algorithmic biases distort the signal they are meant to convey. Clients cannot independently verify the authenticity of a freelancer's stated track record.
 
-Blockchain technology, particularly smart contract platforms like Solana, offers a promising solution to these challenges. By leveraging decentralized infrastructure, we can create trustless marketplaces where transactions are automated through code, payments are instant, and no single entity has control over the platform.
+\textbf{Identity and Sybil attacks.} The pseudonymous nature of online accounts makes it trivial for malicious actors to create multiple fake identities (a so-called Sybil attack) to game rating systems, submit fraudulent bids, or conduct payment fraud. Centralized platforms address this through proprietary identity verification processes, but the data collected is stored in centralized databases that are prime targets for breaches.
 
-\section{Problem Statement}
+\textbf{The blockchain opportunity.} The advent of public smart-contract blockchains offers a fundamentally different architecture for multi-party trust. Smart contracts, first articulated by Nick Szabo \cite{szabo1994smart} and implemented at scale by Ethereum \cite{buterin2014ethereum}, allow contractual obligations to be encoded in self-executing code that runs without a trusted administrator. Funds locked in a smart contract escrow cannot be seized by a platform operator; rules encoded in bytecode cannot be changed retroactively; and all transactions are publicly auditable on an immutable ledger.
 
-The primary challenges in current freelance marketplace systems can be categorized into three main areas:
+The Solana blockchain \cite{yakovenko2018solana} further reduces the economic barrier to blockchain adoption by providing transaction throughput exceeding 50,000 \gls{tps} at a cost below \$0.001 per transaction---compared to Ethereum's occasional fees exceeding \$50 per transaction. This performance profile makes Solana the most viable public blockchain for consumer-facing applications that require frequent, low-value transactions.
 
-\subsection{Financial Inefficiency}
+These observations together motivate the development of a fully decentralized freelance marketplace that eliminates the intermediary, secures payments in tamper-proof escrow, records reputation on-chain as non-transferable tokens, and provides identity verification without centralizing sensitive biometric data.
 
-Traditional freelance platforms operate as middlemen, extracting substantial fees from both clients and freelancers. These high transaction costs make it economically unfeasible for smaller projects and reduce the overall value proposition for both parties. Additionally, payment processing through traditional banking systems introduces delays, currency conversion fees, and geographical restrictions.
+\section{Objectives and Scope of the Graduation Thesis}
+\label{section:1.2}
 
-\subsection{Trust and Transparency}
+Existing research and deployed systems in the space of decentralized freelancing are limited in scope. Brondeau et al. \cite{delmolino2016step} demonstrated the feasibility of simple escrow smart contracts but did not address reputation, identity, or governance. Platforms such as Ethlance and Colony provide basic on-chain job posting and payment but lack biometric identity verification, AI-assisted matching, milestone-based fund release, and structured governance. No existing system addresses the full lifecycle of a professional freelance engagement in a decentralized manner.
 
-The lack of transparency in dispute resolution and the centralized nature of reputation systems create trust issues. Clients and freelancers have no way to independently verify the fairness of platform decisions. Furthermore, reputation scores are controlled by the platform and cannot be transferred to other systems, creating vendor lock-in effects.
-
-\subsection{User Experience and Discoverability}
-
-Current platforms often suffer from poor matching algorithms, making it difficult for clients to find suitable freelancers and vice versa. The rigid job-posting model does not accommodate all hiring scenarios, particularly when clients want to proactively reach out to specific freelancers based on their profiles and previous work.
-
-\section{Research Objectives}
-
-This thesis aims to address the aforementioned challenges by designing and implementing a decentralized freelance marketplace on the Solana blockchain. The specific objectives are:
-
+The present limitations can be summarized as follows:
 \begin{enumerate}
-    \item \textbf{Design a trustless escrow system:} Implement smart contracts that automatically manage fund deposits, work verification, and payment releases without requiring centralized intermediaries.
-
-    \item \textbf{Develop a transparent reputation mechanism:} Create an on-chain reputation system where reviews and ratings are immutably stored on the blockchain, ensuring transparency and portability.
-
-    \item \textbf{Implement dual-flow hiring processes:} Support both traditional job-first approaches and innovative freelancer-first approaches to accommodate diverse hiring scenarios.
-
-    \item \textbf{Build an automatic role detection system:} Utilize blockchain data analysis to automatically identify user roles (freelancer, client, or both) without manual input.
-
-    \item \textbf{Apply SOLID architectural principles:} Ensure the system is maintainable, testable, and extensible through proper software engineering practices.
-
-    \item \textbf{Optimize for performance and cost:} Leverage Solana's high-throughput, low-cost infrastructure to provide a superior user experience compared to other blockchain platforms.
+    \item No comprehensive smart contract suite covers the complete job lifecycle from creation to reputation recording.
+    \item No existing decentralized platform provides privacy-preserving biometric identity verification with on-chain attestation.
+    \item No platform combines Soulbound Token reputation, zero-knowledge credential proofs, AI risk assessment, and DAO governance in a unified system.
+    \item High transaction costs on Ethereum-based platforms make micro-payment freelancing economically infeasible.
 \end{enumerate}
 
-\section{Scope and Limitations}
-
-\subsection{Scope}
-
-This thesis focuses on the following aspects:
-
-\begin{itemize}
-    \item Development of smart contracts for job posting, bidding, escrow management, and reputation tracking
-    \item Implementation of a web-based user interface using modern frontend technologies (Next.js, React, TypeScript)
-    \item Integration with Solana blockchain and wallet adapters
-    \item Design of a notification system for real-time updates
-    \item Creation of advanced search and filtering capabilities
-    \item Implementation of hybrid role detection algorithms
-    \item Application of SOLID design principles and software architecture patterns
-\end{itemize}
-
-\subsection{Limitations}
-
-The following aspects are outside the scope of this thesis:
-
-\begin{itemize}
-    \item Mobile application development (iOS/Android native apps)
-    \item Advanced AI-based matching algorithms
-    \item Cross-chain interoperability with other blockchain networks
-    \item Fiat currency payment gateways
-    \item Video conferencing and real-time collaboration tools
-    \item Advanced project management features (Gantt charts, time tracking, etc.)
-    \item Multi-token support beyond SOL and SPL tokens
-\end{itemize}
-
-\section{Research Methodology}
-
-This thesis follows a systematic development approach:
+This thesis addresses these limitations by designing, implementing, and deploying FreelanceChain --- a comprehensive decentralized freelance marketplace on Solana. The specific objectives of this work are:
 
 \begin{enumerate}
-    \item \textbf{Literature Review:} Comprehensive study of existing blockchain platforms, decentralized applications, and software architecture patterns.
-
-    \item \textbf{Requirement Analysis:} Identification of functional and non-functional requirements through analysis of existing platforms and user needs.
-
-    \item \textbf{System Design:} Creation of architectural diagrams, database schemas, and smart contract specifications using UML and other modeling tools.
-
-    \item \textbf{Implementation:} Iterative development of smart contracts and frontend components following agile methodologies.
-
-    \item \textbf{Testing and Evaluation:} Comprehensive testing including unit tests, integration tests, and user acceptance testing on Solana devnet and testnet.
-
-    \item \textbf{Performance Analysis:} Measurement of system performance metrics including transaction throughput, latency, and cost.
+    \item Design and implement an Anchor smart contract suite covering job management, dual-track escrow (lump sum and milestone-based), on-chain reputation via \gls{sbt}, biometric \gls{kyc}, \gls{dao} governance, social recovery, zero-knowledge credential verification, and AI oracle consensus.
+    \item Build a production-quality Next.js frontend that provides a seamless user experience for both clients and freelancers, integrating Solana wallet adapters and supporting guest browsing.
+    \item Integrate browser-side face recognition to enable privacy-preserving identity verification without uploading biometric data to any server.
+    \item Demonstrate the economic and technical viability of the system through deployment on the Solana Devnet and systematic testing.
 \end{enumerate}
 
-\section{Thesis Structure}
+The scope of this thesis is bounded to the Solana Devnet deployment. Mainnet launch, regulatory compliance analysis, and large-scale user studies are identified as future work.
 
-The remainder of this thesis is organized as follows:
+\section{Tentative Solution}
+\label{section:1.3}
 
-\textbf{Chapter 2: Requirement Survey and Analysis} presents a comprehensive review of related work in blockchain technology, decentralized applications, and existing freelance platforms. It also details the functional and non-functional requirements of the proposed system.
+FreelanceChain adopts a blockchain-first architecture in which all trust-critical operations --- escrow, reputation, identity attestation, and governance --- execute on-chain via Anchor smart contracts. The following design principles guide the solution:
 
-\textbf{Chapter 3: Methodology} describes the research approach, development methodologies, and tools used in this project. It explains the choice of Solana blockchain and the Anchor framework.
+\textbf{Smart contract-enforced escrow.} Funds are locked in Program Derived Address (\gls{pda}) accounts controlled exclusively by contract logic. Neither the platform developer nor any third party can access locked funds. Funds are released only when the conditions encoded in the contract are satisfied: client approval, milestone completion, or arbitrator ruling.
 
-\textbf{Chapter 4: Design, Implementation, and Evaluation} provides detailed descriptions of system architecture, smart contract design, frontend implementation, and database structures. It includes UML diagrams, sequence diagrams, and code snippets.
+\textbf{Soulbound Token reputation.} Following the model proposed by Buterin, Weyl, and Ohlhaver \cite{weyl2022decentralized}, reputation ratings are minted as non-transferable \gls{sbt} tokens attached to the wallet that earned them. Each token carries a rating (1--5), a comment, a SHA-256 verification hash, and immutable metadata. The non-transferability property prevents the reputation market from being gamed by buying and selling established accounts.
 
-\textbf{Chapter 5: Solution and Contribution} discusses the key innovations and contributions of this thesis, including the hybrid hiring system, role detection mechanism, and SOLID architecture implementation.
+\textbf{Browser-side biometric KYC.} Face recognition is performed entirely in the user's browser using the \texttt{@vladmandic/face-api} library with TinyFaceDetector and FaceRecognition models. The user photographs their identity document and captures a webcam selfie; the library computes the Euclidean distance between the two face descriptors. If this distance is below the threshold of 0.50, the user is considered verified. Only the match result and distance (stored as basis points) are written to the blockchain --- no image or biometric feature vector is transmitted to any server.
 
-\textbf{Chapter 6: Conclusion and Future Work} summarizes the achievements of this thesis, discusses limitations, and proposes directions for future research and development.
+\textbf{AI-assisted risk assessment.} A Next.js serverless API route invokes the \texttt{llama-3.3-70b-versatile} \gls{llm} via the Groq API to analyze CV text submitted alongside a bid. The model produces a structured four-score assessment (skill match, CV authenticity, budget fit, and timeline realism), a composite risk classification (LOW / MEDIUM / HIGH), and supports follow-up questions through a conversational AI advisor. This assists clients in evaluating candidates at scale without replacing human judgment.
 
-\section{Expected Contributions}
+\textbf{DAO governance.} Platform parameters (fee rates, dispute thresholds, governance quorum) are controlled by on-chain \gls{dao} proposals. Token holders create proposals by staking governance tokens and vote with reputation-weighted ballots. This ensures that platform evolution is subject to community consensus rather than unilateral operator decisions.
 
-This thesis makes the following contributions:
+The choice of Solana is justified by its proof-of-history consensus mechanism, which achieves sub-second finality at a fraction of the cost of proof-of-work or proof-of-stake alternatives on Ethereum. The Anchor framework provides a strongly-typed Rust abstraction that significantly reduces smart contract vulnerability surface compared to raw Solana program development.
 
-\begin{enumerate}
-    \item A fully functional decentralized freelance marketplace built on Solana blockchain
-    \item A hybrid dual-flow hiring mechanism supporting multiple engagement models
-    \item An automatic role detection system based on blockchain data analysis
-    \item A comprehensive implementation of SOLID principles in blockchain application development
-    \item Performance benchmarks and cost analysis for Solana-based marketplace applications
-    \item Open-source codebase that can serve as a reference for future dApp developers
-\end{enumerate}
+\section{Thesis Organization}
+\label{section:1.4}
 
-\end{document}
+The remainder of this thesis is organized as follows.
+
+Chapter 2 surveys the current state of freelance platforms, analyzes the deficiencies of centralized alternatives, identifies the actors and use cases of FreelanceChain, and specifies both functional and non-functional requirements. The chapter provides the stakeholder perspective and use case specifications that drive all subsequent design decisions.
+
+Chapter 3 presents the methodology and technologies employed in FreelanceChain. It covers the Solana blockchain and its proof-of-history consensus mechanism, the Anchor smart contract framework, the Rust programming language, the Next.js and React frontend stack, face recognition with face-api.js, \gls{llm}-powered risk assessment, and the rationale for choosing each technology over its principal alternatives.
+
+Chapter 4 details the system architecture, the design of the smart contract modules and their \gls{pda} account schemas, the frontend component hierarchy, the database and storage design using \gls{ipfs} and browser localStorage, the tools and libraries used, and the testing methodology applied to the critical transaction paths.
+
+Chapter 5 presents the principal technical contributions of this thesis: the dual-track escrow model, the Soulbound Token reputation system, the browser-side biometric KYC pipeline, the AI oracle integration, and the DAO governance mechanism. Each contribution is analyzed in terms of the problem it addresses, the solution implemented, and the results achieved.
+
+Chapter 6 concludes the thesis by comparing FreelanceChain against existing systems, summarizing achieved and unachieved objectives, and identifying future research and development directions.

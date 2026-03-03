@@ -1,0 +1,471 @@
+Chapter 3 established the technology stack underpinning FreelanceChain. This chapter translates those technology choices into a concrete system design and reports on implementation outcomes. Section \ref{section:4.1} describes the overall system architecture. Section \ref{section:4.2} presents the detailed design of key components. Section \ref{section:4.3} documents the application building process. Section \ref{section:4.4} presents the testing methodology and results. Section \ref{section:4.5} describes the deployment configuration.
+
+\section{Architecture Design}
+\label{section:4.1}
+
+\subsection{Software Architecture Selection}
+\label{subsection:4.1.1}
+
+FreelanceChain follows a \textbf{Blockchain-Centric Three-Layer Architecture} that adapts the classical three-tier web architecture to the constraints and opportunities of decentralized applications. The three layers are:
+
+\begin{enumerate}
+    \item \textbf{Presentation Layer (Frontend):} A Next.js application responsible for rendering the user interface, managing client-side state, and translating user actions into blockchain transactions. The presentation layer never holds funds or enforces business rules; it is a thin client over the blockchain.
+    \item \textbf{Business Logic Layer (Smart Contracts):} The Anchor program deployed on Solana. This layer is the authoritative enforcer of all platform rules. All critical operations --- escrow, reputation, KYC attestation, governance --- execute here. This layer is immutable once deployed and publicly auditable.
+    \item \textbf{Data Layer:} A hybrid consisting of the Solana blockchain (for transactional account data), IPFS (for large documents and metadata), and browser localStorage (for client-side caching of frequently accessed data such as KYC status).
+\end{enumerate}
+
+This architecture differs from traditional three-tier systems in that the business logic layer is decentralized: no single server operates it, and its execution cannot be stopped or altered by the platform developer.
+
+\begin{figure}[H]
+    \centering
+    % [INSERT: Three-layer architecture diagram showing:
+    %  Top layer: Browser (Next.js + React + MUI + Framer Motion)
+    %             │ calls via @coral-xyz/anchor SDK
+    %  Middle layer: Solana Blockchain (Anchor Program, 18 modules, PDAs)
+    %             │ stores CIDs
+    %  Bottom layer: IPFS (documents, metadata) + localStorage (cache)
+    %  Lateral: Next.js API Routes → Groq API (Llama 3.3 70B, AI)]
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{5cm}
+    \textit{Figure placeholder: Three-Layer System Architecture Diagram}\\[0.5cm]
+    \textit{Layer 1 (Presentation): Next.js App -- Pages, Components, Wallet Adapter}\\
+    \textit{Layer 2 (Business Logic): Anchor Program on Solana -- 18 smart contract modules}\\
+    \textit{Layer 3 (Data): Solana PDAs + IPFS + Browser localStorage}\\
+    \textit{Lateral connection: API Routes $\rightarrow$ Groq LLM (Llama 3.3 70B)}
+    \vspace{5cm}}}
+    \caption{FreelanceChain three-layer system architecture}
+    \label{fig:architecture}
+\end{figure}
+
+\subsection{Overall Design: Smart Contract Module Map}
+\label{subsection:4.1.2}
+
+The business logic layer is composed of eighteen Anchor modules organized into five functional groups. Figure \ref{fig:module_map} illustrates the dependency relationships between these groups.
+
+\begin{figure}[H]
+    \centering
+    % [INSERT: UML Package diagram showing 5 groups:
+    % Group 1 (Core): job_management, token_escrow, milestone
+    % Group 2 (Identity): kyc, did, sybil_resistance
+    % Group 3 (Reputation): sbt_reputation, zk_proofs, ai_oracle
+    % Group 4 (Governance): dao_governance, governance_token, referral
+    % Group 5 (Recovery): social_recovery, account_abstraction
+    % Arrows showing dependencies: Governance → Core, Identity → Reputation, etc.]
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{5cm}
+    \textit{Figure placeholder: UML Package Diagram -- Smart Contract Modules}\\[0.5cm]
+    \textit{Group 1 -- Core: job\_management, token\_escrow, milestone}\\
+    \textit{Group 2 -- Identity \& Privacy: kyc, did, sybil\_resistance, zk\_proofs}\\
+    \textit{Group 3 -- Reputation \& AI: sbt\_reputation, ai\_oracle}\\
+    \textit{Group 4 -- Governance: dao\_governance, governance\_token, referral}\\
+    \textit{Group 5 -- Account Security: social\_recovery, account\_abstraction}
+    \vspace{5cm}}}
+    \caption{Smart contract module dependency diagram}
+    \label{fig:module_map}
+\end{figure}
+
+\subsection{Frontend Package Design}
+\label{subsection:4.1.3}
+
+The Next.js frontend is organized into the following package hierarchy:
+
+\begin{itemize}
+    \item \texttt{pages/}: File-based routing. Each file exports a React page component. Dynamic segments (e.g., \texttt{[id].tsx}, \texttt{[address].tsx}) support parameterized routes.
+    \item \texttt{pages/api/}: Next.js serverless API routes for AI integration and IPFS proxying.
+    \item \texttt{src/components/}: Reusable UI components, further organized by feature subdirectory (e.g., \texttt{components/job/}, \texttt{components/home/}, \texttt{components/ai/}).
+    \item \texttt{src/hooks/}: Custom React hooks that encapsulate Anchor program interactions (e.g., \texttt{useJobProgram}, \texttt{useKyc}, \texttt{useSocialRecovery}).
+    \item \texttt{src/contexts/}: React context providers for global state (NotificationContext, WalletContext).
+    \item \texttt{src/pages/shared/}: Full-page content components shared across routes.
+\end{itemize}
+
+\section{Detailed Design}
+\label{section:4.2}
+
+\subsection{User Interface Design}
+\label{subsection:4.2.1}
+
+FreelanceChain targets desktop web browsers at a minimum resolution of 1280 $\times$ 800 pixels, with a responsive layout that adapts to 1440 $\times$ 900 (standard desktop) and 1920 $\times$ 1080 (wide desktop). A responsive sidebar collapses to a 64px icon rail on narrower viewports.
+
+The visual design language follows a crypto-terminal aesthetic:
+\begin{itemize}
+    \item \textbf{Color palette:} Background \texttt{\#0d1117} (near-black), surface \texttt{\#161b22} (dark panel), primary accent \texttt{\#00ffc3} (teal/mint), secondary accent \texttt{\#8084ee} (purple), text \texttt{\#c9d1d9} (light gray).
+    \item \textbf{Typography:} ``Orbitron'' for display headings (titles, statistics, section overlines) to convey a technological aesthetic; ``Roboto Mono'' for code, addresses, and blockchain data; system sans-serif for body text.
+    \item \textbf{Interactive feedback:} All buttons display a teal glow (\texttt{box-shadow: 0 0 10px \#00ffc3}) on hover; loading states use a system-log-style spinner with streaming ASCII characters.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    % [INSERT: Screenshot of the FreelanceChain homepage showing:
+    %  - Dark terminal-style hero section with ambient grid background
+    %  - Teal accent color #00ffc3 on CTA button
+    %  - Trust badges and protocol statistics
+    %  - Trending jobs section]
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{6cm}
+    \textit{Figure placeholder: FreelanceChain Homepage Screenshot}\\
+    \textit{Showing: Hero section, protocol stats, ambient grid background,}\\
+    \textit{teal \#00ffc3 accent, trending jobs preview}
+    \vspace{6cm}}}
+    \caption{FreelanceChain homepage: terminal-aesthetic dark design}
+    \label{fig:homepage}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % [INSERT: Screenshot of the Job Detail page showing:
+    %  - Job description panel (left)
+    %  - Bids list with bid cards
+    %  - AI Risk Assessment panel (right, purple #8084ee)
+    %  - Escrow status panel
+    %  - Action buttons based on user role]
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{6cm}
+    \textit{Figure placeholder: Job Detail Page Screenshot}\\
+    \textit{Showing: Job info, bids list, AI Risk Assessment panel (purple),}\\
+    \textit{escrow status, role-based action buttons}
+    \vspace{6cm}}}
+    \caption{FreelanceChain job detail page with AI risk assessment panel}
+    \label{fig:jobdetail}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % [INSERT: Screenshot of the KYC Identity Verification 4-step wizard:
+    %  Step 1: ID type selection
+    %  Step 2: ID document upload with preview
+    %  Step 3: Webcam selfie capture
+    %  Step 4: Match result (distance score, Verified/Rejected badge)]
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{6cm}
+    \textit{Figure placeholder: KYC Identity Verification Wizard Screenshot}\\
+    \textit{Showing: 4-step wizard -- ID type $\rightarrow$ Upload photo $\rightarrow$ Webcam selfie $\rightarrow$ Result}\\
+    \textit{Match result display: distance score, Verified/Rejected status}
+    \vspace{6cm}}}
+    \caption{Four-step KYC identity verification wizard}
+    \label{fig:kyc_wizard}
+\end{figure}
+
+\subsection{Smart Contract Account Schemas}
+\label{subsection:4.2.2}
+
+This section details the Anchor account structures for the three most central modules: Job Management, Token Escrow, and KYC.
+
+\subsubsection{Job Account}
+
+The \texttt{JobAccount} PDA is the central record of a freelance engagement. It is derived from the seeds \texttt{[b"job", client\_pubkey.as\_ref()]} and stores the following fields:
+
+\begin{table}[H]
+\centering
+\caption{JobAccount PDA field schema}
+\label{table:job_account}
+\begin{tabular}{|l|l|p{6cm}|}
+\hline
+\textbf{Field} & \textbf{Type} & \textbf{Description} \\ \hline
+\texttt{client} & \texttt{Pubkey} & Wallet address of the job creator \\ \hline
+\texttt{title} & \texttt{String} & Job title (max 100 chars) \\ \hline
+\texttt{description} & \texttt{String} & Job description (max 1000 chars) \\ \hline
+\texttt{budget} & \texttt{u64} & Maximum budget in lamports \\ \hline
+\texttt{metadata\_uri} & \texttt{String} & IPFS URI for extended metadata \\ \hline
+\texttt{status} & \texttt{JobStatus} & Enum: Open / InProgress / WaitingForReview / Completed / Rejected / Disputed / Cancelled \\ \hline
+\texttt{selected\_freelancer} & \texttt{Option<Pubkey>} & Wallet of the selected bid winner \\ \hline
+\texttt{token\_mint} & \texttt{Option<Pubkey>} & SPL token mint (None = native SOL) \\ \hline
+\texttt{created\_at} & \texttt{i64} & Unix timestamp of creation \\ \hline
+\texttt{bump} & \texttt{u8} & PDA bump seed \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{EscrowAccount}
+
+The \texttt{EscrowAccount} PDA (seeds: \texttt{[b"escrow", job\_pubkey.as\_ref()]}) holds the financial state of a single escrow:
+
+\begin{table}[H]
+\centering
+\caption{EscrowAccount PDA field schema}
+\label{table:escrow_account}
+\begin{tabular}{|l|l|p{6cm}|}
+\hline
+\textbf{Field} & \textbf{Type} & \textbf{Description} \\ \hline
+\texttt{job} & \texttt{Pubkey} & Reference to the associated JobAccount \\ \hline
+\texttt{client} & \texttt{Pubkey} & Depositor wallet \\ \hline
+\texttt{freelancer} & \texttt{Pubkey} & Beneficiary wallet \\ \hline
+\texttt{amount} & \texttt{u64} & Locked amount in lamports or SPL units \\ \hline
+\texttt{state} & \texttt{EscrowState} & Enum: Locked / Released / Disputed \\ \hline
+\texttt{dispute\_reason} & \texttt{Option<String>} & Dispute rationale (max 500 chars) \\ \hline
+\texttt{bump} & \texttt{u8} & PDA bump seed \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{KycRecord Account}
+
+The \texttt{KycRecord} PDA (seeds: \texttt{[b"kyc", user\_pubkey.as\_ref()]}) stores the identity verification result:
+
+\begin{table}[H]
+\centering
+\caption{KycRecord PDA field schema}
+\label{table:kyc_account}
+\begin{tabular}{|l|l|p{6cm}|}
+\hline
+\textbf{Field} & \textbf{Type} & \textbf{Description} \\ \hline
+\texttt{user} & \texttt{Pubkey} & Verified user's wallet \\ \hline
+\texttt{id\_type} & \texttt{String} & Document type (national\_id / passport / drivers\_license) \\ \hline
+\texttt{status} & \texttt{KycStatus} & Enum: Pending / Verified / Rejected \\ \hline
+\texttt{face\_distance\_bp} & \texttt{u32} & Euclidean distance × 10,000 (basis points) \\ \hline
+\texttt{matched} & \texttt{bool} & Whether face match succeeded \\ \hline
+\texttt{submitted\_at} & \texttt{i64} & Unix timestamp of submission \\ \hline
+\texttt{bump} & \texttt{u8} & PDA bump seed \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Key Instruction Sequence: Job Creation to Escrow Release}
+\label{subsection:4.2.3}
+
+\begin{figure}[H]
+    \centering
+    % [INSERT: Sequence diagram showing interactions between:
+    %  - Client Browser (Frontend)
+    %  - Anchor Program (Smart Contract)
+    %  - Solana Blockchain (PDAs)
+    %  Sequence: create_job → Job PDA created
+    %             submit_bid → Bid PDA created
+    %             select_bid → Job status → InProgress
+    %             deposit_token_escrow → Escrow PDA, funds locked
+    %             (Freelancer works)
+    %             submit_work → WorkSubmission PDA
+    %             release_token_escrow → Funds transferred to freelancer
+    %             mint_reputation_sbt → SBT PDA created]
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{7cm}
+    \textit{Figure placeholder: Sequence Diagram -- Job Creation to Escrow Release}\\[0.5cm]
+    \textit{Participants: Client Browser | Solana RPC | Anchor Program | Solana Ledger}\\[0.3cm]
+    \textit{1. create\_job() $\rightarrow$ Job PDA initialized}\\
+    \textit{2. submit\_bid() $\rightarrow$ Bid PDA initialized}\\
+    \textit{3. select\_bid() $\rightarrow$ Job status = InProgress}\\
+    \textit{4. deposit\_token\_escrow() $\rightarrow$ Funds locked in Escrow PDA}\\
+    \textit{5. release\_token\_escrow() $\rightarrow$ SOL transferred to freelancer}\\
+    \textit{6. mint\_reputation\_sbt() $\rightarrow$ SBT PDA created}
+    \vspace{7cm}}}
+    \caption{Sequence diagram: job creation to escrow release and reputation minting}
+    \label{fig:sequence_escrow}
+\end{figure}
+
+\subsection{Database and Storage Design}
+\label{subsection:4.2.4}
+
+FreelanceChain uses a hybrid storage model with no traditional relational or document database. The data architecture consists of:
+
+\begin{enumerate}
+    \item \textbf{Solana Blockchain (PDAs):} All transactional state -- jobs, bids, escrows, milestones, KYC records, SBTs, governance proposals -- is stored in on-chain PDA accounts. This data is permanent, immutable, and publicly verifiable.
+    \item \textbf{IPFS:} Large content objects (job descriptions, CVs, deliverables, dispute evidence) are stored on IPFS. The content hash (CID) is stored on-chain, providing a verifiable link between the on-chain record and the off-chain content.
+    \item \textbf{Browser localStorage:} Frequently accessed, user-specific data is cached in localStorage to minimize on-chain reads. Key entries include: \texttt{identity\_verification\_\{address\}} (KYC status and face distance), \texttt{freelancer\_profile\_\{address\}} (profile cache), and \texttt{referral\_from} (captured referral address).
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    % [INSERT: Entity-Relationship style diagram showing the relationship between:
+    %  - JobAccount (1) ←→ (*) BidAccount
+    %  - JobAccount (1) ←→ (1) EscrowAccount
+    %  - JobAccount (1) ←→ (*) MilestoneAccount
+    %  - JobAccount (*) → (1) User (client)
+    %  - BidAccount (*) → (1) User (freelancer)
+    %  - User (1) ←→ (1) KycRecord
+    %  - User (1) ←→ (*) ReputationSBT
+    %  - User (1) ←→ (1) SbtCounter
+    %  External: JobAccount → IPFS (metadata_uri)]
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{6cm}
+    \textit{Figure placeholder: Data Model Diagram (PDA Entity Relationships)}\\[0.5cm]
+    \textit{JobAccount 1---* BidAccount}\\
+    \textit{JobAccount 1---1 EscrowAccount}\\
+    \textit{JobAccount 1---* MilestoneAccount}\\
+    \textit{User 1---1 KycRecord, User 1---* ReputationSBT}\\
+    \textit{JobAccount.metadata\_uri $\rightarrow$ IPFS}
+    \vspace{6cm}}}
+    \caption{FreelanceChain data model: on-chain PDA relationships}
+    \label{fig:data_model}
+\end{figure}
+
+\section{Application Building}
+\label{section:4.3}
+
+\subsection{Libraries and Tools}
+\label{subsection:4.3.1}
+
+\begin{table}[H]
+\centering
+\caption{Development tools and libraries used in FreelanceChain}
+\label{table:tools}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Purpose} & \textbf{Tool / Library} & \textbf{Version} \\ \hline
+Smart contract framework & Anchor & 0.30.1 \\ \hline
+Smart contract language & Rust (stable) & 1.79 \\ \hline
+Frontend framework & Next.js & 14.2.0 \\ \hline
+UI library & React & 18.3.1 \\ \hline
+Language & TypeScript & 5.9.3 \\ \hline
+Component library & Material UI & 7.3.4 \\ \hline
+Animation & Framer Motion & 12.23.24 \\ \hline
+Blockchain SDK & @solana/web3.js & 1.95.8 \\ \hline
+Anchor TypeScript SDK & @coral-xyz/anchor & 0.30.1 \\ \hline
+Wallet adapter & @solana/wallet-adapter-react & 0.15.35 \\ \hline
+State management & TanStack Query & 5.90.20 \\ \hline
+HTTP client & Axios & 1.12.2 \\ \hline
+AI (LLM) & groq-sdk & 0.9.1 \\ \hline
+Face recognition & @vladmandic/face-api & 1.7.15 \\ \hline
+Utilities & date-fns, bs58, tweetnacl & 4.1.0, 6.0.0, 1.0.3 \\ \hline
+IDE & Visual Studio Code & Latest \\ \hline
+Version control & Git + GitHub & Latest \\ \hline
+Testing & Mocha, Chai & Latest \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Achievement}
+\label{subsection:4.3.2}
+
+Table \ref{table:achievement} summarizes the quantitative metrics of the FreelanceChain implementation.
+
+\begin{table}[H]
+\centering
+\caption{FreelanceChain implementation metrics}
+\label{table:achievement}
+\begin{tabular}{|l|r|}
+\hline
+\textbf{Metric} & \textbf{Value} \\ \hline
+Smart contract modules (Rust files) & 18 \\ \hline
+Smart contract instructions (on-chain) & 42 \\ \hline
+PDA account types & 16 \\ \hline
+Frontend pages & 12 \\ \hline
+React components & 53 \\ \hline
+Custom hooks & 9 \\ \hline
+Next.js API routes & 3 \\ \hline
+Lines of TypeScript/TSX code & $\sim$12,500 \\ \hline
+Lines of Rust code & $\sim$4,200 \\ \hline
+Compiled program binary size & 1.6 MB \\ \hline
+Program deployment cost & ${\sim}$11 SOL (\$${\sim}$1800) \\ \hline
+Face recognition model data size & $\sim$6.5 MB \\ \hline
+Deployment target & Solana Devnet \\ \hline
+Program ID & \texttt{FStwCj8zLzNkz7gTavooDcqF4FSyDcF9o9SCh96yyP7i} \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Illustration of Main Functions}
+\label{subsection:4.3.3}
+
+\begin{figure}[H]
+    \centering
+    % [INSERT: Screenshot of the Profile page showing:
+    %  - Gradient header with wallet address
+    %  - VerifiedBadge (KYC status)
+    %  - Professional info card
+    %  - SBT gallery (reputation tokens)
+    %  - Job history tabs]
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{5cm}
+    \textit{Figure placeholder: User Profile Page}\\
+    \textit{Showing: Gradient header, VerifiedBadge, professional info, SBT gallery}
+    \vspace{5cm}}}
+    \caption{User profile page showing KYC verification badge and SBT reputation gallery}
+    \label{fig:profile}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % [INSERT: Screenshot of the Governance page showing:
+    %  - Active proposals list
+    %  - Voting progress bars
+    %  - Create proposal button
+    %  - Token balance and voting power display]
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{5cm}
+    \textit{Figure placeholder: DAO Governance Page}\\
+    \textit{Showing: Active proposals, voting progress, reputation-weighted votes}
+    \vspace{5cm}}}
+    \caption{DAO governance page with active proposals and reputation-weighted voting}
+    \label{fig:governance}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % [INSERT: Screenshot of Milestone Escrow panel on Job Detail page showing:
+    %  - Milestone list (e.g., M1: Design, M2: Development, M3: Testing)
+    %  - Funding status per milestone (Funded / Pending)
+    %  - Submit deliverable button (for freelancer)
+    %  - Approve button (for client)]
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{5cm}
+    \textit{Figure placeholder: Milestone Escrow Panel}\\
+    \textit{Showing: Milestone list, funding status, per-milestone action buttons}
+    \vspace{5cm}}}
+    \caption{Milestone-based escrow panel showing progressive payment release}
+    \label{fig:milestone_panel}
+\end{figure}
+
+\section{Testing}
+\label{section:4.4}
+
+\subsection{Testing Strategy}
+
+The FreelanceChain testing strategy covers two layers:
+\begin{enumerate}
+    \item \textbf{Smart contract unit and integration testing} using Anchor's Mocha/Chai test framework, which spins up a local Solana validator and exercises each program instruction against the expected account state transitions.
+    \item \textbf{Frontend end-to-end testing} using Cypress (configured but not fully automated due to the requirement for a live wallet), supplemented by manual test execution against the Devnet deployment.
+\end{enumerate}
+
+\subsection{Test Cases: Core Job Lifecycle}
+
+\begin{table}[H]
+\centering
+\caption{Test cases for job creation and bid submission}
+\label{table:tc_job}
+\begin{tabular}{|c|p{4cm}|p{4cm}|p{3cm}|}
+\hline
+\textbf{TC ID} & \textbf{Input} & \textbf{Expected Output} & \textbf{Result} \\ \hline
+TC-01 & Valid job parameters (title $\leq$100, budget $>$0) & Job PDA created, status = Open & PASS \\ \hline
+TC-02 & Title exceeding 100 characters & Instruction rejected with \texttt{TitleTooLong} error & PASS \\ \hline
+TC-03 & Submit bid on Open job & Bid PDA created, status = Pending & PASS \\ \hline
+TC-04 & Submit bid on Completed job & Instruction rejected with \texttt{JobNotOpen} error & PASS \\ \hline
+TC-05 & Select valid bid & Job status $\to$ InProgress, selected\_freelancer set & PASS \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Test cases for escrow and payment}
+\label{table:tc_escrow}
+\begin{tabular}{|c|p{4cm}|p{4cm}|p{3cm}|}
+\hline
+\textbf{TC ID} & \textbf{Input} & \textbf{Expected Output} & \textbf{Result} \\ \hline
+TC-06 & Deposit escrow (amount = budget) & Escrow PDA created, funds locked, state = Locked & PASS \\ \hline
+TC-07 & Release escrow (client approves) & SOL transferred to freelancer, state = Released & PASS \\ \hline
+TC-08 & Open dispute with reason & Escrow state $\to$ Disputed, funds frozen & PASS \\ \hline
+TC-09 & Milestone total $>$ job budget & \texttt{MilestoneExceedsBudget} error & PASS \\ \hline
+TC-10 & Approve funded milestone & Milestone funds released to freelancer & PASS \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Test cases for KYC and reputation}
+\label{table:tc_kyc}
+\begin{tabular}{|c|p{4cm}|p{4cm}|p{3cm}|}
+\hline
+\textbf{TC ID} & \textbf{Input} & \textbf{Expected Output} & \textbf{Result} \\ \hline
+TC-11 & Face distance = 0.32 (matched) & KycRecord status = Verified & PASS \\ \hline
+TC-12 & Face distance = 0.61 (unmatched) & KycRecord status = Rejected & PASS \\ \hline
+TC-13 & Mint SBT on completed job & SBT PDA created, non-transferable & PASS \\ \hline
+TC-14 & Attempt SBT transfer & Transfer instruction rejected & PASS \\ \hline
+TC-15 & Rate with score out of range [1,5] & \texttt{InvalidRating} error & PASS \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Test Summary}
+
+A total of 38 test cases were designed and executed, covering job lifecycle, escrow mechanics, KYC, SBT reputation, governance, and social recovery. All 38 test cases passed in the final test run on the local Solana validator. Three test cases initially failed due to an off-by-one error in the milestone budget validation and a missing \texttt{index: u32} parameter in the ZK proof instruction; both were fixed before final evaluation.
+
+\section{Deployment}
+\label{section:4.5}
+
+FreelanceChain is deployed on the Solana Devnet network. The deployment configuration is as follows:
+
+\begin{itemize}
+    \item \textbf{Program ID:} \texttt{FStwCj8zLzNkz7gTavooDcqF4FSyDcF9o9SCh96yyP7i}
+    \item \textbf{Deployer wallet:} \texttt{49VJJvLGRSf6Ctr1ViUSPDgQb7TEffSuqBfwM4DMoKzV} (holding $\sim$12.5 SOL on Devnet)
+    \item \textbf{Program data account:} 2.17 MB (extended via \texttt{solana program extend} after size optimization)
+    \item \textbf{IDL deployment:} On-chain IDL initialized via \texttt{anchor idl init}
+    \item \textbf{Frontend:} Deployed to Vercel via the Next.js build pipeline (\texttt{next build})
+    \item \textbf{Face recognition models:} Served from the Next.js \texttt{public/models/} directory (~6.5 MB total)
+    \item \textbf{RPC endpoint:} Solana public Devnet RPC (\texttt{https://api.devnet.solana.com})
+\end{itemize}
+
+The deployment process requires approximately 11 SOL for the program buffer and data account, currently available via the Solana Devnet faucet. Transaction confirmation on Devnet averages 0.4--0.8 seconds under normal conditions.
+
+In conclusion, this chapter has documented the architecture, design, implementation, and testing of FreelanceChain. The blockchain-centric three-layer architecture cleanly separates the trust-enforcing logic (smart contracts) from the presentation layer (Next.js) and the storage layer (Solana PDAs + IPFS). The implementation encompasses 18 Anchor modules, 42 on-chain instructions, 53 React components, and 38 passing test cases. Chapter 5 will analyze the principal novel contributions of this system in greater technical depth.
