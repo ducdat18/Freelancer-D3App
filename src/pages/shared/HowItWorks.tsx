@@ -1,4 +1,4 @@
-import { Container, Typography, Box, Grid, Card, CardContent, Chip } from '@mui/material';
+import { Container, Typography, Box, Grid, Card, CardContent, Chip, useTheme, alpha } from '@mui/material';
 import WorkIcon from '@mui/icons-material/Work';
 import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
@@ -114,26 +114,34 @@ const whyCards = [
   },
 ];
 
-const escrowFlow = [
-  { label: 'Client Posts Job', color: '#00ffc3' },
-  null,
-  { label: 'Bid Accepted', color: '#00ffc3' },
-  null,
-  { label: 'Funds → Escrow', color: '#ff9500', highlight: true },
-  null,
-  { label: 'Work Submitted', color: '#00ffc3' },
-  null,
-  { label: 'Payment Released', color: '#4caf50' },
-];
-
 export default function HowItWorks() {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+  const secondaryMain = theme.palette.secondary.main;
+
+  const escrowFlow = [
+    { label: 'Client Posts Job', color: primaryMain },
+    null,
+    { label: 'Bid Accepted', color: primaryMain },
+    null,
+    { label: 'Funds → Escrow', color: theme.palette.warning.main, highlight: true },
+    null,
+    { label: 'Work Submitted', color: primaryMain },
+    null,
+    { label: 'Payment Released', color: theme.palette.success.main },
+  ];
+
   return (
     <Box>
       {/* Hero */}
       <Box
         sx={{
-          background: 'linear-gradient(180deg, rgba(0,255,195,0.04) 0%, transparent 100%)',
-          borderBottom: '1px solid rgba(0,255,195,0.08)',
+          background: isDark 
+            ? 'linear-gradient(180deg, rgba(0,255,195,0.04) 0%, transparent 100%)'
+            : `linear-gradient(180deg, ${alpha(primaryMain, 0.08)} 0%, transparent 100%)`,
+          borderBottom: 1,
+          borderColor: 'divider',
           py: { xs: 6, md: 9 },
           textAlign: 'center',
         }}
@@ -147,22 +155,26 @@ export default function HowItWorks() {
               fontFamily: '"Orbitron", monospace',
               fontSize: '0.62rem',
               letterSpacing: 3,
-              color: '#00ffc3',
-              borderColor: 'rgba(0,255,195,0.3)',
-              bgcolor: 'rgba(0,255,195,0.05)',
+              color: primaryMain,
+              borderColor: alpha(primaryMain, 0.3),
+              bgcolor: isDark ? alpha(primaryMain, 0.05) : alpha(primaryMain, 0.03),
               mb: 3,
+              fontWeight: 700,
             }}
           />
           <Typography
             variant="h2"
-            fontWeight={700}
+            fontWeight={800}
             sx={{
-              background: 'linear-gradient(135deg, #fff 0%, #00ffc3 60%)',
+              background: isDark
+                ? `linear-gradient(135deg, #fff 0%, ${primaryMain} 60%)`
+                : `linear-gradient(135deg, ${theme.palette.text.primary} 0%, ${primaryMain} 60%)`,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               mb: 2,
               fontFamily: '"Orbitron", sans-serif',
               fontSize: { xs: '2rem', md: '3rem' },
+              letterSpacing: 1,
             }}
           >
             How It Works
@@ -170,7 +182,7 @@ export default function HowItWorks() {
           <Typography
             variant="h6"
             color="text.secondary"
-            sx={{ maxWidth: 560, mx: 'auto', fontWeight: 400, lineHeight: 1.7 }}
+            sx={{ maxWidth: 560, mx: 'auto', fontWeight: 500, lineHeight: 1.7 }}
           >
             A trustless, peer-to-peer freelance protocol built entirely on Solana smart contracts.
             No intermediary. No permission required.
@@ -182,10 +194,10 @@ export default function HowItWorks() {
 
         {/* Escrow Flow */}
         <Box sx={{ mb: 10 }}>
-          <Typography variant="h5" fontWeight={600} gutterBottom sx={{ mb: 1 }}>
+          <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 1, fontFamily: '"Orbitron", sans-serif' }}>
             The Escrow Flow
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 4, fontWeight: 500 }}>
             Funds are held by the smart contract — not by Lancer Lab, not by any third party.
           </Typography>
           <Box
@@ -195,9 +207,10 @@ export default function HowItWorks() {
               flexWrap: 'wrap',
               gap: 1,
               p: 3,
-              border: '1px solid rgba(0,255,195,0.1)',
+              border: 1,
+              borderColor: 'divider',
               borderRadius: 2,
-              bgcolor: 'rgba(0,0,0,0.3)',
+              bgcolor: isDark ? 'rgba(0,0,0,0.3)' : alpha(primaryMain, 0.02),
               fontFamily: 'monospace',
             }}
           >
@@ -205,7 +218,7 @@ export default function HowItWorks() {
               step === null ? (
                 <Box
                   key={i}
-                  sx={{ color: 'rgba(0,255,195,0.35)', fontSize: 18, userSelect: 'none', mx: 0.5 }}
+                  sx={{ color: 'text.disabled', fontSize: 18, userSelect: 'none', mx: 0.5, fontWeight: 800 }}
                 >
                   →
                 </Box>
@@ -216,13 +229,14 @@ export default function HowItWorks() {
                     px: 2,
                     py: 0.75,
                     borderRadius: 1,
-                    border: `1px solid ${step.color}40`,
-                    bgcolor: step.highlight ? `${step.color}18` : `${step.color}08`,
+                    border: 1,
+                    borderColor: alpha(step.color, 0.4),
+                    bgcolor: step.highlight ? alpha(step.color, 0.15) : alpha(step.color, 0.05),
                     color: step.color,
                     fontSize: '0.8rem',
-                    fontWeight: step.highlight ? 700 : 500,
+                    fontWeight: 800,
                     whiteSpace: 'nowrap',
-                    boxShadow: step.highlight ? `0 0 10px ${step.color}25` : 'none',
+                    boxShadow: step.highlight ? (isDark ? `0 0 10px ${alpha(step.color, 0.25)}` : 'none') : 'none',
                   }}
                 >
                   {step.label}
@@ -240,21 +254,22 @@ export default function HowItWorks() {
               <Box
                 sx={{
                   width: 42, height: 42, borderRadius: 1.5,
-                  bgcolor: 'rgba(0,255,195,0.08)',
-                  border: '1px solid rgba(0,255,195,0.25)',
+                  bgcolor: isDark ? alpha(primaryMain, 0.08) : alpha(primaryMain, 0.05),
+                  border: 1,
+                  borderColor: alpha(primaryMain, 0.25),
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
               >
-                <WorkIcon sx={{ color: '#00ffc3', fontSize: 22 }} />
+                <WorkIcon sx={{ color: primaryMain, fontSize: 22 }} />
               </Box>
               <Box>
                 <Typography
                   variant="overline"
-                  sx={{ color: '#00ffc3', letterSpacing: 3, fontSize: '0.62rem', display: 'block', lineHeight: 1.2 }}
+                  sx={{ color: primaryMain, letterSpacing: 3, fontSize: '0.62rem', display: 'block', lineHeight: 1.2, fontWeight: 700 }}
                 >
                   FOR CLIENTS
                 </Typography>
-                <Typography variant="h5" fontWeight={700}>
+                <Typography variant="h5" fontWeight={800} sx={{ fontFamily: '"Orbitron", sans-serif' }}>
                   Post &amp; Hire
                 </Typography>
               </Box>
@@ -270,8 +285,9 @@ export default function HowItWorks() {
                         left: 19,
                         top: 42,
                         bottom: 0,
-                        width: '1px',
-                        bgcolor: 'rgba(0,255,195,0.1)',
+                        width: '2px',
+                        bgcolor: 'divider',
+                        opacity: 0.5,
                         zIndex: 0,
                       }}
                     />
@@ -281,23 +297,25 @@ export default function HowItWorks() {
                       width: 40, height: 40,
                       borderRadius: '50%',
                       flexShrink: 0,
-                      border: '1px solid rgba(0,255,195,0.35)',
+                      border: 2,
+                      borderColor: primaryMain,
                       bgcolor: 'background.paper',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       zIndex: 1,
                       fontFamily: '"Orbitron", monospace',
-                      fontSize: '0.62rem',
-                      fontWeight: 700,
-                      color: '#00ffc3',
+                      fontSize: '0.75rem',
+                      fontWeight: 800,
+                      color: primaryMain,
+                      boxShadow: isDark ? `0 0 10px ${alpha(primaryMain, 0.3)}` : 'none',
                     }}
                   >
                     {step.number}
                   </Box>
                   <Box sx={{ pb: 3.5 }}>
-                    <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 0.5 }}>
+                    <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 0.5 }}>
                       {step.title}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, fontWeight: 500 }}>
                       {step.desc}
                     </Typography>
                   </Box>
@@ -312,21 +330,22 @@ export default function HowItWorks() {
               <Box
                 sx={{
                   width: 42, height: 42, borderRadius: 1.5,
-                  bgcolor: 'rgba(128,132,238,0.08)',
-                  border: '1px solid rgba(128,132,238,0.25)',
+                  bgcolor: isDark ? alpha(secondaryMain, 0.08) : alpha(secondaryMain, 0.05),
+                  border: 1,
+                  borderColor: alpha(secondaryMain, 0.25),
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
               >
-                <PersonIcon sx={{ color: '#8084ee', fontSize: 22 }} />
+                <PersonIcon sx={{ color: secondaryMain, fontSize: 22 }} />
               </Box>
               <Box>
                 <Typography
                   variant="overline"
-                  sx={{ color: '#8084ee', letterSpacing: 3, fontSize: '0.62rem', display: 'block', lineHeight: 1.2 }}
+                  sx={{ color: secondaryMain, letterSpacing: 3, fontSize: '0.62rem', display: 'block', lineHeight: 1.2, fontWeight: 700 }}
                 >
                   FOR FREELANCERS
                 </Typography>
-                <Typography variant="h5" fontWeight={700}>
+                <Typography variant="h5" fontWeight={800} sx={{ fontFamily: '"Orbitron", sans-serif' }}>
                   Bid &amp; Earn
                 </Typography>
               </Box>
@@ -342,8 +361,9 @@ export default function HowItWorks() {
                         left: 19,
                         top: 42,
                         bottom: 0,
-                        width: '1px',
-                        bgcolor: 'rgba(128,132,238,0.1)',
+                        width: '2px',
+                        bgcolor: 'divider',
+                        opacity: 0.5,
                         zIndex: 0,
                       }}
                     />
@@ -353,23 +373,25 @@ export default function HowItWorks() {
                       width: 40, height: 40,
                       borderRadius: '50%',
                       flexShrink: 0,
-                      border: '1px solid rgba(128,132,238,0.35)',
+                      border: 2,
+                      borderColor: secondaryMain,
                       bgcolor: 'background.paper',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       zIndex: 1,
                       fontFamily: '"Orbitron", monospace',
-                      fontSize: '0.62rem',
-                      fontWeight: 700,
-                      color: '#8084ee',
+                      fontSize: '0.75rem',
+                      fontWeight: 800,
+                      color: secondaryMain,
+                      boxShadow: isDark ? `0 0 10px ${alpha(secondaryMain, 0.3)}` : 'none',
                     }}
                   >
                     {step.number}
                   </Box>
                   <Box sx={{ pb: 3.5 }}>
-                    <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 0.5 }}>
+                    <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 0.5 }}>
                       {step.title}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, fontWeight: 500 }}>
                       {step.desc}
                     </Typography>
                   </Box>
@@ -382,10 +404,10 @@ export default function HowItWorks() {
         {/* Why Decentralized */}
         <Box>
           <Box sx={{ mb: 4 }}>
-            <Typography variant="h5" fontWeight={700} gutterBottom>
+            <Typography variant="h5" fontWeight={800} gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif' }}>
               Why Decentralized?
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 500 }}>
               The advantages of removing the platform from every transaction.
             </Typography>
           </Box>
@@ -395,35 +417,37 @@ export default function HowItWorks() {
             whileInView="animate"
             viewport={{ once: true, amount: 0.2 }}
           >
-            <Grid container spacing={2}>
+            <Grid container spacing={3}>
               {whyCards.map((item) => (
                 <Grid size={{ xs: 12, sm: 6, md: 4 }} key={item.title}>
                   <MotionCard
                     variants={staggerChild}
                     sx={{
                       height: '100%',
-                      border: '1px solid rgba(0,255,195,0.08)',
+                      border: 1,
+                      borderColor: 'divider',
                       transition: 'all 0.25s ease',
+                      backgroundImage: 'none',
                       '&:hover': {
-                        borderColor: 'rgba(0,255,195,0.22)',
-                        boxShadow: '0 0 24px rgba(0,255,195,0.06)',
-                        transform: 'translateY(-3px)',
+                        borderColor: primaryMain,
+                        boxShadow: isDark ? `0 0 24px ${alpha(primaryMain, 0.1)}` : '0 8px 24px rgba(0,0,0,0.05)',
+                        transform: 'translateY(-4px)',
                       },
                     }}
                   >
                     <CardContent sx={{ p: 3 }}>
                       <item.icon
                         sx={{
-                          fontSize: 30,
-                          color: '#00ffc3',
-                          mb: 1.5,
-                          filter: 'drop-shadow(0 0 5px rgba(0,255,195,0.35))',
+                          fontSize: 32,
+                          color: primaryMain,
+                          mb: 2,
+                          filter: isDark ? `drop-shadow(0 0 5px ${alpha(primaryMain, 0.5)})` : 'none',
                         }}
                       />
-                      <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+                      <Typography variant="subtitle1" fontWeight={800} gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif', fontSize: '0.9rem' }}>
                         {item.title}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7, fontWeight: 500 }}>
                         {item.desc}
                       </Typography>
                     </CardContent>

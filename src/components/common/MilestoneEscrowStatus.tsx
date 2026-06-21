@@ -7,6 +7,7 @@ import {
   Alert,
   Paper,
   Divider,
+  useTheme,
 } from '@mui/material';
 import LoadingSpinner from '../LoadingSpinner';
 import {
@@ -44,6 +45,10 @@ interface MilestoneEscrowStatusProps {
 
 export default function MilestoneEscrowStatus({ jobPda }: MilestoneEscrowStatusProps) {
   const { fetchMilestoneConfig, fetchAllMilestones } = useMilestones();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+  const secondaryMain = theme.palette.secondary.main;
 
   const [config, setConfig] = useState<MilestoneConfigData | null>(null);
   const [milestones, setMilestones] = useState<MilestoneData[]>([]);
@@ -143,18 +148,18 @@ export default function MilestoneEscrowStatus({ jobPda }: MilestoneEscrowStatusP
     : 0;
 
   return (
-    <Paper sx={{ p: { xs: 2.5, md: 3 }, borderRadius: 3 }}>
-      <Typography variant="h6" fontWeight={600} gutterBottom>
+    <Paper sx={{ p: { xs: 2.5, md: 3 }, borderRadius: 3, border: 1, borderColor: 'divider', backgroundImage: 'none' }}>
+      <Typography variant="h6" fontWeight={700} gutterBottom sx={{ fontSize: '1rem' }}>
         Milestone Escrow
       </Typography>
 
       {/* Progress bar */}
       <Box sx={{ mb: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" color="text.secondary" fontWeight={600}>
             Progress
           </Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" color="text.secondary" fontWeight={600}>
             {approvedCount} of {totalMilestones} complete
           </Typography>
         </Box>
@@ -165,12 +170,14 @@ export default function MilestoneEscrowStatus({ jobPda }: MilestoneEscrowStatusP
             position: 'relative',
             width: '100%',
             height: 12,
-            bgcolor: 'rgba(11,25,42,0.5)',
+            bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
             borderRadius: 2,
             overflow: 'hidden',
+            border: 1,
+            borderColor: 'divider',
           }}
         >
-          {/* Funded (blue) layer */}
+          {/* Funded layer */}
           <Box
             sx={{
               position: 'absolute',
@@ -178,11 +185,12 @@ export default function MilestoneEscrowStatus({ jobPda }: MilestoneEscrowStatusP
               top: 0,
               bottom: 0,
               width: `${fundedPercent}%`,
-              bgcolor: '#8084ee',
+              bgcolor: secondaryMain,
+              opacity: 0.6,
               transition: 'width 0.5s ease',
             }}
           />
-          {/* Released (cyan) layer on top */}
+          {/* Released layer on top */}
           <Box
             sx={{
               position: 'absolute',
@@ -190,89 +198,90 @@ export default function MilestoneEscrowStatus({ jobPda }: MilestoneEscrowStatusP
               top: 0,
               bottom: 0,
               width: `${releasedPercent}%`,
-              bgcolor: '#00ffc3',
+              bgcolor: primaryMain,
               transition: 'width 0.5s ease',
+              boxShadow: isDark ? `0 0 10px ${primaryMain}40` : 'none',
             }}
           />
         </Box>
 
         {/* Legend */}
-        <Box sx={{ display: 'flex', gap: 3, mt: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#00ffc3' }} />
-            <Typography variant="caption" color="text.secondary">
+        <Box sx={{ display: 'flex', gap: 2.5, mt: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: primaryMain }} />
+            <Typography variant="caption" color="text.secondary" fontWeight={600}>
               Released
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#8084ee' }} />
-            <Typography variant="caption" color="text.secondary">
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: secondaryMain, opacity: 0.6 }} />
+            <Typography variant="caption" color="text.secondary" fontWeight={600}>
               Funded
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'rgba(11,25,42,0.5)' }} />
-            <Typography variant="caption" color="text.secondary">
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }} />
+            <Typography variant="caption" color="text.secondary" fontWeight={600}>
               Unfunded
             </Typography>
           </Box>
         </Box>
       </Box>
 
-      <Divider sx={{ my: 2 }} />
+      <Divider sx={{ my: 2.5 }} />
 
       {/* Summary stats */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 2 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 2.5 }}>
         <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <AccountBalanceWallet sx={{ fontSize: 18, color: 'text.secondary' }} />
-            <Typography variant="caption" color="text.secondary">
-              Total
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
+            <AccountBalanceWallet sx={{ fontSize: 16, color: 'text.secondary' }} />
+            <Typography variant="caption" color="text.secondary" fontWeight={700} sx={{ letterSpacing: 0.5 }}>
+              TOTAL
             </Typography>
           </Box>
-          <Typography variant="body1" fontWeight={700}>
+          <Typography variant="body1" fontWeight={800}>
             {totalAmountSol.toFixed(4)} SOL
           </Typography>
         </Box>
 
         <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <Lock sx={{ fontSize: 18, color: '#00ffc3' }} />
-            <Typography variant="caption" color="text.secondary">
-              Locked
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
+            <Lock sx={{ fontSize: 16, color: primaryMain }} />
+            <Typography variant="caption" color="text.secondary" fontWeight={700} sx={{ letterSpacing: 0.5 }}>
+              LOCKED
             </Typography>
           </Box>
-          <Typography variant="body1" fontWeight={700} color="#00ffc3">
+          <Typography variant="body1" fontWeight={800} color="primary.main">
             {lockedAmountSol.toFixed(4)} SOL
           </Typography>
         </Box>
 
         <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <LockOpen sx={{ fontSize: 18, color: '#00ffc3' }} />
-            <Typography variant="caption" color="text.secondary">
-              Released
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
+            <LockOpen sx={{ fontSize: 16, color: primaryMain }} />
+            <Typography variant="caption" color="text.secondary" fontWeight={700} sx={{ letterSpacing: 0.5 }}>
+              RELEASED
             </Typography>
           </Box>
-          <Typography variant="body1" fontWeight={700} color="#00ffc3">
+          <Typography variant="body1" fontWeight={800} color="primary.main">
             {releasedAmountSol.toFixed(4)} SOL
           </Typography>
         </Box>
       </Box>
 
-      <Divider sx={{ my: 2 }} />
+      <Divider sx={{ my: 2.5 }} />
 
       {/* Milestone counts */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Lock sx={{ fontSize: 16, color: 'text.secondary' }} />
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="caption" color="text.secondary" fontWeight={600}>
             {fundedCount} of {totalMilestones} funded
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <CheckCircle sx={{ fontSize: 16, color: 'success.main' }} />
-          <Typography variant="body2" color="text.secondary">
+          <CheckCircle sx={{ fontSize: 16, color: theme.palette.success.main }} />
+          <Typography variant="caption" color="text.secondary" fontWeight={600}>
             {approvedCount} approved
           </Typography>
         </Box>
@@ -282,18 +291,20 @@ export default function MilestoneEscrowStatus({ jobPda }: MilestoneEscrowStatusP
       {approvedCount === totalMilestones && totalMilestones > 0 && (
         <Box
           sx={{
-            mt: 2,
-            p: 2,
-            bgcolor: 'success.light',
-            borderRadius: 2,
+            mt: 2.5,
+            p: 1.5,
+            bgcolor: isDark ? 'rgba(76,175,80,0.1)' : 'rgba(76,175,80,0.05)',
+            borderRadius: 1.5,
+            border: 1,
+            borderColor: 'success.light',
             display: 'flex',
             alignItems: 'center',
             gap: 1,
           }}
         >
-          <CheckCircle color="success" />
-          <Typography variant="body2" fontWeight={600} color="success.dark">
-            All milestones completed and funds released!
+          <CheckCircle color="success" sx={{ fontSize: 18 }} />
+          <Typography variant="caption" fontWeight={700} color="success.main" sx={{ textTransform: 'uppercase' }}>
+            Mission Complete: All funds released
           </Typography>
         </Box>
       )}

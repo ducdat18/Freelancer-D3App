@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import {
   Box, Typography, Button, TextField, CircularProgress,
   Chip, Alert, LinearProgress, Collapse, Divider, Tooltip,
-  IconButton,
+  IconButton, useTheme, alpha,
 } from '@mui/material'
 import {
   Psychology, ExpandMore, ExpandLess, CheckCircle, Warning,
@@ -18,11 +18,14 @@ interface Props {
 // ─── score ring ────────────────────────────────────────────────────────────
 
 function ScoreGauge({ value, label, color }: { value: number; label: string; color: string }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   return (
     <Box sx={{ textAlign: 'center' }}>
       <Box sx={{ position: 'relative', display: 'inline-flex', mb: 0.5 }}>
         <CircularProgress variant="determinate" value={100} size={60} thickness={5}
-          sx={{ color: 'rgba(255,255,255,0.06)', position: 'absolute' }} />
+          sx={{ color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)', position: 'absolute' }} />
         <CircularProgress variant="determinate" value={value} size={60} thickness={5}
           sx={{ color }} />
         <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -31,7 +34,7 @@ function ScoreGauge({ value, label, color }: { value: number; label: string; col
           </Typography>
         </Box>
       </Box>
-      <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.65rem', letterSpacing: '0.05em' }}>
+      <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.65rem', letterSpacing: '0.05em', fontWeight: 600 }}>
         {label}
       </Typography>
     </Box>
@@ -41,31 +44,34 @@ function ScoreGauge({ value, label, color }: { value: number; label: string; col
 // ─── finding item ───────────────────────────────────────────────────────────
 
 function FindingItem({ finding }: { finding: RiskFinding }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   const iconMap = {
-    positive: <CheckCircle sx={{ fontSize: 14, color: '#4caf50', flexShrink: 0 }} />,
-    warning:  <Warning     sx={{ fontSize: 14, color: '#ff9800', flexShrink: 0 }} />,
-    danger:   <ErrorIcon   sx={{ fontSize: 14, color: '#f44336', flexShrink: 0 }} />,
+    positive: <CheckCircle sx={{ fontSize: 14, color: theme.palette.success.main, flexShrink: 0 }} />,
+    warning:  <Warning     sx={{ fontSize: 14, color: theme.palette.warning.main, flexShrink: 0 }} />,
+    danger:   <ErrorIcon   sx={{ fontSize: 14, color: theme.palette.error.main, flexShrink: 0 }} />,
   }
   const colorMap = {
-    positive: 'rgba(76,175,80,0.08)',
-    warning:  'rgba(255,152,0,0.08)',
-    danger:   'rgba(244,67,54,0.08)',
+    positive: isDark ? 'rgba(76,175,80,0.08)' : 'rgba(76,175,80,0.05)',
+    warning:  isDark ? 'rgba(255,152,0,0.08)' : 'rgba(255,152,0,0.05)',
+    danger:   isDark ? 'rgba(244,67,54,0.08)' : 'rgba(244,67,54,0.05)',
   }
   const borderMap = {
-    positive: 'rgba(76,175,80,0.2)',
-    warning:  'rgba(255,152,0,0.2)',
-    danger:   'rgba(244,67,54,0.2)',
+    positive: isDark ? 'rgba(76,175,80,0.2)' : 'rgba(76,175,80,0.15)',
+    warning:  isDark ? 'rgba(255,152,0,0.2)' : 'rgba(255,152,0,0.15)',
+    danger:   isDark ? 'rgba(244,67,54,0.2)' : 'rgba(244,67,54,0.15)',
   }
 
   return (
     <Box sx={{
-      display: 'flex', alignItems: 'flex-start', gap: 1, p: 1,
+      display: 'flex', alignItems: 'flex-start', gap: 1, p: 1.25,
       borderRadius: 1,
       bgcolor: colorMap[finding.type],
       border: `1px solid ${borderMap[finding.type]}`,
     }}>
       {iconMap[finding.type]}
-      <Typography variant="caption" sx={{ lineHeight: 1.5, color: 'text.secondary' }}>
+      <Typography variant="caption" sx={{ lineHeight: 1.5, color: 'text.secondary', fontWeight: 500 }}>
         {finding.text}
       </Typography>
     </Box>
@@ -75,10 +81,13 @@ function FindingItem({ finding }: { finding: RiskFinding }) {
 // ─── risk badge ──────────────────────────────────────────────────────────────
 
 function RiskBadge({ level }: { level: 'LOW' | 'MEDIUM' | 'HIGH' }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   const config = {
-    LOW:    { color: '#4caf50', bg: 'rgba(76,175,80,0.12)',   border: 'rgba(76,175,80,0.3)',   label: 'LOW RISK' },
-    MEDIUM: { color: '#ff9800', bg: 'rgba(255,152,0,0.12)',   border: 'rgba(255,152,0,0.3)',   label: 'MEDIUM RISK' },
-    HIGH:   { color: '#f44336', bg: 'rgba(244,67,54,0.12)',   border: 'rgba(244,67,54,0.3)',   label: 'HIGH RISK' },
+    LOW:    { color: theme.palette.success.main, bg: isDark ? 'rgba(76,175,80,0.12)' : 'rgba(76,175,80,0.08)',   border: 'rgba(76,175,80,0.3)',   label: 'LOW RISK' },
+    MEDIUM: { color: theme.palette.warning.main, bg: isDark ? 'rgba(255,152,0,0.12)' : 'rgba(255,152,0,0.08)',   border: 'rgba(255,152,0,0.3)',   label: 'MEDIUM RISK' },
+    HIGH:   { color: theme.palette.error.main,   bg: isDark ? 'rgba(244,67,54,0.12)' : 'rgba(244,67,54,0.08)',   border: 'rgba(244,67,54,0.3)',   label: 'HIGH RISK' },
   }[level]
 
   return (
@@ -108,6 +117,10 @@ export default function RiskAssessmentPanel({ jobDescription, jobTitle }: Props)
   const [result, setResult]         = useState<RiskAssessmentResult | null>(null)
   const [error, setError]           = useState('')
   const fileInputRef                = useRef<HTMLInputElement>(null)
+  
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const secondaryMain = theme.palette.secondary.main;
 
   const handleFileRead = (file: File) => {
     if (file.type === 'text/plain') {
@@ -118,9 +131,7 @@ export default function RiskAssessmentPanel({ jobDescription, jobTitle }: Props)
       }
       reader.readAsText(file)
     } else {
-      // For PDF/DOC we can't extract text client-side without a library
-      // Inform user to paste text instead
-      setError(`"${file.name}" — PDF/DOC extraction is not supported in the browser. Please paste your CV text directly in the box below.`)
+      setError(`"${file.name}" — PDF/DOC extraction is not supported. Please paste text directly.`)
     }
   }
 
@@ -152,19 +163,21 @@ export default function RiskAssessmentPanel({ jobDescription, jobTitle }: Props)
   }
 
   const riskColor = result
-    ? result.riskLevel === 'LOW' ? '#4caf50' : result.riskLevel === 'MEDIUM' ? '#ff9800' : '#f44336'
-    : '#00ffc3'
+    ? result.riskLevel === 'LOW' ? theme.palette.success.main : result.riskLevel === 'MEDIUM' ? theme.palette.warning.main : theme.palette.error.main
+    : theme.palette.primary.main
 
-  const matchColor  = result ? (result.matchScore  >= 70 ? '#4caf50' : result.matchScore  >= 40 ? '#ff9800' : '#f44336') : '#00ffc3'
-  const authColor   = result ? (result.authenticityScore >= 70 ? '#4caf50' : result.authenticityScore >= 40 ? '#ff9800' : '#f44336') : '#00ffc3'
+  const matchColor  = result ? (result.matchScore  >= 70 ? theme.palette.success.main : result.matchScore  >= 40 ? theme.palette.warning.main : theme.palette.error.main) : theme.palette.primary.main
+  const authColor   = result ? (result.authenticityScore >= 70 ? theme.palette.success.main : result.authenticityScore >= 40 ? theme.palette.warning.main : theme.palette.error.main) : theme.palette.primary.main
 
   return (
     <Box
       sx={{
-        border: '1px solid rgba(128,132,238,0.2)',
+        border: 1,
+        borderColor: isDark ? alpha(secondaryMain, 0.2) : 'divider',
         borderRadius: 2,
-        background: 'rgba(7,5,17,0.5)',
+        background: isDark ? 'rgba(7,5,17,0.5)' : 'background.paper',
         overflow: 'hidden',
+        backgroundImage: 'none',
       }}
     >
       {/* Header — always visible */}
@@ -173,21 +186,22 @@ export default function RiskAssessmentPanel({ jobDescription, jobTitle }: Props)
         sx={{
           display: 'flex', alignItems: 'center', gap: 1.5, px: 2.5, py: 1.75,
           cursor: 'pointer',
-          '&:hover': { bgcolor: 'rgba(128,132,238,0.05)' },
-          borderBottom: expanded ? '1px solid rgba(128,132,238,0.12)' : 'none',
+          '&:hover': { bgcolor: alpha(secondaryMain, 0.05) },
+          borderBottom: expanded ? 1 : 'none',
+          borderColor: alpha(secondaryMain, 0.12),
           transition: 'background 0.15s',
         }}
       >
-        <Psychology sx={{ fontSize: 18, color: '#8084ee' }} />
+        <Psychology sx={{ fontSize: 18, color: secondaryMain }} />
         <Box sx={{ flex: 1 }}>
           <Typography sx={{
             fontFamily: '"Orbitron",sans-serif', fontSize: '0.65rem',
-            letterSpacing: '0.15em', color: '#8084ee', lineHeight: 1,
+            letterSpacing: '0.15em', color: secondaryMain, lineHeight: 1, fontWeight: 700,
           }}>
             AI RISK ASSESSMENT
           </Typography>
           {result && !loading && (
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.25, display: 'block' }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block', fontWeight: 600 }}>
               Match {result.matchScore}% · Auth {result.authenticityScore}%
             </Typography>
           )}
@@ -198,13 +212,13 @@ export default function RiskAssessmentPanel({ jobDescription, jobTitle }: Props)
 
       {/* Body — collapsible */}
       <Collapse in={expanded}>
-        <Box sx={{ p: 2.5, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Box sx={{ p: 2.5, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
 
           {/* Intro */}
           {!result && (
-            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-              Paste your CV/résumé below. Our AI will evaluate how well your profile matches this job and
-              check whether your CV appears credible — then compute an overall hiring risk score.
+            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.6, fontWeight: 500 }}>
+              Paste your CV/résumé below. Our AI will evaluate your profile match, 
+              check credibility, and compute an overall hiring risk score.
             </Typography>
           )}
 
@@ -225,7 +239,7 @@ export default function RiskAssessmentPanel({ jobDescription, jobTitle }: Props)
                   variant="outlined"
                   startIcon={<FileUpload sx={{ fontSize: 15 }} />}
                   onClick={() => fileInputRef.current?.click()}
-                  sx={{ fontSize: '0.72rem', borderColor: 'rgba(128,132,238,0.3)', color: '#8084ee', '&:hover': { borderColor: '#8084ee' } }}
+                  sx={{ fontSize: '0.72rem', fontWeight: 700 }}
                 >
                   Upload .txt CV
                 </Button>
@@ -234,10 +248,10 @@ export default function RiskAssessmentPanel({ jobDescription, jobTitle }: Props)
                     label={fileName}
                     size="small"
                     onDelete={() => { setCvText(''); setFileName('') }}
-                    sx={{ fontSize: '0.65rem' }}
+                    sx={{ fontSize: '0.65rem', fontWeight: 600 }}
                   />
                 )}
-                <Typography variant="caption" color="text.disabled">
+                <Typography variant="caption" color="text.disabled" sx={{ fontWeight: 500 }}>
                   or paste below
                 </Typography>
               </Box>
@@ -246,16 +260,12 @@ export default function RiskAssessmentPanel({ jobDescription, jobTitle }: Props)
                 multiline
                 rows={7}
                 fullWidth
-                placeholder="Paste your CV / resume text here…
-
-Skills, experience, education, past projects — anything relevant."
+                placeholder="Paste your CV text here... Skills, experience, education, projects."
                 value={cvText}
                 onChange={e => setCvText(e.target.value)}
                 size="small"
                 sx={{
                   '& .MuiInputBase-root': { fontSize: '0.8rem', fontFamily: 'monospace', lineHeight: 1.6 },
-                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(128,132,238,0.2)' },
-                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(128,132,238,0.4)' },
                 }}
               />
 
@@ -267,26 +277,25 @@ Skills, experience, education, past projects — anything relevant."
 
               <Button
                 variant="contained"
-                startIcon={loading ? <CircularProgress size={14} sx={{ color: 'inherit' }} /> : <Psychology sx={{ fontSize: 16 }} />}
+                startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <Psychology sx={{ fontSize: 16 }} />}
                 onClick={handleAnalyze}
                 disabled={loading || !cvText.trim()}
                 sx={{
-                  background: 'linear-gradient(135deg, #5a5fcc 0%, #8084ee 100%)',
-                  '&:hover': { background: 'linear-gradient(135deg, #6a6fd8 0%, #9095f5 100%)' },
                   alignSelf: 'flex-start',
+                  fontWeight: 700,
                 }}
               >
-                {loading ? 'Analyzing…' : 'Analyze Risk'}
+                {loading ? 'Analyzing...' : 'Analyze Risk'}
               </Button>
             </>
           )}
 
           {/* Loading state */}
           {loading && (
-            <Box>
-              <LinearProgress sx={{ mb: 1, '& .MuiLinearProgress-bar': { bgcolor: '#8084ee' } }} />
-              <Typography variant="caption" color="text.secondary">
-                Gemini AI is reading your CV and the job description…
+            <Box sx={{ py: 2 }}>
+              <LinearProgress sx={{ mb: 1.5 }} />
+              <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                AI is analyzing your profile and the job requirements...
               </Typography>
             </Box>
           )}
@@ -295,37 +304,37 @@ Skills, experience, education, past projects — anything relevant."
           {result && !loading && (
             <>
               {/* Score gauges row */}
-              <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', py: 1 }}>
+              <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', py: 1, flexWrap: 'wrap' }}>
                 <ScoreGauge value={result.matchScore}       label="JOB MATCH"   color={matchColor} />
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                   <RiskBadge level={result.riskLevel} />
-                  <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, fontSize: '0.6rem' }}>
-                    risk score {result.riskScore}/100
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, fontSize: '0.6rem', fontWeight: 700 }}>
+                    SCORE: {result.riskScore}/100
                   </Typography>
                 </Box>
-                <ScoreGauge value={result.authenticityScore} label="CV CREDIBILITY" color={authColor} />
+                <ScoreGauge value={result.authenticityScore} label="CREDIBILITY" color={authColor} />
               </Box>
 
-              <Divider sx={{ borderColor: 'rgba(128,132,238,0.1)' }} />
+              <Divider />
 
               {/* Summary */}
-              <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: 'rgba(128,132,238,0.06)', border: '1px solid rgba(128,132,238,0.12)' }}>
-                <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+              <Box sx={{ p: 2, borderRadius: 1.5, bgcolor: isDark ? alpha(secondaryMain, 0.06) : 'grey.50', border: 1, borderColor: 'divider' }}>
+                <Typography variant="caption" sx={{ color: 'text.primary', lineHeight: 1.6, fontWeight: 500, display: 'block' }}>
                   {result.summary}
                 </Typography>
               </Box>
 
               {/* Findings */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {result.findings.map((f, i) => <FindingItem key={i} finding={f} />)}
               </Box>
 
               {/* Recommendation */}
-              <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: `${riskColor}0d`, border: `1px solid ${riskColor}30` }}>
-                <Typography variant="caption" fontWeight={600} sx={{ color: riskColor, display: 'block', mb: 0.25, fontFamily: '"Orbitron",sans-serif', fontSize: '0.6rem', letterSpacing: '0.1em' }}>
+              <Box sx={{ p: 2, borderRadius: 1.5, bgcolor: alpha(riskColor, 0.05), border: 1, borderColor: alpha(riskColor, 0.3) }}>
+                <Typography variant="caption" fontWeight={800} sx={{ color: riskColor, display: 'block', mb: 0.5, fontFamily: '"Orbitron",sans-serif', fontSize: '0.6rem', letterSpacing: 1 }}>
                   RECOMMENDATION
                 </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5 }}>
+                <Typography variant="caption" color="text.primary" sx={{ lineHeight: 1.5, fontWeight: 600, display: 'block' }}>
                   {result.recommendation}
                 </Typography>
               </Box>
@@ -335,9 +344,9 @@ Skills, experience, education, past projects — anything relevant."
                 size="small"
                 variant="outlined"
                 onClick={() => setResult(null)}
-                sx={{ alignSelf: 'flex-start', fontSize: '0.72rem', borderColor: 'rgba(128,132,238,0.3)', color: '#8084ee' }}
+                sx={{ alignSelf: 'flex-start', fontSize: '0.72rem', fontWeight: 700 }}
               >
-                Re-analyze with different CV
+                Re-analyze
               </Button>
             </>
           )}

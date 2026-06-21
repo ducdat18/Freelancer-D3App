@@ -6,7 +6,8 @@ import {
   Chip,
   Popover,
   Typography,
-  IconButton
+  IconButton,
+  useTheme
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -37,6 +38,8 @@ export default function DateRangeFilter({
   onChange
 }: DateRangeFilterProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -94,12 +97,21 @@ export default function DateRangeFilter({
           startIcon={<CalendarToday />}
           endIcon={
             hasDateRange ? (
-              <IconButton size="small" onClick={handleClear}>
-                <Clear fontSize="small" />
+              <IconButton size="small" onClick={handleClear} sx={{ p: 0.5, mr: -1 }}>
+                <Clear sx={{ fontSize: 16 }} />
               </IconButton>
             ) : undefined
           }
-          sx={{ minWidth: 200 }}
+          sx={{ 
+            minWidth: 200,
+            fontWeight: 600,
+            borderColor: hasDateRange ? 'primary.main' : 'divider',
+            color: hasDateRange ? 'primary.main' : 'text.primary',
+            '&:hover': {
+              borderColor: 'primary.main',
+              bgcolor: isDark ? 'rgba(0,255,195,0.05)' : 'rgba(5,150,105,0.05)',
+            }
+          }}
         >
           {formatDateRange()}
         </Button>
@@ -112,35 +124,34 @@ export default function DateRangeFilter({
             vertical: 'bottom',
             horizontal: 'left',
           }}
+          PaperProps={{
+            sx: { mt: 1, border: 1, borderColor: 'divider', boxShadow: isDark ? 10 : 4, backgroundImage: 'none' }
+          }}
         >
-          <Box sx={{ p: 3, minWidth: 400 }}>
-            <Typography variant="subtitle2" gutterBottom>
+          <Box sx={{ p: 3, minWidth: { xs: '100vw', sm: 400 } }}>
+            <Typography variant="subtitle2" gutterBottom fontWeight={700} sx={{ mb: 1.5 }}>
               Quick Select
             </Typography>
-            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 3 }}>
-              {PRESETS.map((preset) => (
-                <Chip
-                  key={preset.label}
-                  label={preset.label}
-                  onClick={() => handlePreset(preset.days)}
-                  variant={
-                    preset.days === 0 && !hasDateRange
-                      ? 'filled'
-                      : 'outlined'
-                  }
-                  color={
-                    preset.days === 0 && !hasDateRange
-                      ? 'primary'
-                      : 'default'
-                  }
-                />
-              ))}
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 4 }}>
+              {PRESETS.map((preset) => {
+                const active = preset.days === 0 ? !hasDateRange : false; // simplistic check
+                return (
+                  <Chip
+                    key={preset.label}
+                    label={preset.label}
+                    onClick={() => handlePreset(preset.days)}
+                    variant={active ? 'filled' : 'outlined'}
+                    color={active ? 'primary' : 'default'}
+                    sx={{ fontWeight: 600, fontSize: '0.75rem' }}
+                  />
+                );
+              })}
             </Stack>
 
-            <Typography variant="subtitle2" gutterBottom>
+            <Typography variant="subtitle2" gutterBottom fontWeight={700} sx={{ mb: 1.5 }}>
               Custom Range
             </Typography>
-            <Stack spacing={2}>
+            <Stack spacing={2.5}>
               <DatePicker
                 label="Start Date"
                 value={startDate}
@@ -148,7 +159,7 @@ export default function DateRangeFilter({
                 slotProps={{
                   textField: {
                     fullWidth: true,
-                    size: 'small'
+                    size: 'small',
                   }
                 }}
                 maxDate={endDate || undefined}
@@ -168,11 +179,11 @@ export default function DateRangeFilter({
               />
             </Stack>
 
-            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-              <Button size="small" onClick={() => onChange({ start: null, end: null })}>
-                Clear
+            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
+              <Button size="small" onClick={() => { onChange({ start: null, end: null }); handleClose(); }} sx={{ fontWeight: 600 }}>
+                Reset
               </Button>
-              <Button size="small" variant="contained" onClick={handleClose}>
+              <Button size="small" variant="contained" onClick={handleClose} sx={{ fontWeight: 700, px: 3 }}>
                 Apply
               </Button>
             </Box>

@@ -11,21 +11,19 @@ import {
   Tab,
   Pagination,
   LinearProgress,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import GavelIcon from '@mui/icons-material/Gavel';
 import AddIcon from '@mui/icons-material/Add';
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import ScienceIcon from '@mui/icons-material/Science';
 import { useRouter } from 'next/router';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import Layout from '../../src/components/Layout';
-import ComingSoonBanner from '../../src/components/ComingSoonBanner';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import EmptyState from '../../src/components/EmptyState';
-import { useSolanaProgram } from '../../src/hooks/useSolanaProgram';
 import { useDAOGovernance } from '../../src/hooks/useDAOGovernance';
 import { GovernanceProposalStatus, GovernanceProposalType } from '../../src/types';
 import type { ProposalData } from '../../src/types';
@@ -61,13 +59,12 @@ const proposalTypeLabels: Record<number, string> = {
 const ITEMS_PER_PAGE = 6;
 
 export default function GovernancePage() {
-  const { program } = useSolanaProgram();
-  // @ts-ignore
-  const isDeployed = typeof program?.methods?.createProposal === 'function';
-
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+  
   const router = useRouter();
   const { publicKey, connected } = useWallet();
-  const { setVisible } = useWalletModal();
   const {
     daoConfig,
     proposals,
@@ -121,50 +118,20 @@ export default function GovernancePage() {
   const approvedCount = proposals.filter(p => p.status === GovernanceProposalStatus.Approved).length;
   const executedCount = proposals.filter(p => p.status === GovernanceProposalStatus.Executed).length;
 
-  if (!connected) {
-    return (
-      <Layout>
-        <Container maxWidth="md" sx={{ py: 8 }}>
-          <EmptyState
-            title="Wallet Not Connected"
-            description="Connect your wallet to participate in governance."
-            actionLabel="Connect Wallet"
-            onAction={() => setVisible(true)}
-          />
-        </Container>
-      </Layout>
-    );
-  }
-
   return (
     <Layout>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Header */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4, flexWrap: 'wrap', gap: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <GavelIcon sx={{ fontSize: 40, color: '#00ffc3' }} />
+            <GavelIcon sx={{ fontSize: 40, color: 'primary.main' }} />
             <Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Typography variant="h4" fontWeight={700}>
+                <Typography variant="h4" fontWeight={800} sx={{ fontFamily: '"Orbitron", sans-serif' }}>
                   Governance
                 </Typography>
-                {!isDeployed && (
-                  <Chip
-                    icon={<ScienceIcon />}
-                    label="DEVNET SIMULATION"
-                    size="small"
-                    sx={{
-                      fontFamily: '"Orbitron", monospace',
-                      fontSize: '0.55rem',
-                      letterSpacing: '0.08em',
-                      bgcolor: 'rgba(224,77,1,0.15)',
-                      color: '#e04d01',
-                      border: '1px solid rgba(224,77,1,0.3)',
-                    }}
-                  />
-                )}
               </Box>
-              <Typography variant="body1" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                 Shape the future of the platform through decentralized proposals and voting
               </Typography>
             </Box>
@@ -172,8 +139,10 @@ export default function GovernancePage() {
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => router.push('/governance/create')}
-            sx={{ px: 3, py: 1.2, whiteSpace: 'nowrap' }}
+            onClick={() => connected ? router.push('/governance/create') : undefined}
+            disabled={!connected}
+            title={!connected ? 'Connect wallet to create a proposal' : ''}
+            sx={{ px: 3, py: 1.2, whiteSpace: 'nowrap', fontWeight: 700 }}
           >
             Create Proposal
           </Button>
@@ -188,65 +157,34 @@ export default function GovernancePage() {
             mb: 4,
           }}
         >
-          <Paper
-            sx={{
-              p: 2.5,
-              textAlign: 'center',
-              border: '1px solid rgba(0, 255, 195, 0.15)',
-              background: 'linear-gradient(135deg, rgba(0,255,195,0.03) 0%, rgba(0,0,0,0) 100%)',
-            }}
-          >
-            <HowToVoteIcon sx={{ color: '#00ffc3', fontSize: 28, mb: 0.5 }} />
-            <Typography variant="h5" fontWeight={700}>
-              {daoConfig?.proposalCount ?? 0}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Total Proposals
-            </Typography>
-          </Paper>
-          <Paper
-            sx={{
-              p: 2.5,
-              textAlign: 'center',
-              border: '1px solid rgba(0, 255, 195, 0.15)',
-            }}
-          >
-            <AccountBalanceIcon sx={{ color: '#00ffc3', fontSize: 28, mb: 0.5 }} />
-            <Typography variant="h5" fontWeight={700}>
-              {daoConfig?.totalProposalsExecuted ?? 0}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Executed
-            </Typography>
-          </Paper>
-          <Paper
-            sx={{
-              p: 2.5,
-              textAlign: 'center',
-              border: '1px solid rgba(0, 255, 195, 0.15)',
-            }}
-          >
-            <Typography variant="h5" fontWeight={700}>
-              {daoConfig?.quorumPercentage ?? 0}%
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Quorum Required
-            </Typography>
-          </Paper>
-          <Paper
-            sx={{
-              p: 2.5,
-              textAlign: 'center',
-              border: '1px solid rgba(0, 255, 195, 0.15)',
-            }}
-          >
-            <Typography variant="h5" fontWeight={700}>
-              {daoConfig ? `${daoConfig.votingPeriod / 86400}d` : '--'}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Voting Period
-            </Typography>
-          </Paper>
+          {[
+            { label: 'Total Proposals', value: daoConfig?.proposalCount ?? 0, icon: HowToVoteIcon },
+            { label: 'Executed', value: daoConfig?.totalProposalsExecuted ?? 0, icon: AccountBalanceIcon },
+            { label: 'Quorum Required', value: `${daoConfig?.quorumPercentage ?? 0}%`, icon: GavelIcon },
+            { label: 'Voting Period', value: daoConfig ? `${daoConfig.votingPeriod / 86400}d` : '--', icon: AccessTimeIcon },
+          ].map((stat, i) => (
+            <Paper
+              key={i}
+              sx={{
+                p: 2.5,
+                textAlign: 'center',
+                border: 1,
+                borderColor: 'divider',
+                bgcolor: 'background.paper',
+                backgroundImage: i === 0 ? (isDark ? `linear-gradient(135deg, ${alpha(primaryMain, 0.08)} 0%, transparent 100%)` : `linear-gradient(135deg, ${alpha(primaryMain, 0.04)} 0%, transparent 100%)`) : 'none',
+                transition: 'all 0.2s',
+                '&:hover': { borderColor: primaryMain, transform: 'translateY(-2px)' }
+              }}
+            >
+              <stat.icon sx={{ color: 'primary.main', fontSize: 28, mb: 0.5, opacity: 0.8 }} />
+              <Typography variant="h5" fontWeight={800} sx={{ fontFamily: '"Orbitron", sans-serif' }}>
+                {stat.value}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                {stat.label}
+              </Typography>
+            </Paper>
+          ))}
         </Box>
 
         {error && (
@@ -256,7 +194,7 @@ export default function GovernancePage() {
         )}
 
         {/* Tabs */}
-        <Paper sx={{ mb: 3 }}>
+        <Paper sx={{ mb: 3, border: 1, borderColor: 'divider', backgroundImage: 'none' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs
               value={activeTab}
@@ -264,11 +202,13 @@ export default function GovernancePage() {
                 setActiveTab(v);
                 setPage(1);
               }}
+              variant="scrollable"
+              scrollButtons="auto"
             >
-              <Tab label={`All (${proposals.length})`} value="all" />
-              <Tab label={`Active (${activeCount})`} value="active" />
-              <Tab label={`Approved (${approvedCount})`} value="approved" />
-              <Tab label={`Executed (${executedCount})`} value="executed" />
+              <Tab label={`All (${proposals.length})`} value="all" sx={{ fontWeight: 600 }} />
+              <Tab label={`Active (${activeCount})`} value="active" sx={{ fontWeight: 600 }} />
+              <Tab label={`Approved (${approvedCount})`} value="approved" sx={{ fontWeight: 600 }} />
+              <Tab label={`Executed (${executedCount})`} value="executed" sx={{ fontWeight: 600 }} />
             </Tabs>
           </Box>
         </Paper>
@@ -329,6 +269,10 @@ interface ProposalCardProps {
 }
 
 function ProposalCard({ proposal, onClick, getTimeRemaining }: ProposalCardProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+  
   const totalVotes = proposal.votesFor + proposal.votesAgainst;
   const forPercentage = totalVotes > 0 ? (proposal.votesFor / totalVotes) * 100 : 0;
   const isActive = proposal.status === GovernanceProposalStatus.Active;
@@ -340,81 +284,90 @@ function ProposalCard({ proposal, onClick, getTimeRemaining }: ProposalCardProps
       sx={{
         p: 3,
         cursor: 'pointer',
-        border: '1px solid rgba(0, 255, 195, 0.1)',
-        transition: 'all 0.3s ease',
+        border: 1,
+        borderColor: 'divider',
+        bgcolor: 'background.paper',
+        backgroundImage: 'none',
+        transition: 'all 0.25s ease',
         '&:hover': {
-          borderColor: 'rgba(0, 255, 195, 0.3)',
-          transform: 'translateY(-2px)',
-          boxShadow: '0 4px 20px rgba(0, 255, 195, 0.08)',
+          borderColor: 'primary.main',
+          transform: 'translateY(-3px)',
+          boxShadow: isDark ? `0 4px 20px ${alpha(primaryMain, 0.12)}` : '0 4px 20px rgba(0,0,0,0.05)',
         },
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2.5 }}>
         <Box sx={{ flex: 1, mr: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <Typography variant="h6" fontWeight={600} noWrap>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+            <Typography variant="h6" fontWeight={700} sx={{ lineHeight: 1.2 }}>
               {proposal.title}
             </Typography>
             <Chip
               label={proposalTypeLabels[proposal.proposalType] || 'Unknown'}
               size="small"
               variant="outlined"
-              sx={{ fontWeight: 500, fontSize: '0.7rem' }}
+              sx={{ fontWeight: 700, fontSize: '0.65rem', height: 20, borderColor: 'divider' }}
             />
           </Box>
-          <Typography variant="body2" color="text.secondary">
-            Proposed by {proposal.proposer.slice(0, 8)}...{proposal.proposer.slice(-4)}
+          <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>
+            PROPOSED BY: {proposal.proposer.slice(0, 8)}...{proposal.proposer.slice(-4)}
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           {isActive && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <AccessTimeIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-              <Typography variant="caption" color="text.secondary">
+              <AccessTimeIcon sx={{ fontSize: 16, color: 'text.disabled' }} />
+              <Typography variant="caption" color="text.secondary" fontWeight={600}>
                 {timeText}
               </Typography>
             </Box>
           )}
           <Chip
-            label={statusLabels[proposal.status] || 'Unknown'}
+            label={statusLabels[proposal.status].toUpperCase() || 'UNKNOWN'}
             size="small"
             color={statusColors[proposal.status] || 'default'}
-            sx={{ fontWeight: 600 }}
+            sx={{ fontWeight: 800, fontSize: '0.65rem', letterSpacing: 0.5 }}
           />
         </Box>
       </Box>
 
       {/* Vote Progress */}
-      <Box sx={{ mt: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-          <Typography variant="caption" color="text.secondary">
-            For: {proposal.votesFor}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {proposal.totalVoters} voter{proposal.totalVoters !== 1 ? 's' : ''}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Against: {proposal.votesAgainst}
+      <Box sx={{ mt: 3, p: 2, bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'grey.50', borderRadius: 1.5, border: 1, borderColor: 'divider' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="caption" color="success.main" fontWeight={800}>
+              FOR: {proposal.votesFor}
+            </Typography>
+            <Typography variant="caption" color="text.disabled">|</Typography>
+            <Typography variant="caption" color="error.main" fontWeight={800}>
+              AGAINST: {proposal.votesAgainst}
+            </Typography>
+          </Box>
+          <Typography variant="caption" color="text.secondary" fontWeight={700}>
+            {proposal.totalVoters} VOTER{proposal.totalVoters !== 1 ? 'S' : ''}
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 0.5, height: 6, borderRadius: 3, overflow: 'hidden' }}>
+        <Box sx={{ display: 'flex', gap: 0.5, height: 8, borderRadius: 4, overflow: 'hidden', bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
           <Box
             sx={{
-              width: totalVotes > 0 ? `${forPercentage}%` : '50%',
-              background: 'linear-gradient(90deg, #00ffc3, #00e6b0)',
-              borderRadius: 3,
+              width: totalVotes > 0 ? `${forPercentage}%` : '0%',
+              background: `linear-gradient(90deg, ${theme.palette.success.dark}, ${theme.palette.success.main})`,
+              borderRadius: 4,
               transition: 'width 0.5s ease',
             }}
           />
-          <Box
-            sx={{
-              flex: 1,
-              background: totalVotes > 0 ? 'rgba(255, 77, 77, 0.5)' : 'rgba(255,255,255,0.08)',
-              borderRadius: 3,
-              transition: 'width 0.5s ease',
-            }}
-          />
+          {totalVotes > 0 && (
+            <Box
+              sx={{
+                flex: 1,
+                background: `linear-gradient(90deg, ${theme.palette.error.main}, ${theme.palette.error.dark})`,
+                borderRadius: 4,
+                transition: 'width 0.5s ease',
+                opacity: 0.6
+              }}
+            />
+          )}
         </Box>
       </Box>
     </Paper>

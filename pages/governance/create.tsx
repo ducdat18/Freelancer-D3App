@@ -12,6 +12,8 @@ import {
   Select,
   MenuItem,
   Chip,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import GavelIcon from '@mui/icons-material/Gavel';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -22,7 +24,6 @@ import { useRouter } from 'next/router';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import Layout from '../../src/components/Layout';
-import ComingSoonBanner from '../../src/components/ComingSoonBanner';
 import EmptyState from '../../src/components/EmptyState';
 import { useSolanaProgram } from '../../src/hooks/useSolanaProgram';
 import { useDAOGovernance } from '../../src/hooks/useDAOGovernance';
@@ -57,6 +58,10 @@ const proposalTypes = [
 ];
 
 export default function CreateProposalPage() {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+  
   const { program } = useSolanaProgram();
   // @ts-ignore
   const isDeployed = typeof program?.methods?.createProposal === 'function';
@@ -92,8 +97,6 @@ export default function CreateProposalPage() {
 
     try {
       setSubmitting(true);
-      // In simulation mode: pass description text directly (stored in localStorage)
-      // In production: would upload to IPFS first, then pass the content hash URI
       const descriptionUri = isDeployed
         ? `ipfs://placeholder-${Date.now()}`
         : description;
@@ -131,49 +134,51 @@ export default function CreateProposalPage() {
         <Button
           startIcon={<ArrowBackIcon />}
           onClick={() => router.push('/governance')}
-          sx={{ mb: 3, color: 'text.secondary' }}
+          sx={{ mb: 3, color: 'text.secondary', fontWeight: 600, '&:hover': { color: 'primary.main' } }}
         >
           Back to Governance
         </Button>
 
         {/* Header */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-          <GavelIcon sx={{ fontSize: 40, color: '#00ffc3' }} />
+          <GavelIcon sx={{ fontSize: 40, color: 'primary.main' }} />
           <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Typography variant="h4" fontWeight={700}>
+              <Typography variant="h4" fontWeight={800} sx={{ fontFamily: '"Orbitron", sans-serif' }}>
                 Create Proposal
               </Typography>
               {!isDeployed && (
                 <Chip
-                  icon={<ScienceIcon />}
+                  icon={<ScienceIcon sx={{ fontSize: '0.9rem !important' }} />}
                   label="DEVNET SIMULATION"
                   size="small"
                   sx={{
                     fontFamily: '"Orbitron", monospace',
                     fontSize: '0.55rem',
                     letterSpacing: '0.08em',
-                    bgcolor: 'rgba(224,77,1,0.15)',
-                    color: '#e04d01',
-                    border: '1px solid rgba(224,77,1,0.3)',
+                    bgcolor: isDark ? 'rgba(224,77,1,0.15)' : 'rgba(224,77,1,0.08)',
+                    color: theme.palette.warning.main,
+                    border: 1,
+                    borderColor: alpha(theme.palette.warning.main, 0.3),
+                    fontWeight: 700,
                   }}
                 />
               )}
             </Box>
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
               Submit a governance proposal for community vote
             </Typography>
           </Box>
         </Box>
 
         {successMessage && (
-          <Alert severity="success" sx={{ mb: 3 }}>
+          <Alert severity="success" sx={{ mb: 3, fontWeight: 600 }}>
             {successMessage}
           </Alert>
         )}
 
         {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
+          <Alert severity="error" sx={{ mb: 3, fontWeight: 500 }}>
             {error}
           </Alert>
         )}
@@ -181,23 +186,25 @@ export default function CreateProposalPage() {
         {/* Stake Requirement Notice */}
         <Paper
           sx={{
-            p: 2,
+            p: 2.5,
             mb: 3,
             display: 'flex',
             alignItems: 'center',
             gap: 2,
-            border: '1px solid rgba(255, 152, 0, 0.3)',
-            background: 'rgba(255, 152, 0, 0.05)',
+            border: 1,
+            borderColor: isDark ? alpha(theme.palette.warning.main, 0.3) : alpha(theme.palette.warning.main, 0.4),
+            bgcolor: isDark ? alpha(theme.palette.warning.main, 0.05) : alpha(theme.palette.warning.main, 0.03),
+            borderRadius: 2,
           }}
         >
-          <InfoOutlinedIcon sx={{ color: '#ff9800' }} />
+          <InfoOutlinedIcon sx={{ color: theme.palette.warning.main }} />
           <Box>
-            <Typography variant="body2" fontWeight={600}>
+            <Typography variant="subtitle2" fontWeight={700} color={theme.palette.warning.main}>
               Stake Requirement
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500, display: 'block', mt: 0.25 }}>
               Creating a proposal requires staking{' '}
-              <strong>{daoConfig?.minProposalStake ?? '--'} tokens</strong>.
+              <strong style={{ color: theme.palette.text.primary }}>{daoConfig?.minProposalStake ?? '--'} tokens</strong>.
               Your stake will be returned after the voting period ends, regardless of the outcome.
             </Typography>
           </Box>
@@ -206,11 +213,15 @@ export default function CreateProposalPage() {
         {/* Form */}
         <Paper
           sx={{
-            p: 4,
-            border: '1px solid rgba(0, 255, 195, 0.1)',
+            p: { xs: 3, md: 4 },
+            border: 1,
+            borderColor: 'divider',
+            bgcolor: 'background.paper',
+            backgroundImage: 'none',
+            borderRadius: 3,
           }}
         >
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3.5 }}>
             {/* Title */}
             <TextField
               label="Proposal Title"
@@ -218,6 +229,7 @@ export default function CreateProposalPage() {
               onChange={(e) => setTitle(e.target.value)}
               fullWidth
               required
+              variant="outlined"
               placeholder="A concise title describing the proposed change"
               inputProps={{ maxLength: 80 }}
               helperText={`${title.length}/80 characters`}
@@ -232,7 +244,7 @@ export default function CreateProposalPage() {
                 onChange={(e) => setProposalType(Number(e.target.value) as GovernanceProposalType)}
               >
                 {proposalTypes.map((pt) => (
-                  <MenuItem key={pt.value} value={pt.value}>
+                  <MenuItem key={pt.value} value={pt.value} sx={{ fontWeight: 500 }}>
                     {pt.label}
                   </MenuItem>
                 ))}
@@ -244,12 +256,16 @@ export default function CreateProposalPage() {
               <Box
                 sx={{
                   p: 2,
-                  borderRadius: 1,
-                  border: '1px solid rgba(0, 255, 195, 0.1)',
-                  background: 'rgba(0, 255, 195, 0.02)',
+                  borderRadius: 1.5,
+                  border: 1,
+                  borderColor: alpha(primaryMain, 0.15),
+                  bgcolor: isDark ? alpha(primaryMain, 0.03) : alpha(primaryMain, 0.02),
                 }}
               >
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="caption" color="primary.main" fontWeight={700} sx={{ display: 'block', mb: 0.5, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  TYPE INFO
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                   {selectedTypeInfo.description}
                 </Typography>
               </Box>
@@ -277,15 +293,17 @@ export default function CreateProposalPage() {
             <Box
               sx={{
                 p: 2,
-                borderRadius: 1,
+                borderRadius: 1.5,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1.5,
-                border: '1px dashed rgba(255, 255, 255, 0.15)',
+                border: '1px dashed',
+                borderColor: 'divider',
+                bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
               }}
             >
-              <CloudUploadIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
-              <Typography variant="caption" color="text.secondary">
+              <CloudUploadIcon sx={{ color: 'text.disabled', fontSize: 20 }} />
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500, lineHeight: 1.4 }}>
                 The proposal description will be uploaded to IPFS for permanent, decentralized
                 storage. The on-chain record will reference the IPFS content hash.
               </Typography>
@@ -294,38 +312,43 @@ export default function CreateProposalPage() {
             {/* Summary */}
             <Box
               sx={{
-                p: 2,
-                borderRadius: 1,
-                border: '1px solid rgba(0, 255, 195, 0.1)',
+                p: 2.5,
+                borderRadius: 2,
+                border: 1,
+                borderColor: 'divider',
+                bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'grey.50',
                 display: 'flex',
                 flexWrap: 'wrap',
                 gap: 1.5,
                 alignItems: 'center',
               }}
             >
-              <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
-                Summary:
+              <Typography variant="caption" color="text.secondary" sx={{ mr: 1, fontWeight: 700, textTransform: 'uppercase' }}>
+                PROPOSAL SUMMARY:
               </Typography>
               <Chip
                 label={`Type: ${selectedTypeInfo?.label}`}
                 size="small"
                 variant="outlined"
+                sx={{ fontWeight: 600, fontSize: '0.7rem' }}
               />
               <Chip
                 label={`Voting: ${daoConfig ? `${daoConfig.votingPeriod / 86400} days` : '--'}`}
                 size="small"
                 variant="outlined"
+                sx={{ fontWeight: 600, fontSize: '0.7rem' }}
               />
               <Chip
                 label={`Quorum: ${daoConfig?.quorumPercentage ?? '--'}%`}
                 size="small"
                 variant="outlined"
+                sx={{ fontWeight: 600, fontSize: '0.7rem' }}
               />
               <Chip
                 label={`Stake: ${daoConfig?.minProposalStake ?? '--'} tokens`}
                 size="small"
                 variant="outlined"
-                sx={{ borderColor: '#ff9800', color: '#ff9800' }}
+                sx={{ borderColor: theme.palette.warning.main, color: theme.palette.warning.main, fontWeight: 700, fontSize: '0.7rem' }}
               />
             </Box>
 
@@ -336,9 +359,12 @@ export default function CreateProposalPage() {
               onClick={handleSubmit}
               disabled={submitting || loading || !title.trim() || !description.trim()}
               sx={{
-                py: 1.5,
-                fontSize: '1rem',
-                fontWeight: 600,
+                py: 1.75,
+                fontSize: '0.95rem',
+                fontWeight: 800,
+                fontFamily: '"Orbitron", sans-serif',
+                letterSpacing: 1,
+                boxShadow: isDark ? `0 4px 15px ${alpha(primaryMain, 0.4)}` : 'none',
               }}
             >
               {submitting ? 'Submitting Proposal...' : 'Submit Proposal'}

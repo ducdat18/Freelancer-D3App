@@ -8,7 +8,8 @@ import {
   CircularProgress,
   Alert,
   Stack,
-  Chip
+  Chip,
+  useTheme
 } from '@mui/material'
 import { 
   CloudUpload, 
@@ -34,6 +35,9 @@ export default function EvidenceUpload({
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -109,42 +113,46 @@ export default function EvidenceUpload({
 
   return (
     <Paper
-      elevation={2}
+      elevation={0}
       sx={{
         p: 3,
-        background: 'linear-gradient(135deg, rgba(21, 101, 192, 0.05) 0%, rgba(156, 39, 176, 0.05) 100%)',
-        border: '1px solid',
-        borderColor: 'primary.light',
+        background: isDark
+          ? 'linear-gradient(135deg, rgba(0, 255, 195, 0.05) 0%, rgba(128, 132, 238, 0.05) 100%)'
+          : 'linear-gradient(135deg, rgba(5, 150, 105, 0.05) 0%, rgba(79, 70, 229, 0.05) 100%)',
+        border: 1,
+        borderColor: 'divider',
         borderRadius: 2,
+        backgroundImage: 'none',
       }}
     >
-      <Stack spacing={2}>
+      <Stack spacing={2.5}>
         {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <CloudUpload color="primary" />
-          <Typography variant="h6" color="primary">
-            Upload Evidence
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <CloudUpload sx={{ color: primaryMain }} />
+          <Typography variant="h6" fontWeight={700} sx={{ color: 'text.primary' }}>
+            Evidence Submission
           </Typography>
           <Chip 
-            label={uploaderRole === 'client' ? 'Client' : 'Freelancer'} 
+            label={uploaderRole.toUpperCase()} 
             size="small" 
             color={uploaderRole === 'client' ? 'primary' : 'secondary'}
+            sx={{ fontWeight: 800, fontSize: '0.6rem', letterSpacing: 0.5, height: 20 }}
           />
         </Box>
 
-        <Typography variant="body2" color="text.secondary">
-          Upload images or documents to support your case. Max 10MB per file.
+        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+          Provide documentation or visual evidence to support your case. Max 10MB.
         </Typography>
 
         {/* Error/Success Messages */}
         {error && (
-          <Alert severity="error" onClose={() => setError(null)}>
+          <Alert severity="error" onClose={() => setError(null)} sx={{ fontWeight: 500 }}>
             {error}
           </Alert>
         )}
 
         {success && (
-          <Alert severity="success" onClose={() => setSuccess(null)}>
+          <Alert severity="success" onClose={() => setSuccess(null)} sx={{ fontWeight: 600 }}>
             {success}
           </Alert>
         )}
@@ -154,16 +162,18 @@ export default function EvidenceUpload({
           <Box
             sx={{
               border: '2px dashed',
-              borderColor: 'primary.main',
+              borderColor: isDark ? 'rgba(0, 255, 195, 0.3)' : 'rgba(5, 150, 105, 0.3)',
               borderRadius: 2,
-              p: 4,
+              p: 5,
               textAlign: 'center',
               cursor: disabled ? 'not-allowed' : 'pointer',
               opacity: disabled ? 0.5 : 1,
-              transition: 'all 0.3s',
+              transition: 'all 0.2s ease',
+              bgcolor: isDark ? 'rgba(0, 255, 195, 0.02)' : 'rgba(5, 150, 105, 0.02)',
               '&:hover': disabled ? {} : {
-                borderColor: 'primary.dark',
-                bgcolor: 'rgba(21, 101, 192, 0.05)',
+                borderColor: primaryMain,
+                bgcolor: isDark ? 'rgba(0, 255, 195, 0.08)' : 'rgba(5, 150, 105, 0.05)',
+                boxShadow: isDark ? `0 0 20px ${primaryMain}10` : 'none',
               },
             }}
             onClick={() => !disabled && document.getElementById('evidence-file-input')?.click()}
@@ -176,37 +186,40 @@ export default function EvidenceUpload({
               style={{ display: 'none' }}
               disabled={disabled}
             />
-            <CloudUpload sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-            <Typography variant="body1" color="primary" fontWeight="bold">
+            <CloudUpload sx={{ fontSize: 48, color: primaryMain, mb: 1.5, opacity: 0.8 }} />
+            <Typography variant="body1" color="primary" fontWeight={700}>
               Click to select a file
             </Typography>
-            <Typography variant="caption" color="text.secondary">
-              JPG, PNG, GIF, WEBP, or PDF (max 10MB)
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+              JPG, PNG, WEBP, or PDF
             </Typography>
           </Box>
         ) : (
           <Paper
-            elevation={1}
+            elevation={0}
             sx={{
               p: 2,
-              border: '1px solid',
+              border: 1,
               borderColor: 'divider',
               borderRadius: 2,
+              bgcolor: 'background.paper',
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5 }}>
               {/* Preview */}
               <Box
                 sx={{
-                  width: 80,
-                  height: 80,
+                  width: 64,
+                  height: 64,
                   borderRadius: 1,
                   overflow: 'hidden',
-                  bgcolor: 'grey.100',
+                  bgcolor: isDark ? 'rgba(0,0,0,0.2)' : 'grey.100',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
+                  border: 1,
+                  borderColor: 'divider',
                 }}
               >
                 {isImage && previewUrl ? (
@@ -216,36 +229,36 @@ export default function EvidenceUpload({
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
                 ) : (
-                  <InsertDriveFile sx={{ fontSize: 40, color: 'grey.400' }} />
+                  <InsertDriveFile sx={{ fontSize: 32, color: 'text.disabled' }} />
                 )}
               </Box>
 
               {/* File Info */}
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Typography 
-                  variant="body1" 
-                  fontWeight="bold" 
+                  variant="body2" 
+                  fontWeight={700} 
                   noWrap 
                   title={selectedFile.name}
                 >
                   {selectedFile.name}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {(selectedFile.size / 1024).toFixed(2)} KB
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                  {(selectedFile.size / 1024).toFixed(1)} KB
                 </Typography>
-                <Box sx={{ mt: 1 }}>
+                <Box sx={{ mt: 0.5 }}>
                   <Chip 
                     label={selectedFile.type.split('/')[1].toUpperCase()} 
                     size="small" 
-                    color="primary" 
                     variant="outlined" 
+                    sx={{ height: 18, fontSize: '0.6rem', fontWeight: 700 }}
                   />
                 </Box>
               </Box>
 
               {/* Remove Button */}
               <IconButton onClick={handleCancel} size="small" disabled={uploading}>
-                <Close />
+                <Close fontSize="small" />
               </IconButton>
             </Box>
           </Paper>
@@ -256,20 +269,21 @@ export default function EvidenceUpload({
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button
               variant="contained"
-              color="primary"
               onClick={handleUpload}
               disabled={uploading || disabled}
-              startIcon={uploading ? <CircularProgress size={20} /> : <CloudUpload />}
+              startIcon={uploading ? <CircularProgress size={18} color="inherit" /> : <CloudUpload />}
               fullWidth
+              sx={{ fontWeight: 700 }}
             >
-              {uploading ? 'Uploading to IPFS...' : 'Upload Evidence'}
+              {uploading ? 'UPLOADING...' : 'SUBMIT EVIDENCE'}
             </Button>
             <Button
               variant="outlined"
               onClick={handleCancel}
               disabled={uploading}
+              sx={{ fontWeight: 700 }}
             >
-              Cancel
+              CANCEL
             </Button>
           </Box>
         )}
@@ -277,4 +291,3 @@ export default function EvidenceUpload({
     </Paper>
   )
 }
-

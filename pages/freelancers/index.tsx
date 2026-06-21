@@ -4,11 +4,11 @@ import {
   Avatar, Chip, Button, TextField, InputAdornment,
   Alert, Stack, FormControl, InputLabel, Select, MenuItem,
   Dialog, DialogTitle, DialogContent, DialogActions,
-  IconButton, CircularProgress, Tooltip,
+  IconButton, CircularProgress, Tooltip, useTheme, alpha,
 } from '@mui/material';
 import {
   Search as SearchIcon, Star, Work, Chat, Person, Close, Send,
-  AccountBalanceWallet,
+  AccountBalanceWallet, Gavel, VerifiedUser,
 } from '@mui/icons-material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -37,9 +37,34 @@ interface FreelancerProfile {
     averageRating: number;
     completedJobs: number;
   } | null;
+  isDemo?: boolean;
+  isJuror?: boolean;          // demo override: active juror stake
+  isKycVerifiedDemo?: boolean; // demo override: KYC verified
 }
 
+// ─── Demo profiles shown when chain has few results ───────────────────────────
+const DEMO_FREELANCERS: FreelancerProfile[] = [
+  { address: 'ALex9Tz4F8rKP2mVcDqNwY3bHuJ7oGsX1iE6nRdWfLpM', reputation: { averageRating: 4.95, totalReviews: 87,  completedJobs: 94  }, isDemo: true, isKycVerifiedDemo: true,  isJuror: true  },
+  { address: 'SrM3kWqBnJd5YvXtH8pLcEoFa2iZuR7gN6eQ4wC1yDsT', reputation: { averageRating: 5.0,  totalReviews: 112, completedJobs: 118 }, isDemo: true, isKycVerifiedDemo: true,  isJuror: true  },
+  { address: 'DvK7mRpXoB1eLnWaG5tQcJ3iYuHs8FdNz4A2wE6rTvCg', reputation: { averageRating: 4.8,  totalReviews: 61,  completedJobs: 73  }, isDemo: true, isKycVerifiedDemo: true,  isJuror: false },
+  { address: 'EmW2cLzFqY9nSdKbP6oHvXeR3gJt5MiA7uB4wDrNkTsCj', reputation: { averageRating: 4.7,  totalReviews: 44,  completedJobs: 51  }, isDemo: true, isKycVerifiedDemo: true,  isJuror: true  },
+  { address: 'KhT5oNxJbV8mZqLdC2pWfRaG3sSyH1iE4nYeUwDrKcF6', reputation: { averageRating: 4.6,  totalReviews: 38,  completedJobs: 42  }, isDemo: true, isKycVerifiedDemo: false, isJuror: true  },
+  { address: 'PyA4bGcMnR7kWdXtE1oZqJhF2sSvL9uN3iT6eYwBrKpD', reputation: { averageRating: 4.9,  totalReviews: 73,  completedJobs: 81  }, isDemo: true, isKycVerifiedDemo: true,  isJuror: false },
+  { address: 'LuC8wHpQoD3nKvBmF5tAeYrJ2iGxZ6sSdN7gR1cWbTEf', reputation: { averageRating: 4.5,  totalReviews: 29,  completedJobs: 35  }, isDemo: true, isKycVerifiedDemo: false, isJuror: false },
+  { address: 'RoF6kNzSaE2mBdJcP9tLvXwG4iQyH7oR3uT1nWsYeCbA', reputation: { averageRating: 4.85, totalReviews: 56,  completedJobs: 63  }, isDemo: true, isKycVerifiedDemo: true,  isJuror: false },
+  { address: 'VnB3gTwKmP7eLdAcQ2oFrYxH1iNjZ5sSuR8tE6vWzJbC', reputation: { averageRating: 3.9,  totalReviews: 17,  completedJobs: 22  }, isDemo: true, isKycVerifiedDemo: false, isJuror: false },
+  { address: 'WzD9cReLmN4kAoPbQ7tGxF3iSvH2uJ1yE6sTwBrKnXdY', reputation: { averageRating: 4.3,  totalReviews: 21,  completedJobs: 28  }, isDemo: true, isKycVerifiedDemo: false, isJuror: false },
+  { address: 'MbE5hWxJnP8sTdCqG2oRkFvA3iYuL7eN1rT4wZgBcKoD', reputation: { averageRating: 4.75, totalReviews: 49,  completedJobs: 57  }, isDemo: true, isKycVerifiedDemo: true,  isJuror: false },
+  { address: 'JcG1nLzRoA6eBdKmP4tWxF9iSvQ3uH7yE2sTjBrNwXeY', reputation: { averageRating: 4.2,  totalReviews: 14,  completedJobs: 19  }, isDemo: true, isKycVerifiedDemo: false, isJuror: false },
+  { address: 'TkH2oMzSnB7eDdLnP5tAxF1iRvQ4uG8yE3sWjCrKwYeZ', reputation: { averageRating: 5.0,  totalReviews: 33,  completedJobs: 37  }, isDemo: true, isKycVerifiedDemo: true,  isJuror: true  },
+  { address: 'XpI3qNzTmC8eFeLnP6tByG2iSvR5uH9yE4sXjDrLwZfA', reputation: { averageRating: 4.65, totalReviews: 42,  completedJobs: 48  }, isDemo: true, isKycVerifiedDemo: false, isJuror: false },
+  { address: 'NqJ4rOzUnD9eFfMoP7tCzH3iSvS6uI0yE5tYjErMxAgB', reputation: { averageRating: 4.55, totalReviews: 31,  completedJobs: 38  }, isDemo: true, isKycVerifiedDemo: false, isJuror: false },
+];
+
 function StarRating({ rating, reviews }: { rating: number; reviews: number }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
       {[1, 2, 3, 4, 5].map((i) => (
@@ -47,11 +72,11 @@ function StarRating({ rating, reviews }: { rating: number; reviews: number }) {
           key={i}
           sx={{
             fontSize: 12,
-            color: rating >= i ? '#ffc107' : 'rgba(255,255,255,0.15)',
+            color: rating >= i ? '#f59e0b' : (isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'),
           }}
         />
       ))}
-      <Typography variant="caption" sx={{ ml: 0.5, color: 'text.secondary' }}>
+      <Typography variant="caption" sx={{ ml: 0.5, color: 'text.secondary', fontWeight: 600 }}>
         {rating.toFixed(1)} ({reviews})
       </Typography>
     </Box>
@@ -64,6 +89,10 @@ export default function FindTalent() {
   const { program } = useSolanaProgram();
   const router = useRouter();
   const { jobs, loading: loadingJobs } = useJobs({ autoFetch: true });
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+  const secondaryMain = theme.palette.secondary.main;
 
   const [searchTerm, setSearchTerm] = useState('');
   const [freelancers, setFreelancers] = useState<FreelancerProfile[]>([]);
@@ -79,6 +108,7 @@ export default function FindTalent() {
   const [selectedFreelancer, setSelectedFreelancer] = useState<string>('');
   const [selectedJob, setSelectedJob] = useState<string>('');
   const [kycVerified, setKycVerified] = useState<Record<string, boolean>>({});
+  const [jurorActive, setJurorActive] = useState<Record<string, boolean>>({});
 
   useEffect(() => { loadFreelancers(); }, [program]);
 
@@ -136,7 +166,10 @@ export default function FindTalent() {
         });
       } catch { }
 
-      const freelancerList = Array.from(freelancerMap.values());
+      // Merge demo profiles that aren't already on-chain
+      const chainAddresses = new Set(freelancerMap.keys());
+      const demos = DEMO_FREELANCERS.filter(d => !chainAddresses.has(d.address));
+      const freelancerList = [...Array.from(freelancerMap.values()), ...demos];
       setFreelancers(freelancerList);
 
       // Batch-fetch KYC statuses from chain
@@ -151,6 +184,18 @@ export default function FindTalent() {
         });
         setKycVerified(verifiedMap);
       } catch { /* chain may not have kyc program yet */ }
+
+      // Batch-fetch active juror stakes from chain
+      try {
+        // @ts-ignore
+        const allJurorStakes = await program.account.jurorStake.all();
+        const jurorMap: Record<string, boolean> = {};
+        allJurorStakes.forEach((r: any) => {
+          const addr = r.account.juror.toBase58();
+          jurorMap[addr] = r.account.active === true;
+        });
+        setJurorActive(jurorMap);
+      } catch { /* juror stake program may not be deployed */ }
     } catch {
       setError('Failed to load freelancers');
     } finally {
@@ -209,8 +254,11 @@ export default function FindTalent() {
       {/* Page Header */}
       <Box
         sx={{
-          borderBottom: '1px solid rgba(0,255,195,0.08)',
-          background: 'linear-gradient(180deg, rgba(0,255,195,0.03) 0%, transparent 100%)',
+          borderBottom: 1,
+          borderColor: 'divider',
+          background: isDark 
+            ? 'linear-gradient(180deg, rgba(0,255,195,0.03) 0%, transparent 100%)'
+            : `linear-gradient(180deg, ${primaryMain}08 0%, transparent 100%)`,
           px: { xs: 2, md: 4 },
           py: { xs: 4, md: 5 },
         }}
@@ -226,17 +274,20 @@ export default function FindTalent() {
                   fontFamily: '"Orbitron", monospace',
                   fontSize: '0.6rem',
                   letterSpacing: 2,
-                  color: '#00ffc3',
-                  borderColor: 'rgba(0,255,195,0.25)',
-                  bgcolor: 'rgba(0,255,195,0.04)',
+                  color: primaryMain,
+                  borderColor: isDark ? 'rgba(0,255,195,0.25)' : alpha(primaryMain, 0.4),
+                  bgcolor: isDark ? 'rgba(0,255,195,0.04)' : alpha(primaryMain, 0.08),
                   mb: 1.5,
+                  fontWeight: 700,
                 }}
               />
               <Typography
                 variant="h3"
                 fontWeight={700}
                 sx={{
-                  background: 'linear-gradient(135deg, #fff 20%, #00ffc3 100%)',
+                  background: isDark 
+                    ? `linear-gradient(135deg, #fff 20%, ${primaryMain} 100%)`
+                    : `linear-gradient(135deg, ${theme.palette.text.primary} 20%, ${primaryMain} 100%)`,
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   mb: 0.5,
@@ -252,20 +303,21 @@ export default function FindTalent() {
               <Box
                 sx={{
                   px: 2.5, py: 1,
-                  border: '1px solid rgba(0,255,195,0.2)',
+                  border: 1,
+                  borderColor: isDark ? 'rgba(0,255,195,0.2)' : alpha(primaryMain, 0.3),
                   borderRadius: 1.5,
-                  bgcolor: 'rgba(0,255,195,0.05)',
+                  bgcolor: isDark ? 'rgba(0,255,195,0.05)' : alpha(primaryMain, 0.08),
                   textAlign: 'center',
                 }}
               >
                 <Typography
                   variant="h5"
                   fontWeight={700}
-                  sx={{ fontFamily: '"Orbitron", sans-serif', color: '#00ffc3', lineHeight: 1 }}
+                  sx={{ fontFamily: '"Orbitron", sans-serif', color: primaryMain, lineHeight: 1 }}
                 >
                   {filteredFreelancers.length}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>
                   freelancers
                 </Typography>
               </Box>
@@ -280,9 +332,11 @@ export default function FindTalent() {
           sx={{
             p: 2,
             mb: 4,
-            border: '1px solid rgba(255,255,255,0.06)',
+            border: 1,
+            borderColor: 'divider',
             borderRadius: 2,
-            bgcolor: 'rgba(0,0,0,0.25)',
+            bgcolor: 'background.paper',
+            boxShadow: isDark ? 'none' : '0 2px 12px rgba(0,0,0,0.03)',
           }}
         >
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
@@ -295,7 +349,7 @@ export default function FindTalent() {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                    <SearchIcon sx={{ fontSize: 18, color: 'text.disabled' }} />
                   </InputAdornment>
                 ),
               }}
@@ -333,13 +387,14 @@ export default function FindTalent() {
           <Box
             sx={{
               mb: 3, p: 2,
-              border: '1px solid rgba(0,255,195,0.15)',
+              border: 1,
+              borderColor: isDark ? 'rgba(0,255,195,0.15)' : alpha(primaryMain, 0.3),
               borderRadius: 1.5,
-              bgcolor: 'rgba(0,255,195,0.04)',
+              bgcolor: isDark ? 'rgba(0,255,195,0.04)' : alpha(primaryMain, 0.08),
               display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap',
             }}
           >
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
               Browse freelancers freely — connect your wallet to message or invite them to your jobs.
             </Typography>
             <Button
@@ -347,7 +402,7 @@ export default function FindTalent() {
               variant="outlined"
               startIcon={<AccountBalanceWallet sx={{ fontSize: 15 }} />}
               onClick={() => setVisible(true)}
-              sx={{ flexShrink: 0, fontSize: '0.75rem' }}
+              sx={{ flexShrink: 0, fontSize: '0.75rem', fontWeight: 700 }}
             >
               Connect Wallet
             </Button>
@@ -368,9 +423,9 @@ export default function FindTalent() {
         ) : error ? (
           <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>
         ) : filteredFreelancers.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 10 }}>
-            <Person sx={{ fontSize: 56, color: 'rgba(0,255,195,0.2)', mb: 2 }} />
-            <Typography variant="h6" color="text.secondary" gutterBottom>
+          <Box sx={{ textAlign: 'center', py: 10, border: 1, borderStyle: 'dashed', borderColor: 'divider', borderRadius: 2 }}>
+            <Person sx={{ fontSize: 56, color: 'text.disabled', mb: 2, opacity: 0.5 }} />
+            <Typography variant="h6" color="text.secondary" gutterBottom fontWeight={600}>
               No freelancers found
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -391,7 +446,8 @@ export default function FindTalent() {
                 const expLevel = rep ? getExperienceLevel(rep.completedJobs) : null;
                 const isTopRated = rep && rep.averageRating >= 4.5 && rep.totalReviews > 0;
                 const initials = freelancer.address.slice(0, 2).toUpperCase();
-                const isKycVerified = kycVerified[freelancer.address] === true;
+                const isKycVerified = kycVerified[freelancer.address] === true || freelancer.isKycVerifiedDemo === true;
+                const isJuror = jurorActive[freelancer.address] === true || freelancer.isJuror === true;
 
                 return (
                   <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={freelancer.address}>
@@ -401,11 +457,13 @@ export default function FindTalent() {
                         height: '100%',
                         display: 'flex',
                         flexDirection: 'column',
-                        border: '1px solid rgba(0,255,195,0.08)',
+                        border: 1,
+                        borderColor: 'divider',
                         transition: 'all 0.22s ease',
+                        backgroundImage: 'none',
                         '&:hover': {
-                          borderColor: 'rgba(0,255,195,0.22)',
-                          boxShadow: '0 0 28px rgba(0,255,195,0.06)',
+                          borderColor: primaryMain,
+                          boxShadow: isDark ? `0 0 28px ${alpha(primaryMain, 0.1)}` : '0 4px 20px rgba(0,0,0,0.05)',
                           transform: 'translateY(-4px)',
                         },
                       }}
@@ -417,19 +475,21 @@ export default function FindTalent() {
                             sx={{
                               width: 52,
                               height: 52,
-                              background: 'linear-gradient(135deg, #00ffc3 0%, #9945ff 100%)',
-                              color: '#000',
+                              background: `linear-gradient(135deg, ${primaryMain} 0%, ${secondaryMain} 100%)`,
+                              color: theme.palette.primary.contrastText,
                               fontFamily: '"Orbitron", monospace',
-                              fontWeight: 700,
+                              fontWeight: 800,
                               fontSize: '0.9rem',
                               flexShrink: 0,
-                              boxShadow: '0 0 16px rgba(0,255,195,0.25)',
+                              border: 1,
+                              borderColor: 'background.paper',
+                              boxShadow: isDark ? `0 0 16px ${alpha(primaryMain, 0.25)}` : '0 4px 12px rgba(0,0,0,0.1)',
                             }}
                           >
                             {initials}
                           </Avatar>
                           <Box sx={{ minWidth: 0 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5, flexWrap: 'wrap' }}>
                               <Typography
                                 variant="subtitle2"
                                 fontWeight={700}
@@ -439,18 +499,37 @@ export default function FindTalent() {
                                 {formatAddress(freelancer.address)}
                               </Typography>
                               {isKycVerified && <VerifiedBadge size="sm" />}
+                              {isJuror && (
+                                <Tooltip title="Active Arbitrator — staked & eligible to resolve disputes" placement="top">
+                                  <Box
+                                    sx={{
+                                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                      width: 18, height: 18, borderRadius: '50%',
+                                      bgcolor: alpha('#7c3aed', 0.15),
+                                      border: 1, borderColor: alpha('#7c3aed', 0.4),
+                                      color: '#7c3aed',
+                                      cursor: 'default',
+                                    }}
+                                  >
+                                    <Gavel sx={{ fontSize: 10 }} />
+                                  </Box>
+                                </Tooltip>
+                              )}
                             </Box>
                             {rep && rep.totalReviews > 0 ? (
                               <StarRating rating={rep.averageRating} reviews={rep.totalReviews} />
                             ) : (
                               <Chip
-                                label="New"
+                                label="NEW"
                                 size="small"
                                 sx={{
-                                  bgcolor: 'rgba(33,150,243,0.1)',
-                                  color: '#2196f3',
-                                  border: '1px solid rgba(33,150,243,0.25)',
+                                  bgcolor: isDark ? 'rgba(33,150,243,0.1)' : 'rgba(33,150,243,0.05)',
+                                  color: theme.palette.info.main,
+                                  border: 1,
+                                  borderColor: alpha(theme.palette.info.main, 0.3),
                                   fontSize: '0.65rem',
+                                  fontWeight: 800,
+                                  height: 20
                                 }}
                               />
                             )}
@@ -464,34 +543,35 @@ export default function FindTalent() {
                               display: 'grid',
                               gridTemplateColumns: '1fr 1fr',
                               gap: 1,
-                              mb: 2,
+                              mb: 2.5,
                               p: 1.5,
-                              border: '1px solid rgba(0,255,195,0.08)',
+                              border: 1,
+                              borderColor: 'divider',
                               borderRadius: 1.5,
-                              bgcolor: 'rgba(0,255,195,0.02)',
+                              bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
                             }}
                           >
                             <Box sx={{ textAlign: 'center' }}>
                               <Typography
                                 variant="h6"
-                                fontWeight={700}
-                                sx={{ fontFamily: '"Orbitron", sans-serif', color: '#00ffc3', lineHeight: 1 }}
+                                fontWeight={800}
+                                sx={{ fontFamily: '"Orbitron", sans-serif', color: primaryMain, lineHeight: 1 }}
                               >
                                 {rep.completedJobs}
                               </Typography>
-                              <Typography variant="caption" color="text.secondary">
+                              <Typography variant="caption" color="text.secondary" fontWeight={600}>
                                 jobs done
                               </Typography>
                             </Box>
                             <Box sx={{ textAlign: 'center' }}>
                               <Typography
                                 variant="h6"
-                                fontWeight={700}
-                                sx={{ fontFamily: '"Orbitron", sans-serif', color: '#00ffc3', lineHeight: 1 }}
+                                fontWeight={800}
+                                sx={{ fontFamily: '"Orbitron", sans-serif', color: primaryMain, lineHeight: 1 }}
                               >
                                 {rep.totalReviews > 0 ? rep.averageRating.toFixed(1) : '—'}
                               </Typography>
-                              <Typography variant="caption" color="text.secondary">
+                              <Typography variant="caption" color="text.secondary" fontWeight={600}>
                                 avg rating
                               </Typography>
                             </Box>
@@ -500,32 +580,68 @@ export default function FindTalent() {
 
                         {/* Badges */}
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2.5 }}>
+                          {isKycVerified && (
+                            <Chip
+                              icon={<VerifiedUser sx={{ fontSize: '12px !important' }} />}
+                              label="ID Verified"
+                              size="small"
+                              sx={{
+                                bgcolor: isDark ? alpha('#00ffc3', 0.08) : alpha('#00b894', 0.06),
+                                color: isDark ? '#00ffc3' : '#00875a',
+                                border: 1,
+                                borderColor: isDark ? alpha('#00ffc3', 0.3) : alpha('#00b894', 0.3),
+                                fontWeight: 700,
+                                fontSize: '0.63rem',
+                                height: 22,
+                                '& .MuiChip-icon': { color: 'inherit' },
+                              }}
+                            />
+                          )}
+                          {isJuror && (
+                            <Chip
+                              icon={<Gavel sx={{ fontSize: '12px !important' }} />}
+                              label="Arbitrator"
+                              size="small"
+                              sx={{
+                                bgcolor: isDark ? alpha('#7c3aed', 0.1) : alpha('#7c3aed', 0.06),
+                                color: '#7c3aed',
+                                border: 1,
+                                borderColor: alpha('#7c3aed', 0.3),
+                                fontWeight: 700,
+                                fontSize: '0.63rem',
+                                height: 22,
+                                '& .MuiChip-icon': { color: 'inherit' },
+                              }}
+                            />
+                          )}
                           {isTopRated && (
                             <Chip
                               label="Top Rated"
                               size="small"
                               sx={{
-                                bgcolor: 'rgba(76,175,80,0.1)',
-                                color: '#4caf50',
-                                border: '1px solid rgba(76,175,80,0.25)',
-                                fontWeight: 600,
+                                bgcolor: isDark ? 'rgba(76,175,80,0.1)' : 'rgba(76,175,80,0.05)',
+                                color: theme.palette.success.main,
+                                border: 1,
+                                borderColor: alpha(theme.palette.success.main, 0.3),
+                                fontWeight: 700,
                                 fontSize: '0.65rem',
+                                height: 22
                               }}
                             />
                           )}
                           {expLevel && (
                             <Chip
-                              label={expLevel.label}
+                              label={expLevel.label.toUpperCase()}
                               size="small"
                               color={expLevel.color}
-                              sx={{ fontSize: '0.65rem' }}
+                              sx={{ fontSize: '0.65rem', fontWeight: 700, height: 22 }}
                             />
                           )}
                         </Box>
 
                         {/* Actions */}
                         <Box sx={{ mt: 'auto' }}>
-                          <Stack spacing={1}>
+                          <Stack spacing={1.5}>
                             <Button
                               component={Link}
                               href={`/profile/${freelancer.address}`}
@@ -533,6 +649,7 @@ export default function FindTalent() {
                               size="small"
                               fullWidth
                               endIcon={<ArrowForwardIcon />}
+                              sx={{ fontWeight: 700 }}
                             >
                               View Profile
                             </Button>
@@ -546,6 +663,7 @@ export default function FindTalent() {
                                     onClick={() => connected ? handleOpenChat(freelancer.address) : setVisible(true)}
                                     fullWidth
                                     disabled={!connected}
+                                    sx={{ fontWeight: 700 }}
                                   >
                                     Message
                                   </Button>
@@ -559,6 +677,7 @@ export default function FindTalent() {
                                   startIcon={<Send sx={{ fontSize: 14 }} />}
                                   onClick={() => handleOpenInvite(freelancer.address)}
                                   fullWidth
+                                  sx={{ fontWeight: 700 }}
                                 >
                                   Invite
                                 </Button>
@@ -585,17 +704,23 @@ export default function FindTalent() {
         )}
 
         {/* Invite to Job Dialog */}
-        <Dialog open={inviteDialogOpen} onClose={() => setInviteDialogOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle>
+        <Dialog 
+          open={inviteDialogOpen} 
+          onClose={() => setInviteDialogOpen(false)} 
+          maxWidth="sm" 
+          fullWidth
+          PaperProps={{ sx: { backgroundImage: 'none' } }}
+        >
+          <DialogTitle sx={{ py: 2.5 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="h6" fontWeight={600}>Invite to Job</Typography>
+              <Typography variant="h6" fontWeight={700}>Invite to Job</Typography>
               <IconButton onClick={() => setInviteDialogOpen(false)} size="small">
                 <Close />
               </IconButton>
             </Box>
           </DialogTitle>
-          <DialogContent>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          <DialogContent dividers={!isDark}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, fontWeight: 500 }}>
               Select an open job to invite <strong style={{ fontFamily: 'monospace' }}>{formatAddress(selectedFreelancer)}</strong> to bid on.
             </Typography>
             {loadingJobs ? (
@@ -611,8 +736,8 @@ export default function FindTalent() {
                   {myOpenJobs.map((job) => (
                     <MenuItem key={job.publicKey.toString()} value={job.publicKey.toString()}>
                       <Box>
-                        <Typography variant="body2" fontWeight={600}>{job.account.title}</Typography>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="body2" fontWeight={700}>{job.account.title}</Typography>
+                        <Typography variant="caption" color="text.secondary" fontWeight={600}>
                           {formatSol(job.account.budget.toNumber() / 1e9)} SOL
                         </Typography>
                       </Box>
@@ -622,13 +747,14 @@ export default function FindTalent() {
               </FormControl>
             )}
           </DialogContent>
-          <DialogActions sx={{ p: 2 }}>
-            <Button onClick={() => setInviteDialogOpen(false)}>Cancel</Button>
+          <DialogActions sx={{ p: 2.5 }}>
+            <Button onClick={() => setInviteDialogOpen(false)} sx={{ fontWeight: 700 }}>Cancel</Button>
             <Button
               variant="contained"
               onClick={handleSendInvite}
               disabled={!selectedJob}
               startIcon={<Send />}
+              sx={{ px: 4, fontWeight: 700 }}
             >
               Send Invite
             </Button>

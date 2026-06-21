@@ -9,6 +9,7 @@ import {
   Alert,
   Divider,
   LinearProgress,
+  useTheme,
 } from '@mui/material';
 import {
   CheckCircle,
@@ -49,14 +50,20 @@ export default function BidCard({
   onRiskCheck,
   onChat,
 }: BidCardProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  
   const createdAt = new Date(bid.account.createdAt.toNumber() * 1000);
   const statusText = getBidStatusText(bid.account.status);
   const statusColor = getBidStatusColor(bid.account.status);
+  
+  // High contrast rank colors
   const rankColor =
-    rank === 1 ? '#FFD700' :
-    rank === 2 ? '#C0C0C0' :
-    rank === 3 ? '#CD7F32' :
-    'rgba(255,255,255,0.15)';
+    rank === 1 ? (isDark ? '#FFD700' : '#B8860B') : // Gold
+    rank === 2 ? (isDark ? '#C0C0C0' : '#708090') : // Silver
+    rank === 3 ? (isDark ? '#CD7F32' : '#8B4513') : // Bronze
+    'divider';
+    
   const scoreLevel = getScoreLevel(score);
   const scoreColor = SCORE_COLORS[scoreLevel];
 
@@ -70,9 +77,10 @@ export default function BidCard({
       variant="outlined"
       sx={{
         position: 'relative',
-        borderColor: rank <= 3 ? rankColor : undefined,
+        borderColor: rank <= 3 ? rankColor : 'divider',
         borderWidth: rank === 1 ? 2 : 1,
-        '&:hover': { boxShadow: 2 },
+        transition: 'all 0.2s ease',
+        '&:hover': { boxShadow: isDark ? `0 0 20px ${theme.palette.primary.main}10` : '0 4px 12px rgba(0,0,0,0.05)' },
       }}
     >
       <CardContent>
@@ -90,16 +98,16 @@ export default function BidCard({
             width: 36, height: 36, borderRadius: '50%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontWeight: 800, fontSize: '0.75rem',
-            background: rank <= 3 ? rankColor : 'rgba(255,255,255,0.08)',
-            color: rank <= 3 ? '#000' : 'rgba(255,255,255,0.4)',
-            border: `2px solid ${rankColor}`,
+            background: rank <= 3 ? rankColor : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'),
+            color: rank <= 3 ? '#fff' : 'text.disabled',
+            border: rank <= 3 ? `2px solid ${rankColor}` : `1px solid ${theme.palette.divider}`,
             fontFamily: '"Orbitron", monospace',
           }}>
             #{rank}
           </Box>
           <Box sx={{
             px: 0.75, py: 0.2, borderRadius: 0.75,
-            bgcolor: scoreColor + '22',
+            bgcolor: scoreColor + (isDark ? '22' : '15'),
             border: `1px solid ${scoreColor}55`,
             fontSize: '0.6rem', fontWeight: 700,
             color: scoreColor, fontFamily: 'monospace',
@@ -114,14 +122,14 @@ export default function BidCard({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Avatar sx={{
               width: 48, height: 48,
-              bgcolor: rank <= 3 ? rankColor : undefined,
-              color: rank <= 3 ? '#000' : undefined,
+              bgcolor: rank <= 3 ? rankColor : theme.palette.primary.main,
+              color: '#fff',
             }}>
               {bid.account.freelancer.toBase58().slice(0, 2).toUpperCase()}
             </Avatar>
             <Box>
               <Link href={`/profile/${bid.account.freelancer.toBase58()}`} passHref legacyBehavior>
-                <MuiLink sx={{ cursor: 'pointer', fontWeight: 600, fontSize: '1rem' }}>
+                <MuiLink sx={{ cursor: 'pointer', fontWeight: 600, fontSize: '1rem', color: 'primary.main' }}>
                   {formatAddress(bid.account.freelancer)}
                 </MuiLink>
               </Link>
@@ -131,7 +139,7 @@ export default function BidCard({
             </Box>
           </Box>
 
-          <Chip label={statusText} color={statusColor} size="small" />
+          <Chip label={statusText} color={statusColor} size="small" variant={isDark ? 'filled' : 'outlined'} />
         </Box>
 
         <Divider sx={{ my: 2 }} />
@@ -143,8 +151,8 @@ export default function BidCard({
               Bid Amount
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <SolanaIconSimple sx={{ fontSize: 16 }} />
-              <Typography variant="body1" fontWeight={600}>
+              <SolanaIconSimple sx={{ fontSize: 16, color: 'primary.main' }} />
+              <Typography variant="body1" fontWeight={700} color="primary.main">
                 {bid.budgetInSol.toFixed(4)}
               </Typography>
               {jobBudgetSol > 0 && (
@@ -180,7 +188,7 @@ export default function BidCard({
               value={score}
               sx={{
                 height: 4, borderRadius: 2,
-                bgcolor: 'rgba(255,255,255,0.08)',
+                bgcolor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
                 '& .MuiLinearProgress-bar': { bgcolor: scoreColor, borderRadius: 2 },
               }}
             />
@@ -199,8 +207,11 @@ export default function BidCard({
               maxHeight: 150,
               overflow: 'auto',
               p: 1.5,
-              bgcolor: 'background.default',
+              bgcolor: isDark ? 'background.default' : 'grey.50',
+              border: 1,
+              borderColor: 'divider',
               borderRadius: 1,
+              color: 'text.primary',
             }}
           >
             {getCleanProposal(bid.account.proposal)}
@@ -247,8 +258,9 @@ export default function BidCard({
               onClick={() => onRiskCheck(bid)}
               sx={{
                 flex: '0 1 auto', minWidth: '110px',
-                borderColor: 'rgba(128,132,238,0.4)', color: '#8084ee',
-                '&:hover': { borderColor: '#8084ee', bgcolor: 'rgba(128,132,238,0.06)' },
+                borderColor: isDark ? 'rgba(128,132,238,0.4)' : 'secondary.light',
+                color: 'secondary.main',
+                '&:hover': { borderColor: 'secondary.main', bgcolor: isDark ? 'rgba(128,132,238,0.06)' : 'rgba(99,102,241,0.04)' },
               }}
             >
               Risk Check

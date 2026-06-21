@@ -1,4 +1,4 @@
-import { Box, Card, CardContent } from '@mui/material';
+import { Box, Card, CardContent, useTheme } from '@mui/material';
 import { PublicKey } from '@solana/web3.js';
 import JobActionPanel from './JobActionPanel';
 import BidsList from './BidsList';
@@ -51,6 +51,9 @@ export default function JobMainContent({
   onChatOpen,
   onBidAccepted,
 }: JobMainContentProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   return (
     <>
       <JobActionPanel
@@ -91,7 +94,7 @@ export default function JobMainContent({
       {/* Milestone Timeline - Show if job has milestones */}
       {hasMilestones && jobPda && (
         <Box sx={{ mt: 3 }}>
-          <Card>
+          <Card sx={{ border: 1, borderColor: 'divider' }}>
             <CardContent>
               <MilestoneTimeline
                 jobPda={jobPda}

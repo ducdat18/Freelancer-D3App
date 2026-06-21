@@ -13,6 +13,7 @@ import {
   CircularProgress,
   Alert,
   Stack,
+  useTheme,
 } from '@mui/material';
 import LoadingSpinner from '../LoadingSpinner';
 import {
@@ -46,6 +47,9 @@ export default function BrowseFreelancersTab() {
   const [freelancers, setFreelancers] = useState<FreelancerProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
 
   useEffect(() => {
     loadFreelancers();
@@ -104,7 +108,7 @@ export default function BrowseFreelancersTab() {
 
   if (!connected) {
     return (
-      <Alert severity="info">
+      <Alert severity="info" sx={{ fontWeight: 500 }}>
         Please connect your wallet to browse freelancers
       </Alert>
     );
@@ -112,8 +116,8 @@ export default function BrowseFreelancersTab() {
 
   return (
     <Box>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Browse and connect with talented freelancers. View their profiles, ratings, and completed work.
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3, fontWeight: 500 }}>
+        Browse and connect with top freelancers. Review their on-chain reputation and history.
       </Typography>
 
       {/* Search Bar */}
@@ -125,11 +129,11 @@ export default function BrowseFreelancersTab() {
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <SearchIcon />
+              <SearchIcon sx={{ color: 'text.disabled' }} />
             </InputAdornment>
           ),
         }}
-        sx={{ mb: 3 }}
+        sx={{ mb: 4 }}
       />
 
       {loading ? (
@@ -147,46 +151,57 @@ export default function BrowseFreelancersTab() {
           {error}
         </Alert>
       ) : filteredFreelancers.length === 0 ? (
-        <Alert severity="info">
-          {searchTerm ? 'No freelancers found matching your search.' : 'No freelancers available yet. Check back later!'}
-        </Alert>
+        <Box sx={{ py: 6, textAlign: 'center', border: 1, borderStyle: 'dashed', borderColor: 'divider', borderRadius: 2 }}>
+          <Person sx={{ fontSize: 48, color: 'text.disabled', opacity: 0.5, mb: 1 }} />
+          <Typography variant="body2" color="text.secondary" fontWeight={600}>
+            {searchTerm ? 'No freelancers found matching your search.' : 'No freelancers available yet. Check back later!'}
+          </Typography>
+        </Box>
       ) : (
-        <Grid container spacing={3}>
+        <Grid container spacing={2.5}>
           {filteredFreelancers.map((freelancer) => (
             <Grid key={freelancer.address} size={{ xs: 12, md: 6 }}>
               <Card
                 sx={{
                   height: '100%',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  border: 1,
+                  borderColor: 'divider',
+                  transition: 'all 0.2s ease',
                   '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: 4,
+                    transform: 'translateY(-2px)',
+                    boxShadow: isDark ? `0 0 20px ${primaryMain}15` : '0 4px 12px rgba(0,0,0,0.05)',
+                    borderColor: primaryMain,
                   },
                 }}
               >
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <CardContent sx={{ p: 2.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2.5 }}>
                     <Avatar
                       sx={{
-                        width: 56,
-                        height: 56,
-                        bgcolor: 'primary.main',
+                        width: 52,
+                        height: 52,
+                        bgcolor: isDark ? 'rgba(0,255,195,0.1)' : 'rgba(5,150,105,0.08)',
+                        color: primaryMain,
                         mr: 2,
+                        border: 1,
+                        borderColor: isDark ? 'rgba(0,255,195,0.2)' : 'rgba(5,150,105,0.2)',
+                        fontWeight: 700,
+                        fontFamily: '"Orbitron", sans-serif',
                       }}
                     >
-                      <Person />
+                      {freelancer.address.slice(0, 2).toUpperCase()}
                     </Avatar>
                     <Box sx={{ flex: 1 }}>
-                      <Typography variant="h6" fontWeight={600}>
+                      <Typography variant="subtitle1" fontWeight={700} sx={{ fontFamily: 'monospace' }}>
                         {formatAddress(freelancer.address)}
                       </Typography>
                       {freelancer.reputation && freelancer.reputation.totalReviews > 0 && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                          <Star sx={{ fontSize: 18, color: 'warning.main' }} />
-                          <Typography variant="body2" fontWeight={600}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                          <Star sx={{ fontSize: 16, color: '#f59e0b' }} />
+                          <Typography variant="body2" fontWeight={700}>
                             {freelancer.reputation.averageRating.toFixed(1)}
                           </Typography>
-                          <Typography variant="caption" color="text.secondary">
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
                             ({freelancer.reputation.totalReviews} {freelancer.reputation.totalReviews === 1 ? 'review' : 'reviews'})
                           </Typography>
                         </Box>
@@ -194,47 +209,50 @@ export default function BrowseFreelancersTab() {
                     </Box>
                   </Box>
 
-                  <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}>
+                  <Stack direction="row" spacing={1} sx={{ mb: 2.5, flexWrap: 'wrap', gap: 1 }}>
                     {freelancer.reputation && (
                       <>
                         <Chip
-                          icon={<Work />}
-                          label={`${freelancer.reputation.completedJobs} jobs completed`}
+                          icon={<Work sx={{ fontSize: '0.9rem !important' }} />}
+                          label={`${freelancer.reputation.completedJobs} completed`}
                           size="small"
                           variant="outlined"
+                          sx={{ fontWeight: 600, fontSize: '0.7rem' }}
                         />
                         {freelancer.reputation.totalReviews > 0 && (
                           <Chip
                             label={`${freelancer.reputation.averageRating.toFixed(1)}★ Rating`}
                             size="small"
                             color={getRatingColor(freelancer.reputation.averageRating) as any}
+                            sx={{ fontWeight: 700, fontSize: '0.7rem' }}
                           />
                         )}
                       </>
                     )}
                     {(!freelancer.reputation || freelancer.reputation.totalReviews === 0) && (
-                      <Chip label="New Freelancer" size="small" color="info" />
+                      <Chip label="NEW" size="small" color="info" sx={{ fontWeight: 800, fontSize: '0.65rem' }} />
                     )}
                   </Stack>
 
-                  <Stack direction="row" spacing={1}>
+                  <Stack direction="row" spacing={1.5}>
                     <Button
                       component={Link}
                       href={`/profile/${freelancer.address}`}
                       variant="contained"
                       size="small"
                       fullWidth
+                      sx={{ fontWeight: 700 }}
                     >
-                      View Profile
+                      Profile
                     </Button>
                     <Button
                       variant="outlined"
                       size="small"
                       startIcon={<Chat />}
                       onClick={() => router.push(`/messages?recipient=${freelancer.address}`)}
-                      sx={{ minWidth: '120px' }}
+                      sx={{ minWidth: '110px', fontWeight: 700 }}
                     >
-                      Message
+                      Chat
                     </Button>
                   </Stack>
                 </CardContent>

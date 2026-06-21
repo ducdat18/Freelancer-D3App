@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Box, Typography, IconButton, CircularProgress, Alert } from '@mui/material';
-import { OpenInNew, Close } from '@mui/icons-material';
+import { Box, Typography, IconButton, CircularProgress, Alert, useTheme } from '@mui/material';
+import { OpenInNew, Close, Fullscreen, FullscreenExit } from '@mui/icons-material';
 import { getIPFSUrl } from '../../services/ipfs';
 
 interface PDFViewerProps {
@@ -19,6 +19,8 @@ export default function PDFViewer({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   const pdfUrl = getIPFSUrl(hash);
 
@@ -48,6 +50,10 @@ export default function PDFViewer({
         height: isFullscreen ? '100vh' : height,
         zIndex: isFullscreen ? 9999 : 1,
         bgcolor: isFullscreen ? 'background.paper' : 'transparent',
+        border: 1,
+        borderColor: 'divider',
+        borderRadius: isFullscreen ? 0 : 1,
+        overflow: 'hidden',
       }}
     >
       {/* Loading indicator */}
@@ -58,8 +64,7 @@ export default function PDFViewer({
             justifyContent: 'center',
             alignItems: 'center',
             height: '100%',
-            bgcolor: 'grey.100',
-            borderRadius: 1,
+            bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'grey.50',
           }}
         >
           <CircularProgress />
@@ -73,22 +78,27 @@ export default function PDFViewer({
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            p: 1,
-            bgcolor: 'grey.900',
-            color: 'white',
+            px: 2,
+            py: 1,
+            bgcolor: isDark ? 'background.paper' : 'grey.100',
+            borderBottom: 1,
+            borderColor: 'divider',
           }}
         >
-          <Typography variant="body2" noWrap>
+          <Typography variant="subtitle2" fontWeight={700} noWrap sx={{ maxWidth: '70%' }}>
             {title || 'PDF Document'}
           </Typography>
-          <Box>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
             {showOpenButton && (
-              <IconButton size="small" onClick={handleOpen} sx={{ color: 'white' }}>
+              <IconButton size="small" onClick={handleOpen} title="Open in new tab">
                 <OpenInNew fontSize="small" />
               </IconButton>
             )}
+            <IconButton size="small" onClick={handleFullscreen} title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}>
+              {isFullscreen ? <FullscreenExit fontSize="small" /> : <Fullscreen fontSize="small" />}
+            </IconButton>
             {isFullscreen && (
-              <IconButton size="small" onClick={handleFullscreen} sx={{ color: 'white' }}>
+              <IconButton size="small" onClick={handleFullscreen}>
                 <Close fontSize="small" />
               </IconButton>
             )}
@@ -104,6 +114,7 @@ export default function PDFViewer({
           height: loading ? 0 : isFullscreen ? 'calc(100% - 48px)' : typeof height === 'number' ? `${height - 48}px` : `calc(${height} - 48px)`,
           border: 'none',
           display: loading ? 'none' : 'block',
+          background: '#fff', // PDF viewers usually look best on white background
         }}
         onLoad={() => setLoading(false)}
         onError={() => {
@@ -115,10 +126,10 @@ export default function PDFViewer({
 
       {/* Fallback: Direct link */}
       {!loading && (
-        <Box sx={{ p: 1, textAlign: 'center', bgcolor: 'grey.100' }}>
-          <Typography variant="caption" color="text.secondary">
+        <Box sx={{ p: 1, textAlign: 'center', bgcolor: isDark ? 'rgba(0,0,0,0.2)' : 'grey.50', borderTop: 1, borderColor: 'divider' }}>
+          <Typography variant="caption" color="text.secondary" fontWeight={500}>
             Can't see the PDF?{' '}
-            <a href={pdfUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>
+            <a href={pdfUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline', color: theme.palette.primary.main, fontWeight: 700 }}>
               Open in new tab
             </a>
           </Typography>

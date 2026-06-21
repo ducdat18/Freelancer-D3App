@@ -6,6 +6,7 @@ import { useJobsQuery } from '../../hooks/queries/useJobsQuery';
 import { bnToNumber } from '../../types/solana';
 import JobCard from '../JobCard';
 import { staggerContainer, staggerChild } from '../../utils/animations';
+import { DEMO_JOBS } from '../../data/demoJobs';
 
 const MotionBox = motion.create(Box);
 const MotionGrid = motion.create(Grid);
@@ -13,11 +14,16 @@ const MotionGrid = motion.create(Grid);
 export default function TrendingJobs() {
   const { data: jobs, isLoading } = useJobsQuery('open');
 
-  const trendingJobs = (jobs || [])
-    .sort((a, b) => bnToNumber(b.account.createdAt) - bnToNumber(a.account.createdAt))
-    .slice(0, 6);
+  const chainJobs = (jobs || [])
+    .sort((a, b) => bnToNumber(b.account.createdAt) - bnToNumber(a.account.createdAt));
 
-  if (isLoading || trendingJobs.length === 0) return null;
+  const chainKeys = new Set(chainJobs.map(j => j.publicKey.toBase58()));
+  const demoFill = DEMO_JOBS.filter(d => !chainKeys.has(d.publicKey.toBase58()));
+
+  const trendingJobs = [...chainJobs, ...demoFill].slice(0, 6);
+
+  if (isLoading) return null;
+  if (trendingJobs.length === 0) return null;
 
   return (
     <Container maxWidth="lg">
@@ -49,7 +55,8 @@ export default function TrendingJobs() {
         <Grid container spacing={3}>
           {trendingJobs.map((job) => (
             <MotionGrid size={{ xs: 12, sm: 6, md: 4 }} key={job.publicKey.toString()} variants={staggerChild}>
-              <JobCard job={job} />
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              <JobCard job={job as any} />
             </MotionGrid>
           ))}
         </Grid>

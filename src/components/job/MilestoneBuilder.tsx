@@ -58,6 +58,17 @@ export default function MilestoneBuilder({
     [milestones, onChange]
   );
 
+  // A single milestone amount can be any value, but never greater than the budget.
+  const handleAmountChange = useCallback(
+    (index: number, raw: string) => {
+      const parsed = parseFloat(raw);
+      const amount = Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+      const capped = budget > 0 ? Math.min(amount, budget) : amount;
+      handleChange(index, 'amount', capped);
+    },
+    [budget, handleChange]
+  );
+
   return (
     <Paper sx={{ p: { xs: 3, md: 4 }, borderRadius: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -120,14 +131,20 @@ export default function MilestoneBuilder({
                   label="Amount"
                   type="number"
                   value={milestone.amount || ''}
-                  onChange={(e) => handleChange(index, 'amount', parseFloat(e.target.value) || 0)}
+                  onChange={(e) => handleAmountChange(index, e.target.value)}
                   placeholder="0.00"
                   size="small"
                   required
+                  error={budget > 0 && milestone.amount > budget}
+                  helperText={
+                    budget > 0 && milestone.amount > budget
+                      ? `Cannot exceed budget (${budget} SOL)`
+                      : undefined
+                  }
                   InputProps={{
                     endAdornment: <InputAdornment position="end">SOL</InputAdornment>,
                   }}
-                  inputProps={{ min: 0, step: 0.01 }}
+                  inputProps={{ min: 0, max: budget > 0 ? budget : undefined, step: 0.01 }}
                 />
               </Box>
 

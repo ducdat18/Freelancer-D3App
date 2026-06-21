@@ -33,6 +33,8 @@ export default async function handler(
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+  const { aiRateLimit } = await import('../../../src/utils/rateLimit');
+  if (!aiRateLimit(req, res)) return;
 
   try {
     const { jobAddress, verificationType, deliverableUri }: VerificationRequest = req.body;

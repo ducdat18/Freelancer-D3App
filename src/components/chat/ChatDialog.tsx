@@ -13,6 +13,7 @@ import {
   CircularProgress,
   Chip,
   Alert,
+  useTheme,
 } from '@mui/material'
 import LoadingSpinner from '../LoadingSpinner'
 import { Send, Close, Refresh } from '@mui/icons-material'
@@ -38,6 +39,10 @@ export default function ChatDialog({
   const [messages, setMessages] = useState<DatabaseMessage[]>([])
   const [loadingMessages, setLoadingMessages] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  
+  const theme = useTheme()
+  const isDark = theme.palette.mode === 'dark'
+  const primaryMain = theme.palette.primary.main
 
   // Load messages from database
   useEffect(() => {
@@ -139,31 +144,32 @@ export default function ChatDialog({
           maxHeight: '700px',
           display: 'flex',
           flexDirection: 'column',
+          backgroundImage: 'none',
         },
       }}
     >
       {/* Header */}
-      <DialogTitle>
+      <DialogTitle sx={{ bgcolor: 'background.paper', py: 1.5 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar sx={{ bgcolor: 'primary.main' }}>
+            <Avatar sx={{ bgcolor: primaryMain, color: theme.palette.primary.contrastText, fontWeight: 700 }}>
               {recipientAddress.slice(0, 2).toUpperCase()}
             </Avatar>
             <Box>
-              <Typography variant="h6" fontWeight={600}>
+              <Typography variant="subtitle1" fontWeight={700}>
                 {recipientName || formatAddress(recipientAddress)}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {recipientAddress}
+              <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                {recipientAddress.slice(0, 8)}...{recipientAddress.slice(-8)}
               </Typography>
             </Box>
           </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <IconButton onClick={loadMessages} disabled={loadingMessages}>
-              <Refresh />
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <IconButton onClick={loadMessages} disabled={loadingMessages} size="small">
+              <Refresh fontSize="small" />
             </IconButton>
-            <IconButton onClick={onClose} sx={{ color: 'text.secondary' }}>
-              <Close />
+            <IconButton onClick={onClose} sx={{ color: 'text.secondary' }} size="small">
+              <Close fontSize="small" />
             </IconButton>
           </Box>
         </Box>
@@ -172,7 +178,7 @@ export default function ChatDialog({
       <Divider />
 
       {/* Messages */}
-      <DialogContent sx={{ flex: 1, overflow: 'auto', bgcolor: 'grey.50', p: 2 }}>
+      <DialogContent sx={{ flex: 1, overflow: 'auto', bgcolor: isDark ? 'rgba(0,0,0,0.2)' : 'grey.50', p: 2, display: 'flex', flexDirection: 'column' }}>
         {!recipientAddress || recipientAddress.length === 0 ? (
           <Alert severity="warning" sx={{ mb: 2 }}>
             No recipient selected. Please select a freelancer first.
@@ -185,7 +191,7 @@ export default function ChatDialog({
 
         {loadingMessages && messages.length === 0 ? (
           <LoadingSpinner
-            message="Connecting to chat..."
+            message="Connecting to secure chat..."
             logs={[
               { text: 'POST /auth/challenge — wallet sign...', type: 'info' },
               { text: 'Session token issued', type: 'ok' },
@@ -196,60 +202,68 @@ export default function ChatDialog({
         ) : messages.length === 0 ? (
           <Box
             sx={{
+              flex: 1,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              height: '100%',
-              gap: 2,
+              gap: 1,
+              opacity: 0.6,
             }}
           >
-            <Typography variant="body2" color="text.secondary">
-              No messages yet. Start the conversation!
+            <Typography variant="body2" fontWeight={600}>
+              No messages yet
             </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Messages are stored in database (free & fast!)
+            <Typography variant="caption">
+              Start the conversation with this freelancer
             </Typography>
           </Box>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {messages.map((msg, index) => (
-              <Box
-                key={`${msg.id}-${index}`}
-                sx={{
-                  display: 'flex',
-                  justifyContent: isMyMessage(msg.sender) ? 'flex-end' : 'flex-start',
-                }}
-              >
+            {messages.map((msg, index) => {
+              const mine = isMyMessage(msg.sender);
+              return (
                 <Box
+                  key={`${msg.id}-${index}`}
                   sx={{
-                    p: 1.5,
-                    maxWidth: '70%',
-                    bgcolor: isMyMessage(msg.sender) ? '#1976d2' : '#e8f5e9',
-                    color: isMyMessage(msg.sender) ? 'white' : '#000000',
-                    borderRadius: 2,
-                    borderTopRightRadius: isMyMessage(msg.sender) ? 0 : 2,
-                    borderTopLeftRadius: isMyMessage(msg.sender) ? 2 : 0,
-                    boxShadow: 1,
+                    display: 'flex',
+                    justifyContent: mine ? 'flex-end' : 'flex-start',
                   }}
                 >
-                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                    {msg.content}
-                  </Typography>
-                  <Typography
-                    variant="caption"
+                  <Box
                     sx={{
-                      display: 'block',
-                      mt: 0.5,
-                      opacity: 0.7,
-                      fontSize: '0.7rem',
+                      p: 1.5,
+                      maxWidth: '85%',
+                      bgcolor: mine ? primaryMain : (isDark ? 'background.paper' : '#fff'),
+                      color: mine ? theme.palette.primary.contrastText : 'text.primary',
+                      borderRadius: 2,
+                      borderTopRightRadius: mine ? 0 : 2,
+                      borderTopLeftRadius: mine ? 2 : 0,
+                      boxShadow: isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.05)',
+                      border: 1,
+                      borderColor: mine ? 'transparent' : 'divider',
                     }}
                   >
-                    {formatTime(msg.timestamp)}
-                  </Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontWeight: 500, lineHeight: 1.5 }}>
+                      {msg.content}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        display: 'block',
+                        mt: 0.5,
+                        opacity: 0.6,
+                        fontSize: '0.65rem',
+                        textAlign: mine ? 'right' : 'left',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {formatTime(msg.timestamp)}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            ))}
+              );
+            })}
             <div ref={messagesEndRef} />
           </Box>
         )}
@@ -270,31 +284,42 @@ export default function ChatDialog({
             placeholder={
               !recipientAddress || recipientAddress.length === 0
                 ? 'No recipient selected'
-                : 'Type your message... (max 1000 chars)'
+                : 'Type a message...'
             }
             variant="outlined"
             size="small"
             disabled={loading || !recipientAddress || recipientAddress.length === 0}
             inputProps={{ maxLength: 1000 }}
-            helperText={`${message.length}/1000`}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'grey.50',
+              }
+            }}
           />
           <IconButton
             color="primary"
             onClick={handleSend}
             disabled={!message.trim() || loading || !recipientAddress || recipientAddress.length === 0}
             sx={{
-              bgcolor: 'primary.main',
-              color: 'white',
+              bgcolor: primaryMain,
+              color: theme.palette.primary.contrastText,
               '&:hover': { bgcolor: 'primary.dark' },
-              '&:disabled': { bgcolor: 'grey.300' },
+              '&:disabled': { bgcolor: 'action.disabledBackground', color: 'action.disabled' },
+              width: 40,
+              height: 40,
             }}
           >
-            {loading ? <CircularProgress size={20} /> : <Send />}
+            {loading ? <CircularProgress size={20} color="inherit" /> : <Send fontSize="small" />}
           </IconButton>
         </Box>
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-          Press Enter to send • Shift+Enter for new line • Auto-refreshes every 5s
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+          <Typography variant="caption" color="text.secondary">
+            Press Enter to send
+          </Typography>
+          <Typography variant="caption" color={message.length > 900 ? 'error' : 'text.secondary'}>
+            {message.length}/1000
+          </Typography>
+        </Box>
       </Box>
     </Dialog>
   )

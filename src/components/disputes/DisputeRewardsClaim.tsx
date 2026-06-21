@@ -8,6 +8,8 @@ import {
   Box,
   CircularProgress,
   Divider,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import LoadingSpinner from '../LoadingSpinner';
 import {
@@ -51,6 +53,10 @@ export default function DisputeRewardsClaim({
   const [claiming, setClaiming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
 
   const loadData = useCallback(async () => {
     if (!publicKey) {
@@ -125,7 +131,7 @@ export default function DisputeRewardsClaim({
 
   if (!publicKey) {
     return (
-      <Card>
+      <Card sx={{ border: 1, borderColor: 'divider' }}>
         <CardContent>
           <Alert severity="info">
             Please connect your wallet to view dispute rewards.
@@ -155,13 +161,14 @@ export default function DisputeRewardsClaim({
     return (
       <Card
         sx={{
-          border: '1px solid',
+          border: 1,
           borderColor: 'divider',
           borderRadius: 2,
+          backgroundImage: 'none',
         }}
       >
-        <CardContent>
-          <Alert severity="info">
+        <CardContent sx={{ p: 3 }}>
+          <Alert severity="info" sx={{ fontWeight: 500 }}>
             You did not vote in this dispute. No rewards or penalties apply.
           </Alert>
         </CardContent>
@@ -174,19 +181,20 @@ export default function DisputeRewardsClaim({
     return (
       <Card
         sx={{
-          border: '1px solid',
+          border: 1,
           borderColor: 'divider',
           borderRadius: 2,
+          backgroundImage: 'none',
         }}
       >
-        <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-            <EmojiEvents color="primary" />
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
+            <EmojiEvents sx={{ color: theme.palette.info.main }} />
             <Typography variant="h6" fontWeight={700}>
               Dispute Rewards
             </Typography>
           </Box>
-          <Alert severity="warning">
+          <Alert severity="warning" sx={{ fontWeight: 500 }}>
             This dispute has not been resolved yet. Rewards will be available
             after resolution.
           </Alert>
@@ -198,17 +206,18 @@ export default function DisputeRewardsClaim({
   return (
     <Card
       sx={{
-        border: '1px solid',
+        border: 1,
         borderColor: 'divider',
         borderRadius: 2,
+        backgroundImage: 'none',
       }}
     >
-      <CardContent>
+      <CardContent sx={{ p: 3 }}>
         {/* Header */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
           <EmojiEvents
             sx={{
-              color: votedWithMajority ? 'success.main' : 'error.main',
+              color: votedWithMajority ? theme.palette.success.main : theme.palette.error.main,
             }}
           />
           <Typography variant="h6" fontWeight={700}>
@@ -234,19 +243,20 @@ export default function DisputeRewardsClaim({
             sx={{
               p: 2.5,
               borderRadius: 2,
-              bgcolor: 'rgba(0,255,195,0.08)',
-              border: '1px solid rgba(0,255,195,0.25)',
+              bgcolor: isDark ? 'rgba(0,255,195,0.08)' : 'rgba(5,150,105,0.05)',
+              border: 1,
+              borderColor: isDark ? 'rgba(0,255,195,0.25)' : 'rgba(5,150,105,0.25)',
               mb: 3,
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
               <CheckCircle color="success" />
-              <Typography variant="subtitle1" fontWeight={700} color="success.main">
-                You voted with the majority!
+              <Typography variant="subtitle1" fontWeight={800} color="success.main" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                Voted with Majority!
               </Typography>
             </Box>
 
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, lineHeight: 1.6, fontWeight: 500 }}>
               Your vote was on the winning side. You are eligible to claim your
               staking reward.
             </Typography>
@@ -255,30 +265,31 @@ export default function DisputeRewardsClaim({
               sx={{
                 display: 'flex',
                 gap: 3,
-                mb: 2,
+                mb: 1,
+                flexWrap: 'wrap',
               }}
             >
               <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Stake Locked
+                <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                  STAKE LOCKED
                 </Typography>
-                <Typography variant="body1" fontWeight={700}>
+                <Typography variant="body1" fontWeight={800} sx={{ mt: 0.5 }}>
                   {stakeLocked.toFixed(4)} tokens
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Reward ({rewardPercentage}%)
+                <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                  REWARD ({rewardPercentage}%)
                 </Typography>
-                <Typography variant="body1" fontWeight={700} color="success.main">
+                <Typography variant="body1" fontWeight={800} color="success.main" sx={{ mt: 0.5 }}>
                   +{rewardAmount.toFixed(4)} tokens
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Total Return
+                <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                  TOTAL RETURN
                 </Typography>
-                <Typography variant="body1" fontWeight={700} color="primary.main">
+                <Typography variant="body1" fontWeight={800} color="primary.main" sx={{ mt: 0.5 }}>
                   {(stakeLocked + rewardAmount).toFixed(4)} tokens
                 </Typography>
               </Box>
@@ -292,19 +303,20 @@ export default function DisputeRewardsClaim({
             sx={{
               p: 2.5,
               borderRadius: 2,
-              bgcolor: 'rgba(255,0,255,0.08)',
-              border: '1px solid rgba(255,0,255,0.25)',
+              bgcolor: isDark ? 'rgba(255,0,255,0.08)' : 'rgba(255,0,255,0.05)',
+              border: 1,
+              borderColor: isDark ? 'rgba(255,0,255,0.25)' : 'rgba(255,0,255,0.25)',
               mb: 3,
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
               <Warning color="error" />
-              <Typography variant="subtitle1" fontWeight={700} color="error.main">
-                You voted with the minority
+              <Typography variant="subtitle1" fontWeight={800} color="error.main" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                Voted with Minority
               </Typography>
             </Box>
 
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, lineHeight: 1.6, fontWeight: 500 }}>
               Your vote was on the losing side. A portion of your stake has been
               slashed as a penalty.
             </Typography>
@@ -313,30 +325,31 @@ export default function DisputeRewardsClaim({
               sx={{
                 display: 'flex',
                 gap: 3,
-                mb: 2,
+                mb: 1,
+                flexWrap: 'wrap',
               }}
             >
               <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Stake Locked
+                <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                  STAKE LOCKED
                 </Typography>
-                <Typography variant="body1" fontWeight={700}>
+                <Typography variant="body1" fontWeight={800} sx={{ mt: 0.5 }}>
                   {stakeLocked.toFixed(4)} tokens
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Slashed ({slashPercentage}%)
+                <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                  SLASHED ({slashPercentage}%)
                 </Typography>
-                <Typography variant="body1" fontWeight={700} color="error.main">
+                <Typography variant="body1" fontWeight={800} color="error.main" sx={{ mt: 0.5 }}>
                   -{slashAmount.toFixed(4)} tokens
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Returned
+                <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                  RETURNED
                 </Typography>
-                <Typography variant="body1" fontWeight={700} color="warning.main">
+                <Typography variant="body1" fontWeight={800} color={theme.palette.warning.main} sx={{ mt: 0.5 }}>
                   {(stakeLocked - slashAmount).toFixed(4)} tokens
                 </Typography>
               </Box>
@@ -344,34 +357,34 @@ export default function DisputeRewardsClaim({
           </Box>
         )}
 
-        <Divider sx={{ mb: 2 }} />
+        <Divider sx={{ mb: 3 }} />
 
         {/* Vote Details */}
         {voteRecord && (
           <Box
             sx={{
-              p: 1.5,
+              p: 2,
               borderRadius: 1.5,
-              bgcolor: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid',
+              bgcolor: isDark ? 'rgba(255, 255, 255, 0.03)' : 'grey.50',
+              border: 1,
               borderColor: 'divider',
-              mb: 2,
+              mb: 3,
             }}
           >
-            <Box sx={{ display: 'flex', gap: 3 }}>
+            <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
               <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Your Vote
+                <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                  YOUR VOTE
                 </Typography>
-                <Typography variant="body2" fontWeight={600}>
+                <Typography variant="body2" fontWeight={700} sx={{ mt: 0.5 }}>
                   {voteRecord.voteForClient ? 'Client' : 'Freelancer'}
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Voted At
+                <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                  VOTED AT
                 </Typography>
-                <Typography variant="body2" fontWeight={600}>
+                <Typography variant="body2" fontWeight={600} sx={{ mt: 0.5 }}>
                   {new Date(voteRecord.votedAt.toNumber() * 1000).toLocaleString()}
                 </Typography>
               </Box>
@@ -383,31 +396,26 @@ export default function DisputeRewardsClaim({
         {canClaim && (
           <Button
             variant="contained"
-            color="success"
             fullWidth
             onClick={handleClaim}
             disabled={claiming}
             startIcon={
               claiming ? (
-                <CircularProgress size={20} sx={{ color: 'white' }} />
+                <CircularProgress size={20} color="inherit" />
               ) : (
                 <AccountBalanceWallet />
               )
             }
             sx={{
               py: 1.5,
-              fontSize: '1rem',
-              fontWeight: 700,
-              textTransform: 'none',
-              background: 'linear-gradient(135deg, #00ffc3 0%, #00d9a6 100%)',
-              boxShadow: '0 4px 12px rgba(0,255,195,0.3)',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #00d9a6 0%, #00b388 100%)',
-                boxShadow: '0 6px 16px rgba(0,255,195,0.4)',
-              },
+              fontSize: '0.9rem',
+              fontWeight: 800,
+              fontFamily: '"Orbitron", sans-serif',
+              letterSpacing: 1,
+              boxShadow: isDark ? `0 4px 15px ${theme.palette.success.main}40` : 'none',
             }}
           >
-            {claiming ? 'Claiming...' : 'Claim Reward'}
+            {claiming ? 'CLAIMING...' : 'CLAIM REWARD'}
           </Button>
         )}
 
@@ -416,16 +424,16 @@ export default function DisputeRewardsClaim({
           <Alert
             severity="success"
             icon={<CheckCircle />}
+            sx={{ fontWeight: 600 }}
           >
-            You have already claimed your reward for this dispute.
+            Reward claimed successfully.
           </Alert>
         )}
 
         {/* Slashed - no claim available */}
         {votedWithMinority && !alreadyClaimed && (
-          <Alert severity="info">
-            Your remaining stake (minus the slashed amount) has been returned to
-            your staking account automatically.
+          <Alert severity="info" sx={{ fontWeight: 500 }}>
+            Remaining stake has been returned to your staking account automatically.
           </Alert>
         )}
       </CardContent>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Box, CircularProgress, IconButton } from '@mui/material'
+import { Box, CircularProgress, IconButton, useTheme } from '@mui/material'
 import { BrokenImage, OpenInNew } from '@mui/icons-material'
 
 interface IPFSImageProps {
@@ -25,6 +25,8 @@ export default function IPFSImage({
 }: IPFSImageProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const theme = useTheme()
+  const isDark = theme.palette.mode === 'dark'
 
   // Remove ipfs:// prefix if present
   const cleanHash = hash.startsWith('ipfs://') ? hash.slice(7) : hash
@@ -51,16 +53,18 @@ export default function IPFSImage({
           width,
           height: typeof height === 'number' ? `${height}px` : height,
           borderRadius,
-          bgcolor: 'grey.100',
+          bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'grey.100',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           flexDirection: 'column',
           gap: 1,
+          border: 1,
+          borderColor: 'divider',
         }}
       >
-        <BrokenImage sx={{ fontSize: 48, color: 'grey.400' }} />
-        <Box sx={{ fontSize: 12, color: 'grey.500' }}>Failed to load image</Box>
+        <BrokenImage sx={{ fontSize: 48, color: 'text.disabled' }} />
+        <Box sx={{ fontSize: 12, color: 'text.secondary', fontWeight: 600 }}>Failed to load image</Box>
       </Box>
     )
   }
@@ -73,7 +77,9 @@ export default function IPFSImage({
         height: typeof height === 'number' && height !== 0 ? `${height}px` : height,
         borderRadius,
         overflow: 'hidden',
-        bgcolor: 'grey.100',
+        bgcolor: isDark ? 'rgba(0,0,0,0.2)' : 'grey.50',
+        border: 1,
+        borderColor: 'divider',
       }}
     >
       {loading && (
@@ -113,6 +119,7 @@ export default function IPFSImage({
             right: 8,
             bgcolor: 'rgba(0,0,0,0.5)',
             color: 'white',
+            backdropFilter: 'blur(4px)',
             '&:hover': {
               bgcolor: 'rgba(0,0,0,0.7)',
             },

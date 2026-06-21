@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import { formatSol } from '../../types/solana';
 
 interface EscrowShieldProps {
@@ -12,6 +12,11 @@ export default function EscrowShield({
   totalReleased = 0,
   activeEscrows = 0,
 }: EscrowShieldProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+  const secondaryMain = theme.palette.secondary.main;
+  
   const total = totalLocked + totalReleased;
   const lockedPercent = total > 0 ? (totalLocked / total) * 100 : 0;
 
@@ -23,8 +28,9 @@ export default function EscrowShield({
   return (
     <Box
       sx={{
-        background: 'rgba(7, 5, 17, 0.9)',
-        border: '1px solid rgba(0, 255, 195, 0.15)',
+        background: theme.palette.background.paper,
+        border: `1px solid ${isDark ? 'rgba(0, 255, 195, 0.15)' : 'rgba(0,0,0,0.08)'}`,
+        boxShadow: isDark ? 'none' : '0 2px 12px rgba(0,0,0,0.03)',
         borderRadius: 2,
         p: 3,
         height: '100%',
@@ -41,9 +47,10 @@ export default function EscrowShield({
           fontFamily: '"Orbitron", sans-serif',
           fontSize: '0.65rem',
           letterSpacing: '0.1em',
-          color: 'rgba(0, 255, 195, 0.5)',
+          color: isDark ? 'rgba(0, 255, 195, 0.5)' : theme.palette.text.secondary,
           textTransform: 'uppercase',
           mb: 2,
+          fontWeight: 600,
         }}
       >
         Escrow Shield
@@ -63,7 +70,7 @@ export default function EscrowShield({
             cy="90"
             r={radius}
             fill="none"
-            stroke="rgba(0, 255, 195, 0.08)"
+            stroke={isDark ? 'rgba(0, 255, 195, 0.08)' : 'rgba(0,0,0,0.05)'}
             strokeWidth="8"
           />
           {/* Active ring */}
@@ -79,7 +86,7 @@ export default function EscrowShield({
             strokeDashoffset={offset}
             style={{
               transition: 'stroke-dashoffset 1.5s ease-out',
-              filter: 'drop-shadow(0 0 6px rgba(0, 255, 195, 0.4))',
+              filter: isDark ? 'drop-shadow(0 0 6px rgba(0, 255, 195, 0.4))' : 'none',
             }}
           />
           {/* Outer glow ring */}
@@ -88,13 +95,13 @@ export default function EscrowShield({
             cy="90"
             r="82"
             fill="none"
-            stroke="rgba(0, 255, 195, 0.04)"
+            stroke={isDark ? 'rgba(0, 255, 195, 0.04)' : 'rgba(0,0,0,0.02)'}
             strokeWidth="1"
           />
           <defs>
             <linearGradient id="escrowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" style={{ stopColor: '#00ffc3' }} />
-              <stop offset="100%" style={{ stopColor: '#8084ee' }} />
+              <stop offset="0%" style={{ stopColor: primaryMain }} />
+              <stop offset="100%" style={{ stopColor: secondaryMain }} />
             </linearGradient>
           </defs>
         </svg>
@@ -114,8 +121,8 @@ export default function EscrowShield({
               fontFamily: '"Orbitron", sans-serif',
               fontSize: '1.4rem',
               fontWeight: 700,
-              color: '#00ffc3',
-              textShadow: '0 0 10px rgba(0, 255, 195, 0.3)',
+              color: primaryMain,
+              textShadow: isDark ? `0 0 10px ${primaryMain}40` : 'none',
               lineHeight: 1,
             }}
           >
@@ -125,9 +132,10 @@ export default function EscrowShield({
             sx={{
               fontFamily: '"Rajdhani", sans-serif',
               fontSize: '0.7rem',
-              color: 'rgba(224, 230, 237, 0.5)',
+              color: theme.palette.text.secondary,
               letterSpacing: '0.08em',
               mt: 0.5,
+              fontWeight: 600,
             }}
           >
             SOL LOCKED
@@ -143,7 +151,7 @@ export default function EscrowShield({
           width: '100%',
           mt: 2,
           pt: 2,
-          borderTop: '1px solid rgba(0, 255, 195, 0.08)',
+          borderTop: `1px solid ${isDark ? 'rgba(0, 255, 195, 0.08)' : 'rgba(0,0,0,0.08)'}`,
         }}
       >
         <Box sx={{ textAlign: 'center', flex: 1 }}>
@@ -152,7 +160,7 @@ export default function EscrowShield({
               fontFamily: '"Orbitron", sans-serif',
               fontSize: '0.9rem',
               fontWeight: 600,
-              color: '#8084ee',
+              color: secondaryMain,
             }}
           >
             {formatSol(totalReleased)}
@@ -160,7 +168,7 @@ export default function EscrowShield({
           <Typography
             sx={{
               fontSize: '0.65rem',
-              color: 'rgba(224, 230, 237, 0.4)',
+              color: theme.palette.text.secondary,
               letterSpacing: '0.06em',
             }}
           >
@@ -170,7 +178,7 @@ export default function EscrowShield({
         <Box
           sx={{
             width: '1px',
-            bgcolor: 'rgba(0, 255, 195, 0.08)',
+            bgcolor: isDark ? 'rgba(0, 255, 195, 0.08)' : 'rgba(0,0,0,0.08)',
           }}
         />
         <Box sx={{ textAlign: 'center', flex: 1 }}>
@@ -179,7 +187,7 @@ export default function EscrowShield({
               fontFamily: '"Orbitron", sans-serif',
               fontSize: '0.9rem',
               fontWeight: 600,
-              color: '#00ffc3',
+              color: primaryMain,
             }}
           >
             {activeEscrows}
@@ -187,7 +195,7 @@ export default function EscrowShield({
           <Typography
             sx={{
               fontSize: '0.65rem',
-              color: 'rgba(224, 230, 237, 0.4)',
+              color: theme.palette.text.secondary,
               letterSpacing: '0.06em',
             }}
           >

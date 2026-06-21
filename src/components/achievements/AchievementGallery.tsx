@@ -9,7 +9,8 @@ import {
   Alert,
   CircularProgress,
   Chip,
-  Stack
+  Stack,
+  useTheme
 } from '@mui/material';
 import LoadingSpinner from '../LoadingSpinner';
 import { EmojiEvents, Lock, CheckCircle } from '@mui/icons-material';
@@ -35,6 +36,8 @@ export default function AchievementGallery({
   const [reputation, setReputation] = useState<ReputationData | null>(null);
   const [filterTab, setFilterTab] = useState<'all' | 'earned' | 'locked'>('all');
   const [selectedAchievement, setSelectedAchievement] = useState<number | null>(null);
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   // Fetch reputation data when wallet address changes
   useEffect(() => {
@@ -99,26 +102,26 @@ export default function AchievementGallery({
   return (
     <Box>
       {/* Header Stats */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h5" fontWeight="bold">
+      <Box sx={{ mb: 5 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h5" fontWeight={800} sx={{ fontFamily: '"Orbitron", sans-serif', letterSpacing: 1 }}>
             Achievements
           </Typography>
           <Chip
-            icon={<EmojiEvents />}
-            label={`${earnedCount}/${totalCount}`}
+            icon={<EmojiEvents sx={{ fontSize: '1rem !important' }} />}
+            label={`${earnedCount} / ${totalCount} COLLECTED`}
             color="primary"
-            sx={{ fontWeight: 'bold' }}
+            sx={{ fontWeight: 800, fontSize: '0.7rem', height: 28, px: 1 }}
           />
         </Box>
 
         {/* Progress Bar */}
-        <Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-            <Typography variant="body2" color="text.secondary">
-              Overall Progress
+        <Box sx={{ p: 2.5, bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'grey.50', borderRadius: 2, border: 1, borderColor: 'divider' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={700} sx={{ letterSpacing: 1 }}>
+              PROTOCOL COMPLETION
             </Typography>
-            <Typography variant="body2" fontWeight="bold">
+            <Typography variant="caption" fontWeight={800} color="primary.main">
               {Math.round(progress)}%
             </Typography>
           </Box>
@@ -126,12 +129,14 @@ export default function AchievementGallery({
             variant="determinate"
             value={progress}
             sx={{
-              height: 8,
-              borderRadius: 4,
-              bgcolor: 'action.hover',
+              height: 10,
+              borderRadius: 5,
+              bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+              border: 1,
+              borderColor: 'divider',
               '& .MuiLinearProgress-bar': {
-                borderRadius: 4,
-                background: 'linear-gradient(90deg, #4CAF50 0%, #2196F3 50%, #9C27B0 100%)'
+                borderRadius: 5,
+                background: `linear-gradient(90deg, ${theme.palette.success.main} 0%, ${theme.palette.primary.main} 50%, ${theme.palette.secondary.main} 100%)`
               }
             }}
           />
@@ -143,13 +148,13 @@ export default function AchievementGallery({
         <Alert
           severity="success"
           icon={<CheckCircle />}
-          sx={{ mb: 3 }}
+          sx={{ mb: 4, border: 1, borderColor: 'success.light', bgcolor: isDark ? 'rgba(76,175,80,0.1)' : 'rgba(76,175,80,0.05)' }}
         >
-          <Typography variant="body2" fontWeight="bold">
-            🎉 You've unlocked {eligibleAchievements.length} new achievement{eligibleAchievements.length > 1 ? 's' : ''}!
+          <Typography variant="body2" fontWeight={700}>
+            🎉 You've unlocked {eligibleAchievements.length} new milestone{eligibleAchievements.length > 1 ? 's' : ''}!
           </Typography>
-          <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
-            Click on the achievement to mint your NFT badge
+          <Typography variant="caption" display="block" sx={{ mt: 0.5, fontWeight: 500 }}>
+            Click any badge below to mint your permanent on-chain NFT record.
           </Typography>
         </Alert>
       )}
@@ -158,14 +163,19 @@ export default function AchievementGallery({
       <Tabs
         value={filterTab}
         onChange={handleTabChange}
-        sx={{ mb: 3 }}
+        sx={{ 
+          mb: 4, 
+          borderBottom: 1, 
+          borderColor: 'divider',
+          '& .MuiTab-root': { minHeight: 48, textTransform: 'none', fontWeight: 600, fontSize: '0.9rem' }
+        }}
         variant="fullWidth"
       >
         <Tab
           label={
             <Stack direction="row" spacing={1} alignItems="center">
               <span>All</span>
-              <Chip label={totalCount} size="small" />
+              <Chip label={totalCount} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem', fontWeight: 700 }} />
             </Stack>
           }
           value="all"
@@ -175,7 +185,7 @@ export default function AchievementGallery({
             <Stack direction="row" spacing={1} alignItems="center">
               <CheckCircle fontSize="small" />
               <span>Earned</span>
-              <Chip label={earnedCount} size="small" color="success" />
+              <Chip label={earnedCount} size="small" color="success" sx={{ height: 20, fontSize: '0.65rem', fontWeight: 700 }} />
             </Stack>
           }
           value="earned"
@@ -185,7 +195,7 @@ export default function AchievementGallery({
             <Stack direction="row" spacing={1} alignItems="center">
               <Lock fontSize="small" />
               <span>Locked</span>
-              <Chip label={totalCount - earnedCount} size="small" />
+              <Chip label={totalCount - earnedCount} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem', fontWeight: 700 }} />
             </Stack>
           }
           value="locked"
@@ -221,19 +231,19 @@ export default function AchievementGallery({
           })}
         </Grid>
       ) : (
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
+        <Box sx={{ textAlign: 'center', py: 10, border: 1, borderStyle: 'dashed', borderColor: 'divider', borderRadius: 3 }}>
+          <Typography variant="h6" color="text.secondary" gutterBottom fontWeight={600}>
             {filterTab === 'earned'
               ? 'No achievements earned yet'
               : filterTab === 'locked'
               ? 'All achievements unlocked!'
               : 'No achievements available'}
           </Typography>
-          {filterTab === 'locked' && (
-            <Typography variant="body2" color="text.secondary">
-              Great job! You've earned all available achievements.
-            </Typography>
-          )}
+          <Typography variant="body2" color="text.secondary">
+            {filterTab === 'earned' 
+              ? 'Complete jobs and build reputation to unlock badges.' 
+              : 'Keep up the great work!'}
+          </Typography>
         </Box>
       )}
 

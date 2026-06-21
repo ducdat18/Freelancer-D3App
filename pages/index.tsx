@@ -1,4 +1,4 @@
-import { Container, Typography, Box, Button, Chip, Grid } from '@mui/material';
+import { Container, Typography, Box, Button, Chip, Grid, useTheme } from '@mui/material';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { ArrowForward, Lock, Speed, PublicOutlined } from '@mui/icons-material';
@@ -22,6 +22,10 @@ const trustBadges = [
 
 export default function Home() {
   const router = useRouter();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+  const secondaryMain = theme.palette.secondary.main;
 
   return (
     <Layout>
@@ -31,8 +35,10 @@ export default function Home() {
           sx={{
             position: 'relative',
             overflow: 'hidden',
-            background: 'linear-gradient(180deg, rgba(0,255,195,0.03) 0%, transparent 60%)',
-            borderBottom: '1px solid rgba(0,255,195,0.06)',
+            background: isDark 
+              ? 'linear-gradient(180deg, rgba(0,255,195,0.03) 0%, transparent 60%)' 
+              : 'linear-gradient(180deg, rgba(0,166,128,0.05) 0%, transparent 60%)',
+            borderBottom: `1px solid ${isDark ? 'rgba(0,255,195,0.06)' : 'rgba(0,0,0,0.05)'}`,
           }}
         >
           {/* Ambient grid */}
@@ -40,9 +46,12 @@ export default function Home() {
             sx={{
               position: 'absolute',
               inset: 0,
-              backgroundImage: `
+              backgroundImage: isDark ? `
                 linear-gradient(rgba(0,255,195,0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0,255,195,0.03) 1px, transparent 1px)
+              ` : `
+                linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px)
               `,
               backgroundSize: '60px 60px',
               pointerEvents: 'none',
@@ -92,7 +101,7 @@ export default function Home() {
                     <Box
                       component="span"
                       sx={{
-                        background: 'linear-gradient(135deg, #00ffc3 0%, #9945ff 100%)',
+                        background: `linear-gradient(135deg, ${primaryMain} 0%, ${secondaryMain} 100%)`,
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                       }}
@@ -110,7 +119,14 @@ export default function Home() {
                   <Typography
                     variant="h6"
                     color="text.secondary"
-                    sx={{ mb: 4, maxWidth: 520, fontWeight: 400, lineHeight: 1.7 }}
+                    sx={{ 
+                      mb: 4, 
+                      maxWidth: 520, 
+                      fontWeight: 500, 
+                      lineHeight: 1.7,
+                      fontFamily: '"Rajdhani", sans-serif',
+                      fontSize: '1.25rem'
+                    }}
                   >
                     Smart contract escrow. On-chain reputation. Instant settlement.
                     Connect directly — no middleman, no platform fees.
@@ -150,12 +166,12 @@ export default function Home() {
                         sx={{
                           display: 'flex', alignItems: 'center', gap: 0.75,
                           px: 1.5, py: 0.5,
-                          border: '1px solid rgba(0,255,195,0.2)',
+                          border: `1px solid ${isDark ? 'rgba(0,255,195,0.2)' : 'rgba(0,0,0,0.1)'}`,
                           borderRadius: 10,
-                          bgcolor: 'rgba(0,255,195,0.04)',
+                          bgcolor: isDark ? 'rgba(0,255,195,0.04)' : 'rgba(0,0,0,0.02)',
                         }}
                       >
-                        <badge.icon sx={{ fontSize: 14, color: '#00ffc3' }} />
+                        <badge.icon sx={{ fontSize: 14, color: 'primary.main' }} />
                         <Typography variant="caption" sx={{ color: 'text.secondary', fontFamily: 'monospace' }}>
                           {badge.label}
                         </Typography>
@@ -174,9 +190,10 @@ export default function Home() {
                 >
                   <Box
                     sx={{
-                      border: '1px solid rgba(0,255,195,0.15)',
+                      border: `1px solid ${isDark ? 'rgba(0,255,195,0.15)' : 'rgba(0,0,0,0.1)'}`,
                       borderRadius: 2,
-                      bgcolor: 'rgba(0,0,0,0.6)',
+                      bgcolor: isDark ? 'rgba(0,0,0,0.6)' : '#ffffff',
+                      boxShadow: isDark ? 'none' : '0 4px 20px rgba(0,0,0,0.05)',
                       overflow: 'hidden',
                       fontFamily: 'monospace',
                       fontSize: '0.78rem',
@@ -187,8 +204,8 @@ export default function Home() {
                       sx={{
                         display: 'flex', alignItems: 'center', gap: 1,
                         px: 2, py: 1.25,
-                        borderBottom: '1px solid rgba(0,255,195,0.08)',
-                        bgcolor: 'rgba(0,255,195,0.03)',
+                        borderBottom: `1px solid ${isDark ? 'rgba(0,255,195,0.08)' : 'rgba(0,0,0,0.08)'}`,
+                        bgcolor: isDark ? 'rgba(0,255,195,0.03)' : '#f8fafc',
                       }}
                     >
                       {['#ff5f57', '#febc2e', '#28c840'].map((c) => (
@@ -202,19 +219,19 @@ export default function Home() {
                       </Typography>
                     </Box>
                     {/* Terminal body */}
-                    <Box sx={{ p: 2.5, lineHeight: 2 }}>
+                    <Box sx={{ p: 2.5, lineHeight: 2, bgcolor: isDark ? 'transparent' : '#ffffff' }}>
                       {[
-                        { label: '$ program.methods', color: '#00ffc3' },
-                        { label: '  .postJob(budget, title)', color: '#8084ee' },
-                        { label: '  .accounts({ escrow, client })', color: '#8084ee' },
-                        { label: '  .rpc()', color: '#8084ee' },
+                        { label: '$ program.methods', color: primaryMain },
+                        { label: '  .postJob(budget, title)', color: secondaryMain },
+                        { label: '  .accounts({ escrow, client })', color: secondaryMain },
+                        { label: '  .rpc()', color: secondaryMain },
                         { label: '', color: 'transparent' },
-                        { label: '✓ Job posted on-chain', color: '#4caf50' },
-                        { label: '✓ Escrow initialized', color: '#4caf50' },
-                        { label: '✓ Awaiting bids...', color: '#ff9500' },
+                        { label: '✓ Job posted on-chain', color: theme.palette.success.main },
+                        { label: '✓ Escrow initialized', color: theme.palette.success.main },
+                        { label: '✓ Awaiting bids...', color: theme.palette.warning.main },
                         { label: '', color: 'transparent' },
-                        { label: '> tx: 3xKpQr...7mNs', color: 'rgba(255,255,255,0.3)' },
-                        { label: '> fee: 0.000005 SOL', color: 'rgba(255,255,255,0.3)' },
+                        { label: '> tx: 3xKpQr...7mNs', color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.4)' },
+                        { label: '> fee: 0.000005 SOL', color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.4)' },
                       ].map((line, i) => (
                         <Box key={i} sx={{ color: line.color, whiteSpace: 'pre' }}>
                           {line.label}
@@ -224,7 +241,7 @@ export default function Home() {
                         sx={{
                           display: 'inline-block',
                           width: 8, height: 16,
-                          bgcolor: '#00ffc3',
+                          bgcolor: primaryMain,
                           verticalAlign: 'middle',
                           animation: 'blink 1.2s step-end infinite',
                           '@keyframes blink': {
@@ -238,6 +255,7 @@ export default function Home() {
                 </MotionBox>
               </Grid>
             </Grid>
+
 
             {/* Stats */}
             <Box sx={{ mt: { xs: 6, md: 8 } }}>

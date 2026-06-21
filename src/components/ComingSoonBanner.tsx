@@ -1,4 +1,4 @@
-import { Box, Typography, Chip } from '@mui/material'
+import { Box, Typography, Chip, useTheme } from '@mui/material'
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch'
 
 interface Props {
@@ -7,6 +7,10 @@ interface Props {
 }
 
 export default function ComingSoonBanner({ feature, description }: Props) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+
   return (
     <Box
       sx={{
@@ -27,9 +31,11 @@ export default function ComingSoonBanner({ feature, description }: Props) {
           fontFamily: '"Orbitron", sans-serif',
           fontSize: '0.6rem',
           letterSpacing: '0.15em',
-          bgcolor: 'rgba(0,255,195,0.1)',
-          color: 'primary.main',
-          border: '1px solid rgba(0,255,195,0.3)',
+          bgcolor: isDark ? 'rgba(0,255,195,0.1)' : 'rgba(5,150,105,0.08)',
+          color: primaryMain,
+          border: 1,
+          borderColor: isDark ? 'rgba(0,255,195,0.3)' : 'rgba(5,150,105,0.3)',
+          fontWeight: 700,
         }}
       />
       <Typography variant="h5" fontWeight={700}>

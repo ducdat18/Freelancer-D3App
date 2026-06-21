@@ -1,4 +1,4 @@
-import { Box, Typography, Stepper, Step, StepLabel, StepContent } from '@mui/material';
+import { Box, Typography, Stepper, Step, StepLabel, StepContent, useTheme } from '@mui/material';
 import {
   CheckCircle,
   Schedule,
@@ -23,6 +23,9 @@ export default function JobStatusTimeline({
   bidCount = 0,
   selectedFreelancer = false,
 }: JobStatusTimelineProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   const getActiveStep = () => {
     if (status === 'Cancelled') return -1;
     if (status === 'Disputed') return -1;
@@ -41,10 +44,10 @@ export default function JobStatusTimeline({
   // Different flow for cancelled/disputed
   if (status === 'Cancelled') {
     return (
-      <Box sx={{ p: 3, bgcolor: 'warning.light', borderRadius: 2 }}>
+      <Box sx={{ p: 2, bgcolor: isDark ? 'rgba(255,152,0,0.1)' : 'rgba(255,152,0,0.05)', border: 1, borderColor: 'warning.light', borderRadius: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
           <Cancel color="warning" />
-          <Typography variant="h6" fontWeight={600}>
+          <Typography variant="h6" fontWeight={600} color="warning.main">
             Job Cancelled
           </Typography>
         </Box>
@@ -59,19 +62,20 @@ export default function JobStatusTimeline({
     return (
       <Box
         sx={{
-          p: 3,
-          bgcolor: 'rgba(255,0,255,0.08)',
-          border: '2px solid #ff00ff',
+          p: 2,
+          bgcolor: isDark ? 'rgba(255,0,255,0.08)' : 'rgba(255,0,255,0.04)',
+          border: 1,
+          borderColor: theme.palette.error.main,
           borderRadius: 2,
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-          <Gavel sx={{ color: '#ff55ff' }} />
-          <Typography variant="h6" fontWeight={600} color="#ff55ff">
-            Under Dispute Resolution
+          <Gavel sx={{ color: theme.palette.error.main }} />
+          <Typography variant="h6" fontWeight={600} color={theme.palette.error.main}>
+            Under Dispute
           </Typography>
         </Box>
-        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>
+        <Typography variant="body2" color="text.secondary">
           This job is currently in dispute. Arbitrators are voting to resolve the issue.
         </Typography>
       </Box>
@@ -129,8 +133,8 @@ export default function JobStatusTimeline({
                 StepIconComponent={() => (
                   <Box
                     sx={{
-                      width: 32,
-                      height: 32,
+                      width: 28,
+                      height: 28,
                       borderRadius: '50%',
                       display: 'flex',
                       alignItems: 'center',
@@ -139,24 +143,24 @@ export default function JobStatusTimeline({
                         ? 'success.main'
                         : isActive
                         ? 'primary.main'
-                        : 'grey.300',
-                      color: 'white',
+                        : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                      color: isCompleted || isActive ? 'white' : 'text.disabled',
                     }}
                   >
-                    <Icon sx={{ fontSize: 18 }} />
+                    <Icon sx={{ fontSize: 16 }} />
                   </Box>
                 )}
               >
                 <Typography
-                  variant="body1"
-                  fontWeight={isActive ? 600 : 400}
-                  color={isActive ? 'primary' : 'text.primary'}
+                  variant="body2"
+                  fontWeight={isActive ? 700 : 500}
+                  color={isActive ? 'primary.main' : 'text.primary'}
                 >
                   {step.label}
                 </Typography>
               </StepLabel>
               <StepContent>
-                <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5, display: 'block' }}>
                   {step.description}
                 </Typography>
               </StepContent>
@@ -169,16 +173,18 @@ export default function JobStatusTimeline({
         <Box
           sx={{
             mt: 2,
-            p: 2,
-            bgcolor: 'success.light',
-            borderRadius: 2,
+            p: 1.5,
+            bgcolor: isDark ? 'rgba(76,175,80,0.12)' : 'rgba(76,175,80,0.08)',
+            border: 1,
+            borderColor: 'success.light',
+            borderRadius: 1.5,
             display: 'flex',
             alignItems: 'center',
             gap: 1,
           }}
         >
-          <CheckCircle color="success" />
-          <Typography variant="body2" fontWeight={600} color="success.dark">
+          <CheckCircle color="success" sx={{ fontSize: 18 }} />
+          <Typography variant="body2" fontWeight={600} color="success.main">
             Job completed successfully!
           </Typography>
         </Box>

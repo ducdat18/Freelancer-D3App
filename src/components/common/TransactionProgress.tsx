@@ -8,7 +8,7 @@
  * - Explorer link on confirmation
  */
 
-import { Dialog, DialogContent, Box, Typography, IconButton, Link } from '@mui/material';
+import { Dialog, DialogContent, Box, Typography, IconButton, Link, useTheme } from '@mui/material';
 import { Close, CheckCircle, ErrorOutline, OpenInNew } from '@mui/icons-material';
 import type { TransactionState } from '../../hooks/useTransactionProgress';
 
@@ -19,19 +19,9 @@ interface TransactionProgressProps {
   explorerUrl?: string;
 }
 
-const STATUS_CONFIG: Record<
-  string,
-  { color: string; label: string; icon?: 'check' | 'error' }
-> = {
-  idle: { color: '#8084ee', label: 'IDLE' },
-  preparing: { color: '#8084ee', label: 'PREPARING' },
-  signing: { color: '#e04d01', label: 'AWAITING SIGNATURE' },
-  confirming: { color: '#00ffc3', label: 'CONFIRMING' },
-  confirmed: { color: '#00ffc3', label: 'CONFIRMED', icon: 'check' },
-  error: { color: '#ff00ff', label: 'ERROR', icon: 'error' },
-};
-
 function ProgressRing({ status, color }: { status: string; color: string }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const radius = 48;
   const circumference = 2 * Math.PI * radius;
   const isAnimating = ['preparing', 'signing', 'confirming'].includes(status);
@@ -54,7 +44,7 @@ function ProgressRing({ status, color }: { status: string; color: string }) {
           cy="60"
           r={radius}
           fill="none"
-          stroke={`${color}15`}
+          stroke={isDark ? `${color}15` : 'rgba(0,0,0,0.05)'}
           strokeWidth="4"
         />
         {/* Progress ring */}
@@ -70,7 +60,7 @@ function ProgressRing({ status, color }: { status: string; color: string }) {
           strokeDashoffset={offset}
           style={{
             transition: 'stroke-dashoffset 0.8s ease-out, stroke 0.3s ease',
-            filter: `drop-shadow(0 0 6px ${color}60)`,
+            filter: isDark ? `drop-shadow(0 0 6px ${color}60)` : 'none',
             ...(isAnimating
               ? {
                   animation: 'txSpin 1.5s linear infinite',
@@ -99,10 +89,10 @@ function ProgressRing({ status, color }: { status: string; color: string }) {
         }}
       >
         {isComplete && (
-          <CheckCircle sx={{ fontSize: 40, color: '#00ffc3' }} />
+          <CheckCircle sx={{ fontSize: 40, color: theme.palette.success.main }} />
         )}
         {isError && (
-          <ErrorOutline sx={{ fontSize: 40, color: '#ff00ff' }} />
+          <ErrorOutline sx={{ fontSize: 40, color: theme.palette.error.main }} />
         )}
         {isAnimating && (
           <Box
@@ -112,7 +102,7 @@ function ProgressRing({ status, color }: { status: string; color: string }) {
               borderRadius: '50%',
               bgcolor: color,
               animation: 'txPulse 1s ease-in-out infinite',
-              boxShadow: `0 0 12px ${color}80`,
+              boxShadow: isDark ? `0 0 12px ${color}80` : `0 0 8px ${color}40`,
               '@keyframes txPulse': {
                 '0%, 100%': { opacity: 0.4, transform: 'scale(0.8)' },
                 '50%': { opacity: 1, transform: 'scale(1.2)' },
@@ -131,6 +121,21 @@ export default function TransactionProgress({
   onClose,
   explorerUrl,
 }: TransactionProgressProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  
+  const STATUS_CONFIG: Record<
+    string,
+    { color: string; label: string; icon?: 'check' | 'error' }
+  > = {
+    idle: { color: theme.palette.info.main, label: 'IDLE' },
+    preparing: { color: theme.palette.info.main, label: 'PREPARING' },
+    signing: { color: theme.palette.warning.main, label: 'AWAITING SIGNATURE' },
+    confirming: { color: theme.palette.primary.main, label: 'CONFIRMING' },
+    confirmed: { color: theme.palette.primary.main, label: 'CONFIRMED', icon: 'check' },
+    error: { color: theme.palette.error.main, label: 'ERROR', icon: 'error' },
+  };
+
   const config = STATUS_CONFIG[state.status] || STATUS_CONFIG.idle;
   const canClose = state.status === 'confirmed' || state.status === 'error' || state.status === 'idle';
 
@@ -146,11 +151,13 @@ export default function TransactionProgress({
       fullWidth
       PaperProps={{
         sx: {
-          background: 'rgba(7, 5, 17, 0.95)',
-          border: `1px solid ${config.color}30`,
+          background: isDark ? 'rgba(7, 5, 17, 0.95)' : 'background.paper',
+          border: 1,
+          borderColor: isDark ? `${config.color}30` : 'divider',
           borderRadius: 3,
           backdropFilter: 'blur(20px)',
           overflow: 'visible',
+          backgroundImage: 'none',
         },
       }}
     >
@@ -163,7 +170,7 @@ export default function TransactionProgress({
               position: 'absolute',
               top: 8,
               right: 8,
-              color: 'rgba(224, 230, 237, 0.4)',
+              color: 'text.disabled',
             }}
           >
             <Close fontSize="small" />
@@ -176,9 +183,11 @@ export default function TransactionProgress({
             fontFamily: '"Orbitron", sans-serif',
             fontSize: '0.65rem',
             letterSpacing: '0.15em',
-            color: `${config.color}80`,
+            color: config.color,
+            opacity: 0.8,
             textTransform: 'uppercase',
             mb: 3,
+            fontWeight: 700,
           }}
         >
           {config.label}
@@ -192,8 +201,8 @@ export default function TransactionProgress({
           sx={{
             fontFamily: '"Rajdhani", sans-serif',
             fontSize: '1rem',
-            fontWeight: 600,
-            color: '#e0e6ed',
+            fontWeight: 700,
+            color: 'text.primary',
             mb: 1,
           }}
         >
@@ -206,12 +215,13 @@ export default function TransactionProgress({
             sx={{
               fontFamily: '"JetBrains Mono", monospace',
               fontSize: '0.75rem',
-              color: '#ff00ff99',
+              color: theme.palette.error.main,
               mt: 1,
               p: 1.5,
               borderRadius: 1,
-              bgcolor: 'rgba(255, 0, 255, 0.05)',
-              border: '1px solid rgba(255, 0, 255, 0.1)',
+              bgcolor: isDark ? 'rgba(255, 0, 255, 0.05)' : 'rgba(255, 0, 255, 0.02)',
+              border: 1,
+              borderColor: `${theme.palette.error.main}20`,
               wordBreak: 'break-word',
             }}
           >
@@ -232,10 +242,11 @@ export default function TransactionProgress({
                 gap: 0.5,
                 fontFamily: '"JetBrains Mono", monospace',
                 fontSize: '0.7rem',
-                color: '#8084ee',
+                color: theme.palette.info.main,
                 textDecoration: 'none',
+                fontWeight: 700,
                 '&:hover': {
-                  color: '#00ffc3',
+                  color: theme.palette.primary.main,
                 },
               }}
             >
@@ -250,7 +261,8 @@ export default function TransactionProgress({
           sx={{
             mt: 3,
             pt: 2,
-            borderTop: '1px solid rgba(0, 255, 195, 0.08)',
+            borderTop: 1,
+            borderColor: 'divider',
             display: 'flex',
             justifyContent: 'center',
             gap: 1.5,
@@ -265,10 +277,10 @@ export default function TransactionProgress({
               const isDone = stepIdx < currentIdx;
               const isErr = state.status === 'error';
 
-              let dotColor = 'rgba(224, 230, 237, 0.15)';
-              if (isDone) dotColor = '#00ffc3';
+              let dotColor = isDark ? 'rgba(224, 230, 237, 0.15)' : 'rgba(0, 0, 0, 0.1)';
+              if (isDone) dotColor = theme.palette.success.main;
               if (isActive && !isErr) dotColor = config.color;
-              if (isErr && stepIdx <= currentIdx) dotColor = '#ff00ff';
+              if (isErr && stepIdx <= currentIdx) dotColor = theme.palette.error.main;
 
               return (
                 <Box
@@ -279,7 +291,9 @@ export default function TransactionProgress({
                     borderRadius: '50%',
                     bgcolor: dotColor,
                     transition: 'all 0.3s ease',
-                    boxShadow: isActive ? `0 0 8px ${dotColor}` : 'none',
+                    boxShadow: isActive ? (isDark ? `0 0 8px ${dotColor}` : 'none') : 'none',
+                    border: isDark ? 0 : (isActive || isDone ? 0 : 1),
+                    borderColor: 'divider',
                   }}
                 />
               );

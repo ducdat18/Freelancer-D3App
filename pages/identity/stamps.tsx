@@ -10,6 +10,8 @@ import {
   Grid,
   LinearProgress,
   CircularProgress,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
@@ -131,6 +133,10 @@ export default function StampsPage() {
 
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [verifyingStamp, setVerifyingStamp] = useState<number | null>(null);
+  
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
 
   useEffect(() => {
     if (connected && publicKey) {
@@ -210,27 +216,27 @@ export default function StampsPage() {
     <Layout>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Header with Score */}
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4, mb: 4 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4, mb: 5 }}>
           <Box sx={{ flex: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-              <ShieldIcon sx={{ fontSize: 40, color: '#00ffc3' }} />
-              <Typography variant="h4" fontWeight={700}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5 }}>
+              <ShieldIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+              <Typography variant="h4" fontWeight={800} sx={{ fontFamily: '"Orbitron", sans-serif' }}>
                 Identity Verification
               </Typography>
             </Box>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 3, fontWeight: 500 }}>
               Earn stamps to prove your humanity and unlock platform features.
               Each stamp contributes points toward your humanity score.
             </Typography>
 
             {/* Threshold indicator */}
             {pointsNeeded > 0 ? (
-              <Alert severity="warning" sx={{ mt: 2 }}>
+              <Alert severity="warning" sx={{ mt: 2, fontWeight: 500, border: 1, borderColor: 'warning.light' }}>
                 You need <strong>{pointsNeeded} more points</strong> to participate in bidding.
                 Verify additional stamps below to increase your score.
               </Alert>
             ) : (
-              <Alert severity="success" sx={{ mt: 2 }}>
+              <Alert severity="success" sx={{ mt: 2, fontWeight: 600, border: 1, borderColor: 'success.light' }}>
                 Your humanity score meets the threshold. You have full platform access.
               </Alert>
             )}
@@ -243,9 +249,14 @@ export default function StampsPage() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              minWidth: 200,
-              border: '1px solid rgba(0, 255, 195, 0.15)',
-              background: 'linear-gradient(135deg, rgba(0,255,195,0.03) 0%, rgba(0,0,0,0) 100%)',
+              minWidth: 220,
+              border: 1,
+              borderColor: alpha(primaryMain, 0.2),
+              background: isDark 
+                ? `linear-gradient(135deg, ${alpha(primaryMain, 0.05)} 0%, transparent 100%)`
+                : `linear-gradient(135deg, ${alpha(primaryMain, 0.02)} 0%, transparent 100%)`,
+              borderRadius: 3,
+              backgroundImage: 'none',
             }}
           >
             <Box sx={{ position: 'relative', display: 'inline-flex', mb: 2 }}>
@@ -255,7 +266,7 @@ export default function StampsPage() {
                 value={100}
                 size={120}
                 thickness={4}
-                sx={{ color: 'rgba(255,255,255,0.08)' }}
+                sx={{ color: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }}
               />
               {/* Score progress */}
               <CircularProgress
@@ -266,7 +277,7 @@ export default function StampsPage() {
                 sx={{
                   position: 'absolute',
                   left: 0,
-                  color: humanityScore >= threshold ? '#00ffc3' : '#ff9800',
+                  color: humanityScore >= threshold ? primaryMain : theme.palette.warning.main,
                   '& .MuiCircularProgress-circle': {
                     strokeLinecap: 'round',
                   },
@@ -287,27 +298,27 @@ export default function StampsPage() {
               >
                 <Typography
                   variant="h4"
-                  fontWeight={700}
-                  sx={{ color: humanityScore >= threshold ? '#00ffc3' : '#ff9800' }}
+                  fontWeight={800}
+                  sx={{ color: humanityScore >= threshold ? primaryMain : theme.palette.warning.main, fontFamily: '"Orbitron", sans-serif' }}
                 >
                   {humanityScore}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
                   / 100
                 </Typography>
               </Box>
             </Box>
-            <Typography variant="subtitle2" fontWeight={600}>
+            <Typography variant="subtitle2" fontWeight={800} sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
               Humanity Score
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
               Threshold: {threshold} pts
             </Typography>
             <Button
               size="small"
               onClick={handleRecalculate}
               disabled={loading}
-              sx={{ mt: 1, fontSize: '0.75rem' }}
+              sx={{ mt: 1.5, fontSize: '0.7rem', fontWeight: 700 }}
             >
               Recalculate
             </Button>
@@ -315,28 +326,30 @@ export default function StampsPage() {
         </Box>
 
         {/* Progress Bar */}
-        <Paper sx={{ p: 2, mb: 4, border: '1px solid rgba(0, 255, 195, 0.1)' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-            <Typography variant="body2" fontWeight={500}>
+        <Paper sx={{ p: 3, mb: 5, border: 1, borderColor: 'divider', borderRadius: 3, backgroundImage: 'none' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
+            <Typography variant="body2" fontWeight={700} sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
               Score Progress
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" fontWeight={600}>
               {humanityScore} / {threshold} points to threshold
             </Typography>
           </Box>
-          <Box sx={{ position: 'relative' }}>
+          <Box sx={{ position: 'relative', mt: 2, mb: 1 }}>
             <LinearProgress
               variant="determinate"
               value={Math.min((humanityScore / threshold) * 100, 100)}
               sx={{
-                height: 10,
-                borderRadius: 5,
-                backgroundColor: 'rgba(255,255,255,0.08)',
+                height: 12,
+                borderRadius: 6,
+                backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+                border: 1,
+                borderColor: 'divider',
                 '& .MuiLinearProgress-bar': {
-                  borderRadius: 5,
+                  borderRadius: 6,
                   background: humanityScore >= threshold
-                    ? 'linear-gradient(90deg, #00ffc3, #00e6b0)'
-                    : 'linear-gradient(90deg, #ff9800, #ffb74d)',
+                    ? `linear-gradient(90deg, ${theme.palette.success.main}, ${primaryMain})`
+                    : `linear-gradient(90deg, ${theme.palette.warning.main}, ${theme.palette.warning.light})`,
                 },
               }}
             />
@@ -344,51 +357,52 @@ export default function StampsPage() {
             <Box
               sx={{
                 position: 'absolute',
-                top: -4,
+                top: -6,
                 left: `${thresholdPercentage}%`,
                 transform: 'translateX(-50%)',
-                width: 2,
-                height: 18,
-                backgroundColor: '#ff4444',
+                width: 3,
+                height: 24,
+                backgroundColor: theme.palette.error.main,
                 borderRadius: 1,
+                boxShadow: `0 0 8px ${alpha(theme.palette.error.main, 0.5)}`,
+                zIndex: 1,
               }}
             />
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
-            <Typography variant="caption" color="text.secondary">
-              0
-            </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+            <Typography variant="caption" color="text.disabled" fontWeight={700}>0</Typography>
             <Typography
               variant="caption"
               sx={{
                 position: 'relative',
                 left: `${thresholdPercentage - 50}%`,
-                color: '#ff4444',
-                fontWeight: 600,
+                color: theme.palette.error.main,
+                fontWeight: 800,
+                fontSize: '0.65rem',
+                textTransform: 'uppercase',
+                letterSpacing: 0.5
               }}
             >
               Threshold ({threshold})
             </Typography>
-            <Typography variant="caption" color="text.secondary">
-              100
-            </Typography>
+            <Typography variant="caption" color="text.disabled" fontWeight={700}>100</Typography>
           </Box>
         </Paper>
 
         {successMessage && (
-          <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccessMessage(null)}>
+          <Alert severity="success" sx={{ mb: 3, fontWeight: 600 }} onClose={() => setSuccessMessage(null)}>
             {successMessage}
           </Alert>
         )}
 
         {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
+          <Alert severity="error" sx={{ mb: 3, fontWeight: 500 }}>
             {error}
           </Alert>
         )}
 
         {/* Stamp Cards Grid */}
-        <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+        <Typography variant="h6" fontWeight={800} sx={{ mb: 3, fontFamily: '"Orbitron", sans-serif', fontSize: '1.1rem' }}>
           Available Stamps
         </Typography>
 
@@ -405,59 +419,61 @@ export default function StampsPage() {
                     height: '100%',
                     display: 'flex',
                     flexDirection: 'column',
-                    border: verified
-                      ? '1px solid rgba(0, 255, 195, 0.3)'
-                      : '1px solid rgba(255, 255, 255, 0.08)',
+                    border: 1,
+                    borderColor: verified ? alpha(primaryMain, 0.4) : 'divider',
                     background: verified
-                      ? 'linear-gradient(135deg, rgba(0,255,195,0.05) 0%, rgba(0,0,0,0) 100%)'
-                      : 'transparent',
+                      ? (isDark ? `linear-gradient(135deg, ${alpha(primaryMain, 0.08)} 0%, transparent 100%)` : `linear-gradient(135deg, ${alpha(primaryMain, 0.04)} 0%, transparent 100%)`)
+                      : 'background.paper',
+                    borderRadius: 3,
+                    backgroundImage: 'none',
                     transition: 'all 0.3s ease',
                     '&:hover': {
-                      borderColor: verified ? 'rgba(0, 255, 195, 0.5)' : 'rgba(0, 255, 195, 0.2)',
-                      transform: 'translateY(-2px)',
+                      borderColor: primaryMain,
+                      transform: 'translateY(-4px)',
+                      boxShadow: isDark ? `0 4px 20px ${alpha(primaryMain, 0.1)}` : '0 4px 12px rgba(0,0,0,0.05)',
                     },
                   }}
                 >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2.5 }}>
                     <Box
                       sx={{
-                        color: verified ? '#00ffc3' : 'text.secondary',
-                        opacity: verified ? 1 : 0.6,
+                        color: verified ? primaryMain : 'text.disabled',
+                        opacity: verified ? 1 : 0.7,
                       }}
                     >
                       {stamp.icon}
                     </Box>
                     {verified ? (
                       <Chip
-                        icon={<CheckCircleIcon />}
-                        label="Verified"
+                        icon={<CheckCircleIcon sx={{ fontSize: '0.9rem !important' }} />}
+                        label="VERIFIED"
                         size="small"
                         color="success"
-                        sx={{ fontWeight: 600 }}
+                        sx={{ fontWeight: 800, fontSize: '0.6rem', height: 22, letterSpacing: 0.5 }}
                       />
                     ) : (
                       <Chip
-                        label={`+${stamp.weight} pts`}
+                        label={`+${stamp.weight} PTS`}
                         size="small"
                         variant="outlined"
-                        sx={{ fontWeight: 600 }}
+                        sx={{ fontWeight: 800, fontSize: '0.6rem', height: 22, letterSpacing: 0.5, border: 1, borderColor: 'divider' }}
                       />
                     )}
                   </Box>
 
-                  <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 0.5 }}>
+                  <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>
                     {stamp.label}
                   </Typography>
 
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flex: 1 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3, flex: 1, fontWeight: 500, lineHeight: 1.6 }}>
                     {stamp.description}
                   </Typography>
 
                   {verified ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <VerifiedUserIcon sx={{ color: '#00ffc3', fontSize: 18 }} />
-                      <Typography variant="body2" sx={{ color: '#00ffc3', fontWeight: 500 }}>
-                        Earned {earnedWeight} points
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1, borderRadius: 1, bgcolor: alpha(primaryMain, 0.05), border: 1, borderColor: alpha(primaryMain, 0.1) }}>
+                      <VerifiedUserIcon sx={{ color: primaryMain, fontSize: 16 }} />
+                      <Typography variant="caption" sx={{ color: primaryMain, fontWeight: 800 }}>
+                        EARNED {earnedWeight} POINTS
                       </Typography>
                     </Box>
                   ) : (
@@ -468,15 +484,17 @@ export default function StampsPage() {
                       disabled={loading || verifyingStamp === stamp.type}
                       fullWidth
                       sx={{
-                        borderColor: 'rgba(0, 255, 195, 0.3)',
-                        color: '#00ffc3',
+                        borderColor: alpha(primaryMain, 0.3),
+                        color: primaryMain,
+                        fontWeight: 700,
+                        py: 1,
                         '&:hover': {
-                          borderColor: '#00ffc3',
-                          background: 'rgba(0, 255, 195, 0.08)',
+                          borderColor: primaryMain,
+                          background: alpha(primaryMain, 0.08),
                         },
                       }}
                     >
-                      {verifyingStamp === stamp.type ? 'Verifying...' : 'Verify'}
+                      {verifyingStamp === stamp.type ? 'Verifying...' : 'Verify Now'}
                     </Button>
                   )}
                 </Paper>

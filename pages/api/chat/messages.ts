@@ -2,20 +2,10 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { PublicKey } from '@solana/web3.js'
 import bs58 from 'bs58'
 import nacl from 'tweetnacl'
+import { getMessages, addMessage, markAsRead, findMessage } from '../../../src/utils/chatStore'
+import { chatRateLimit } from '../../../src/utils/rateLimit'
 
-// In-memory store (persists per serverless warm instance; stateless across cold starts)
-// For production persistence, replace with Vercel KV / Supabase / PlanetScale.
-interface Message {
-  id: number
-  sender: string
-  recipient: string
-  content: string
-  timestamp: number
-  read: boolean
-}
-
-let nextId = 1
-const messages: Message[] = []
+// ─── Auth helpers ─────────────────────────────────────────────────────────────
 
 function verifyWalletSignature(address: string, signature?: string, message?: string): boolean {
   if (!address || !signature || !message) return false
@@ -42,6 +32,8 @@ function isMessageRecent(message: string): boolean {
 export function generateAuthMessage(address: string): string {
   return `Authenticate to Freelance DApp\nWallet: ${address}\nTimestamp: ${Date.now()}`
 }
+
+// ─── Handler ──────────────────────────────────────────────────────────────────
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -71,6 +63,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!signedMessage.includes(walletAddress))
       return res.status(401).json({ error: 'Signature does not match wallet address' })
 
+    if (!chatRateLimit(req, res)) return
+
     switch (req.method) {
       case 'GET':  return handleGetMessages(req, res, walletAddress)
       case 'POST': return handleSendMessage(req, res, walletAddress)
@@ -87,49 +81,28 @@ function handleGetMessages(req: NextApiRequest, res: NextApiResponse, walletAddr
   const { other } = req.query
   if (!other || typeof other !== 'string') return res.status(400).json({ error: 'Missing recipient address' })
 
-  const result = messages.filter(
-    m => (m.sender === walletAddress && m.recipient === other) ||
-         (m.sender === other && m.recipient === walletAddress)
-  )
+  const result = getMessages(walletAddress, other)
   return res.status(200).json({ messages: result })
 }
 
-function handleSendMessage(req: NextApiRequest, res: NextApiResponse, walletAddress: string) {
+async function handleSendMessage(req: NextApiRequest, res: NextApiResponse, walletAddress: string) {
   const { recipient, content } = req.body
   if (!recipient || !content) return res.status(400).json({ error: 'Missing recipient or content' })
   if (content.length > 1000) return res.status(400).json({ error: 'Message too long (max 1000 characters)' })
   if (recipient === walletAddress) return res.status(400).json({ error: 'Cannot message yourself' })
 
-  const msg: Message = { id: nextId++, sender: walletAddress, recipient, content, timestamp: Date.now(), read: false }
-  messages.push(msg)
+  const msg = await addMessage(walletAddress, recipient, content)
   return res.status(201).json({ message: msg })
 }
 
-function handleMarkAsRead(req: NextApiRequest, res: NextApiResponse, walletAddress: string) {
+async function handleMarkAsRead(req: NextApiRequest, res: NextApiResponse, walletAddress: string) {
   const { messageId } = req.body
   if (!messageId) return res.status(400).json({ error: 'Missing message ID' })
 
-  const msg = messages.find(m => m.id === messageId)
+  const msg = findMessage(messageId)
   if (!msg) return res.status(404).json({ error: 'Message not found' })
   if (msg.recipient !== walletAddress) return res.status(403).json({ error: 'Not authorized' })
 
-  msg.read = true
+  await markAsRead(messageId, walletAddress)
   return res.status(200).json({ success: true })
-}
-
-export async function getConversations(walletAddress: string) {
-  const partnerSet = new Set<string>()
-  messages.forEach(m => {
-    if (m.sender === walletAddress) partnerSet.add(m.recipient)
-    if (m.recipient === walletAddress) partnerSet.add(m.sender)
-  })
-
-  return Array.from(partnerSet).map(other => {
-    const conv = messages.filter(
-      m => (m.sender === walletAddress && m.recipient === other) ||
-           (m.sender === other && m.recipient === walletAddress)
-    ).sort((a, b) => b.timestamp - a.timestamp)
-    const unread = messages.filter(m => m.sender === other && m.recipient === walletAddress && !m.read).length
-    return { other_address: other, last_message_time: conv[0]?.timestamp ?? 0, last_message: conv[0]?.content ?? '', unread_count: unread }
-  }).sort((a, b) => b.last_message_time - a.last_message_time)
 }

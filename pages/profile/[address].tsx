@@ -1,4 +1,4 @@
-import { Container, Typography, Box, Grid, Tab, Tabs, Card, CardContent, Avatar, Chip, Divider, Alert, Button } from '@mui/material';
+import { Container, Typography, Box, Grid, Tab, Tabs, Card, CardContent, Avatar, Chip, Divider, Alert, Button, Tooltip, alpha, useTheme } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import { PublicKey } from '@solana/web3.js';
@@ -11,11 +11,12 @@ import EmptyState from '../../src/components/EmptyState';
 import Layout from '../../src/components/Layout';
 import SBTGallery from '../../src/components/profile/SBTGallery';
 import { SolanaIconSimple } from '../../src/components/SolanaIcon';
-import { PictureAsPdf, Description, PersonAdd, Star } from '@mui/icons-material';
+import { PictureAsPdf, Description, PersonAdd, Star, Gavel, VerifiedUser } from '@mui/icons-material';
 import { detectUserRole, getRoleDisplayText, getRoleColor, getExperienceLevel } from '../../src/utils/userRole';
 import VerifiedBadge from '../../src/components/VerifiedBadge';
 import { useSolanaProgram } from '../../src/hooks/useSolanaProgram';
 import { fetchKycStatusOnChain } from '../../src/hooks/useKyc';
+import { deriveJurorStakePDA } from '../../src/utils/pda';
 
 export default function Profile() {
   const router = useRouter();
@@ -28,6 +29,7 @@ export default function Profile() {
   const [savedCVs, setSavedCVs] = useState<any[]>([]);
   const [profileData, setProfileData] = useState<any>(null);
   const [isKycVerified, setIsKycVerified] = useState(false);
+  const [isJuror, setIsJuror] = useState(false);
 
   const { program } = useSolanaProgram();
   const { fetchAllJobs } = useJobs();
@@ -62,6 +64,16 @@ export default function Profile() {
         // Fetch KYC status from chain (source of truth)
         const kycStatus = await fetchKycStatusOnChain(program, pubkey);
         setIsKycVerified(kycStatus === 'verified');
+
+        // Fetch juror stake status
+        try {
+          if (program) {
+            const [stakePda] = deriveJurorStakePDA(pubkey);
+            // @ts-ignore
+            const stakeData = await program.account.jurorStake.fetch(stakePda);
+            setIsJuror(stakeData?.active === true);
+          }
+        } catch { /* no juror stake = not a juror */ }
 
         // Load CV data and profile from localStorage
         if (typeof window !== 'undefined') {
@@ -160,6 +172,9 @@ export default function Profile() {
   );
   const experienceLevel = reputation ? getExperienceLevel(reputation.completedJobs) : null;
 
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const accentColor = theme.palette.primary.main;
   const initials = addressStr.slice(0, 2).toUpperCase();
   // isKycVerified is loaded from chain in loadProfile effect
 
@@ -168,8 +183,8 @@ export default function Profile() {
       {/* Profile Hero Header */}
       <Box
         sx={{
-          borderBottom: '1px solid rgba(0,255,195,0.08)',
-          background: 'linear-gradient(180deg, rgba(0,255,195,0.03) 0%, transparent 100%)',
+          borderBottom: `1px solid ${alpha(accentColor, 0.08)}`,
+          background: `linear-gradient(180deg, ${alpha(accentColor, 0.04)} 0%, transparent 100%)`,
           px: { xs: 2, md: 4 },
           py: { xs: 4, md: 5 },
         }}
@@ -180,10 +195,10 @@ export default function Profile() {
             <Avatar
               sx={{
                 width: 80, height: 80,
-                background: 'linear-gradient(135deg, #00ffc3 0%, #9945ff 100%)',
-                color: '#000', fontFamily: '"Orbitron", monospace',
+                background: `linear-gradient(135deg, ${accentColor} 0%, ${theme.palette.secondary.main} 100%)`,
+                color: theme.palette.primary.contrastText, fontFamily: '"Orbitron", monospace',
                 fontWeight: 700, fontSize: '1.4rem',
-                boxShadow: '0 0 24px rgba(0,255,195,0.3)',
+                boxShadow: `0 0 24px ${alpha(accentColor, 0.3)}`,
                 flexShrink: 0,
               }}
             >
@@ -202,6 +217,21 @@ export default function Profile() {
                   <Chip label={experienceLevel.label} size="small" color={experienceLevel.color} />
                 )}
                 {isKycVerified && <VerifiedBadge size="md" />}
+                {isJuror && (
+                  <Chip
+                    icon={<Gavel sx={{ fontSize: '13px !important' }} />}
+                    label="Arbitrator"
+                    size="small"
+                    sx={{
+                      bgcolor: 'rgba(124,58,237,0.1)',
+                      color: '#7c3aed',
+                      border: '1px solid rgba(124,58,237,0.3)',
+                      fontWeight: 700,
+                      fontSize: '0.7rem',
+                      '& .MuiChip-icon': { color: '#7c3aed' },
+                    }}
+                  />
+                )}
               </Box>
               <Typography
                 variant="h5"
@@ -231,14 +261,14 @@ export default function Profile() {
                     key={stat.label}
                     sx={{
                       textAlign: 'center', px: 2.5, py: 1,
-                      border: '1px solid rgba(0,255,195,0.15)',
-                      borderRadius: 2, bgcolor: 'rgba(0,255,195,0.04)',
+                      border: `1px solid ${alpha(accentColor, 0.15)}`,
+                      borderRadius: 2, bgcolor: alpha(accentColor, 0.04),
                     }}
                   >
                     <Typography
                       variant="h5"
                       fontWeight={700}
-                      sx={{ fontFamily: '"Orbitron", sans-serif', color: '#00ffc3', lineHeight: 1 }}
+                      sx={{ fontFamily: '"Orbitron", sans-serif', color: accentColor, lineHeight: 1 }}
                     >
                       {stat.value}
                     </Typography>
@@ -256,13 +286,13 @@ export default function Profile() {
           <Grid container spacing={3}>
             {/* Sidebar */}
             <Grid size={{ xs: 12, md: 4 }}>
-              <Card sx={{ border: '1px solid rgba(0,255,195,0.08)' }}>
+              <Card sx={{ border: `1px solid ${alpha(accentColor, 0.08)}` }}>
                 <CardContent sx={{ p: 2.5 }}>
                   {reputation && (
                     <>
                       <Typography
                         variant="overline"
-                        sx={{ color: '#00ffc3', letterSpacing: 3, fontSize: '0.6rem', display: 'block', mb: 2 }}
+                        sx={{ color: accentColor, letterSpacing: 3, fontSize: '0.6rem', display: 'block', mb: 2 }}
                       >
                         REPUTATION
                       </Typography>
@@ -271,7 +301,7 @@ export default function Profile() {
                         {[1, 2, 3, 4, 5].map((i) => (
                           <Star
                             key={i}
-                            sx={{ fontSize: 16, color: averageRating >= i ? '#ffc107' : 'rgba(255,255,255,0.12)' }}
+                            sx={{ fontSize: 16, color: averageRating >= i ? '#ffc107' : alpha(theme.palette.text.secondary, isDark ? 0.2 : 0.3) }}
                           />
                         ))}
                         <Typography variant="body2" fontWeight={700} sx={{ ml: 0.5 }}>
@@ -304,7 +334,7 @@ export default function Profile() {
                   {/* Hire Directly button */}
                   {viewerKey && viewerKey.toBase58() !== addressStr && userRole.isFreelancer && (
                     <>
-                      <Divider sx={{ my: 2, borderColor: 'rgba(0,255,195,0.08)' }} />
+                      <Divider sx={{ my: 2 }} />
                       <Button
                         variant="contained"
                         fullWidth
@@ -320,11 +350,11 @@ export default function Profile() {
 
               {/* Profile Information */}
               {profileData && (
-                <Card sx={{ mt: 2.5, border: '1px solid rgba(0,255,195,0.08)' }}>
+                <Card sx={{ mt: 2.5, border: `1px solid ${alpha(accentColor, 0.08)}` }}>
                   <CardContent sx={{ p: 2.5 }}>
                     <Typography
                       variant="overline"
-                      sx={{ color: '#00ffc3', letterSpacing: 3, fontSize: '0.6rem', display: 'block', mb: 2 }}
+                      sx={{ color: accentColor, letterSpacing: 3, fontSize: '0.6rem', display: 'block', mb: 2 }}
                     >
                       PROFESSIONAL INFO
                     </Typography>
@@ -344,16 +374,16 @@ export default function Profile() {
                       <Box sx={{
                         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                         mb: 2, px: 1.5, py: 1,
-                        bgcolor: 'rgba(0,255,195,0.04)', borderRadius: 1.5,
-                        border: '1px solid rgba(0,255,195,0.1)',
+                        bgcolor: alpha(accentColor, 0.04), borderRadius: 1.5,
+                        border: `1px solid ${alpha(accentColor, 0.1)}`,
                       }}>
                         <Typography variant="caption" color="text.secondary">Hourly Rate</Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <SolanaIconSimple sx={{ fontSize: 13, color: '#00ffc3' }} />
+                          <SolanaIconSimple sx={{ fontSize: 13, color: accentColor }} />
                           <Typography
                             variant="body2"
                             fontWeight={700}
-                            sx={{ fontFamily: '"Orbitron", sans-serif', color: '#00ffc3', fontSize: '0.8rem' }}
+                            sx={{ fontFamily: '"Orbitron", sans-serif', color: accentColor, fontSize: '0.8rem' }}
                           >
                             {profileData.hourlyRate}
                           </Typography>
@@ -375,7 +405,7 @@ export default function Profile() {
                               variant="outlined"
                               sx={{
                                 fontSize: '0.65rem', height: 20,
-                                borderColor: 'rgba(0,255,195,0.2)', color: 'rgba(0,255,195,0.8)',
+                                borderColor: alpha(accentColor, 0.2), color: alpha(accentColor, 0.8),
                               }}
                             />
                           ))}
@@ -399,11 +429,11 @@ export default function Profile() {
 
               {/* CV/Resume Section */}
               {savedCVs.length > 0 && (
-                <Card sx={{ mt: 2.5, border: '1px solid rgba(0,255,195,0.08)' }}>
+                <Card sx={{ mt: 2.5, border: `1px solid ${alpha(accentColor, 0.08)}` }}>
                   <CardContent sx={{ p: 2.5 }}>
                     <Typography
                       variant="overline"
-                      sx={{ color: '#00ffc3', letterSpacing: 3, fontSize: '0.6rem', display: 'block', mb: 2 }}
+                      sx={{ color: accentColor, letterSpacing: 3, fontSize: '0.6rem', display: 'block', mb: 2 }}
                     >
                       DOCUMENTS
                     </Typography>
@@ -415,15 +445,15 @@ export default function Profile() {
                           sx={{
                             display: 'flex', alignItems: 'center', gap: 1.5,
                             px: 1.5, py: 1,
-                            bgcolor: 'rgba(0,0,0,0.25)',
-                            border: '1px solid rgba(255,255,255,0.06)',
+                            bgcolor: isDark ? 'rgba(0,0,0,0.25)' : 'rgba(0,0,0,0.04)',
+                            border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
                             borderRadius: 1.5,
                           }}
                         >
                           {cv.fileName.endsWith('.pdf') ? (
                             <PictureAsPdf sx={{ fontSize: 18, color: '#f44336', flexShrink: 0 }} />
                           ) : (
-                            <Description sx={{ fontSize: 18, color: '#00ffc3', flexShrink: 0 }} />
+                            <Description sx={{ fontSize: 18, color: accentColor, flexShrink: 0 }} />
                           )}
                           <Box sx={{ flex: 1, minWidth: 0 }}>
                             <Typography variant="body2" fontWeight={600} noWrap>
@@ -437,7 +467,7 @@ export default function Profile() {
                                 label="IPFS"
                                 size="small"
                                 variant="outlined"
-                                sx={{ height: 16, fontSize: '0.6rem', borderColor: 'rgba(0,255,195,0.2)', color: 'rgba(0,255,195,0.7)' }}
+                                sx={{ height: 16, fontSize: '0.6rem', borderColor: alpha(accentColor, 0.2), color: alpha(accentColor, 0.7) }}
                               />
                             </Box>
                           </Box>
@@ -451,15 +481,15 @@ export default function Profile() {
 
             {/* Jobs Tabs */}
             <Grid size={{ xs: 12, md: 8 }}>
-              <Box sx={{ border: '1px solid rgba(0,255,195,0.08)', borderRadius: 2, overflow: 'hidden' }}>
+              <Box sx={{ border: `1px solid ${alpha(accentColor, 0.08)}`, borderRadius: 2, overflow: 'hidden' }}>
                 {/* Tab bar */}
-                <Box sx={{ borderBottom: '1px solid rgba(0,255,195,0.08)', bgcolor: 'rgba(0,0,0,0.2)' }}>
+                <Box sx={{ borderBottom: `1px solid ${alpha(accentColor, 0.08)}`, bgcolor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.03)' }}>
                   <Tabs
                     value={tabValue}
                     onChange={(_, newValue) => setTabValue(newValue)}
                     variant="scrollable"
                     scrollButtons="auto"
-                    TabIndicatorProps={{ style: { backgroundColor: '#00ffc3', height: 2 } }}
+                    TabIndicatorProps={{ style: { backgroundColor: accentColor, height: 2 } }}
                     sx={{
                       minHeight: 44,
                       '& .MuiTab-root': {
@@ -468,7 +498,7 @@ export default function Profile() {
                         fontSize: '0.82rem',
                         fontWeight: 500,
                         color: 'text.secondary',
-                        '&.Mui-selected': { color: '#00ffc3', fontWeight: 600 },
+                        '&.Mui-selected': { color: accentColor, fontWeight: 600 },
                       },
                     }}
                   >
@@ -485,7 +515,7 @@ export default function Profile() {
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                         <Typography
                           variant="overline"
-                          sx={{ color: '#00ffc3', letterSpacing: 3, fontSize: '0.6rem' }}
+                          sx={{ color: accentColor, letterSpacing: 3, fontSize: '0.6rem' }}
                         >
                           OPEN JOBS
                         </Typography>

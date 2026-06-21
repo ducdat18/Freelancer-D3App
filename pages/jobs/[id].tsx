@@ -8,6 +8,7 @@ import {
   Alert,
   Button,
   Grid,
+  useTheme,
 } from '@mui/material';
 import Layout from '../../src/components/Layout';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
@@ -34,6 +35,11 @@ import BidFormDialog from '../../src/components/job/dialogs/BidFormDialog';
 import RejectWorkDialog from '../../src/components/job/dialogs/RejectWorkDialog';
 import RaiseDisputeDialog from '../../src/components/job/dialogs/RaiseDisputeDialog';
 import RepostDialog from '../../src/components/job/dialogs/RepostDialog';
+import RateClientDialog from '../../src/components/job/dialogs/RateClientDialog';
+import { useTheme as useAppTheme } from '../../src/contexts/ThemeContext';
+import EditIcon from '@mui/icons-material/Edit';
+import RepeatIcon from '@mui/icons-material/Repeat';
+import RepostJobDialog from '../../src/components/job/dialogs/RepostJobDialog';
 
 // Helper functions - defined outside component to avoid TDZ errors
 const getStatusText = (status: any) => {
@@ -52,6 +58,10 @@ const getStatusText = (status: any) => {
 export default function JobDetail() {
   const router = useRouter();
   const { id } = router.query;
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+
   const [job, setJob] = useState<any>(null);
   const [metadata, setMetadata] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -71,8 +81,11 @@ export default function JobDetail() {
   const [disputeReason, setDisputeReason] = useState('');
   const [dispute, setDispute] = useState<any>(null);
   const [hasMilestones, setHasMilestones] = useState(false);
+  const [rateClientDialogOpen, setRateClientDialogOpen] = useState(false);
+  const [rateClientLoading, setRateClientLoading] = useState(false);
+  const [repostJobDialogOpen, setRepostJobDialogOpen] = useState(false);
 
-  const { fetchJob, submitBid, cancelJob } = useJobs();
+  const { fetchJob, submitBid, cancelJob, repostJob } = useJobs();
   const { addNotification } = useNotificationContext();
   const { connected, publicKey } = useWallet();
   const { depositEscrow, fetchEscrow, submitWork } = useEscrow();
@@ -172,6 +185,14 @@ export default function JobDetail() {
     }
     localStorage.setItem(lastStatusKey, statusKey);
     localStorage.setItem(lastBidCountKey, currentBidCount.toString());
+
+    // Prompt freelancer to rate the client if job just completed and not yet reviewed
+    if (statusKey === 'completed' && freelancerKey === myKey) {
+      const alreadyReviewed = localStorage.getItem(`reviewed_client_${pdaStr}`);
+      if (!alreadyReviewed) {
+        setTimeout(() => setRateClientDialogOpen(true), 1500);
+      }
+    }
   }, [job, jobPda, publicKey, metadata, addNotification]);
 
   const reloadJobData = async () => {
@@ -267,6 +288,27 @@ export default function JobDetail() {
     }
   };
 
+  // ── Freelancer rates the client after job completion ──────────────────────
+  const handleRateClient = async (rating: number, review: string) => {
+    if (!jobPda || !publicKey || !job) return;
+    setRateClientLoading(true);
+    try {
+      const clientPubkey = job.client;
+      const clientHasReputation = await hasReputation(clientPubkey);
+      if (clientHasReputation) {
+        await submitReview(jobPda, clientPubkey, rating, review);
+      }
+      // Mark as reviewed in localStorage so we don't prompt again
+      localStorage.setItem(`reviewed_client_${jobPda.toBase58()}`, '1');
+      setRateClientDialogOpen(false);
+    } catch (err) {
+      console.error('Error rating client:', err);
+      throw err;
+    } finally {
+      setRateClientLoading(false);
+    }
+  };
+
   const handleRejectWork = async () => {
     if (!jobPda || !publicKey || !job) return;
     if (!rejectReason.trim()) { alert('Please provide a reason for rejection'); return; }
@@ -329,6 +371,21 @@ export default function JobDetail() {
     else router.push('/client/my-jobs');
   };
 
+  const handleRepostJob = async (newDeadline: Date, newBudgetSol?: string) => {
+    if (!jobPda) return;
+    setActionLoading(true);
+    try {
+      const result = await repostJob(jobPda, newDeadline, newBudgetSol);
+      setRepostJobDialogOpen(false);
+      router.push(`/jobs/${result.jobPda.toBase58()}`);
+    } catch (err) {
+      console.error('Error reposting job:', err);
+      alert('Failed to repost job: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -374,13 +431,13 @@ export default function JobDetail() {
   };
 
   const statusPillMap: Record<string, { color: string; bg: string; border: string }> = {
-    open:             { color: '#4caf50', bg: 'rgba(76,175,80,0.1)',    border: 'rgba(76,175,80,0.25)' },
-    inProgress:       { color: '#2196f3', bg: 'rgba(33,150,243,0.1)',   border: 'rgba(33,150,243,0.25)' },
-    waitingForReview: { color: '#ff9800', bg: 'rgba(255,152,0,0.1)',    border: 'rgba(255,152,0,0.25)' },
-    rejected:         { color: '#f44336', bg: 'rgba(244,67,54,0.1)',    border: 'rgba(244,67,54,0.25)' },
-    completed:        { color: '#9e9e9e', bg: 'rgba(158,158,158,0.1)',  border: 'rgba(158,158,158,0.2)' },
-    disputed:         { color: '#f44336', bg: 'rgba(244,67,54,0.1)',    border: 'rgba(244,67,54,0.25)' },
-    cancelled:        { color: '#ff9800', bg: 'rgba(255,152,0,0.1)',    border: 'rgba(255,152,0,0.25)' },
+    open:             { color: theme.palette.success.main, bg: `${theme.palette.success.main}15`,    border: `${theme.palette.success.main}30` },
+    inProgress:       { color: theme.palette.info.main,    bg: `${theme.palette.info.main}15`,       border: `${theme.palette.info.main}30` },
+    waitingForReview: { color: theme.palette.warning.main, bg: `${theme.palette.warning.main}15`,    border: `${theme.palette.warning.main}30` },
+    rejected:         { color: theme.palette.error.main,   bg: `${theme.palette.error.main}15`,      border: `${theme.palette.error.main}30` },
+    completed:        { color: theme.palette.text.secondary, bg: isDark ? 'rgba(158,158,158,0.1)' : 'rgba(0,0,0,0.05)',  border: 'divider' },
+    disputed:         { color: theme.palette.error.main,   bg: `${theme.palette.error.main}15`,      border: `${theme.palette.error.main}30` },
+    cancelled:        { color: theme.palette.warning.main, bg: `${theme.palette.warning.main}15`,    border: `${theme.palette.warning.main}30` },
   };
   const jobStatusKey = typeof job.status === 'object' ? Object.keys(job.status)[0] : String(job.status);
   const jobStatusSt = statusPillMap[jobStatusKey] ?? statusPillMap.open;
@@ -390,8 +447,11 @@ export default function JobDetail() {
       {/* Page Header */}
       <Box
         sx={{
-          borderBottom: '1px solid rgba(0,255,195,0.08)',
-          background: 'linear-gradient(180deg, rgba(0,255,195,0.03) 0%, transparent 100%)',
+          borderBottom: 1,
+          borderColor: 'divider',
+          background: isDark 
+            ? 'linear-gradient(180deg, rgba(0,255,195,0.03) 0%, transparent 100%)'
+            : `linear-gradient(180deg, ${primaryMain}08 0%, transparent 100%)`,
           px: { xs: 2, md: 4 },
           py: { xs: 3, md: 4 },
         }}
@@ -411,12 +471,39 @@ export default function JobDetail() {
                 <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
                   {createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </Typography>
+
+                {/* Edit Job — owner only, open status */}
+                {connected && publicKey && job.client?.toBase58() === publicKey.toBase58() && jobStatusKey === 'open' && (
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<EditIcon sx={{ fontSize: 14 }} />}
+                    onClick={() => router.push(`/jobs/edit/${jobPda?.toBase58()}`)}
+                    sx={{ fontSize: '0.75rem', textTransform: 'none' }}
+                  >
+                    Edit
+                  </Button>
+                )}
+
+                {/* Repost — owner only, cancelled status */}
+                {connected && publicKey && job.client?.toBase58() === publicKey.toBase58() && jobStatusKey === 'cancelled' && (
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="warning"
+                    startIcon={<RepeatIcon sx={{ fontSize: 14 }} />}
+                    onClick={() => setRepostJobDialogOpen(true)}
+                    sx={{ fontSize: '0.75rem', textTransform: 'none' }}
+                  >
+                    Repost
+                  </Button>
+                )}
               </Box>
             </Box>
-            <Box sx={{ textAlign: 'center', px: 3, py: 1.5, border: '1px solid rgba(0,255,195,0.2)', borderRadius: 2, bgcolor: 'rgba(0,255,195,0.04)', flexShrink: 0 }}>
+            <Box sx={{ textAlign: 'center', px: 3, py: 1.5, border: 1, borderColor: isDark ? 'rgba(0,255,195,0.2)' : `${primaryMain}30`, borderRadius: 2, bgcolor: isDark ? 'rgba(0,255,195,0.04)' : `${primaryMain}08`, flexShrink: 0 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, justifyContent: 'center' }}>
-                <SolanaIconSimple sx={{ fontSize: 18, color: '#00ffc3' }} />
-                <Typography variant="h4" fontWeight={700} sx={{ fontFamily: '"Orbitron", sans-serif', color: '#00ffc3', lineHeight: 1 }}>
+                <SolanaIconSimple sx={{ fontSize: 18, color: primaryMain }} />
+                <Typography variant="h4" fontWeight={700} sx={{ fontFamily: '"Orbitron", sans-serif', color: primaryMain, lineHeight: 1 }}>
                   {formatSol(budgetInSol)}
                 </Typography>
               </Box>
@@ -538,6 +625,28 @@ export default function JobDetail() {
         <RepostDialog
           open={repostDialogOpen}
           onDecision={handleRepostDecision}
+        />
+
+        {/* Rate Client Dialog — shown to freelancer after job completes */}
+        {job && publicKey && (
+          <RateClientDialog
+            open={rateClientDialogOpen}
+            onClose={() => setRateClientDialogOpen(false)}
+            clientAddress={job.client?.toBase58?.() || ''}
+            jobTitle={metadata?.title || job.title || 'this job'}
+            onSubmit={handleRateClient}
+            loading={rateClientLoading}
+          />
+        )}
+
+        {/* Repost Job Dialog — pick new deadline and optionally new budget */}
+        <RepostJobDialog
+          open={repostJobDialogOpen}
+          jobTitle={metadata?.title || job.title || 'this job'}
+          originalBudgetSol={budgetInSol}
+          loading={actionLoading}
+          onClose={() => setRepostJobDialogOpen(false)}
+          onRepost={handleRepostJob}
         />
       </Container>
     </Layout>

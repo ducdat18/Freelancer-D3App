@@ -1,4 +1,4 @@
-import { Container, Typography, Box, Button, Grid, Card, CardContent } from '@mui/material';
+import { Container, Typography, Box, Button, Grid, Card, CardContent, useTheme } from '@mui/material';
 import { WorkOutline, Lock, Paid, ArrowForward } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -7,41 +7,43 @@ import { staggerContainer, staggerChild } from '../../utils/animations';
 const MotionBox = motion.create(Box);
 const MotionCard = motion.create(Card);
 
-const steps = [
-  {
-    icon: WorkOutline,
-    number: '01',
-    title: 'Post or Find a Job',
-    description: 'Clients post jobs with SOL budgets. Freelancers browse and submit competitive bids with on-chain reputation.',
-    accent: '#00ffc3',
-    detail: 'Budget locked on bid acceptance',
-  },
-  {
-    icon: Lock,
-    number: '02',
-    title: 'Smart Contract Escrow',
-    description: 'Funds lock in a Solana smart contract the moment a bid is accepted. Neither party can touch them unilaterally.',
-    accent: '#ff9500',
-    detail: 'Zero custody risk',
-  },
-  {
-    icon: Paid,
-    number: '03',
-    title: 'Instant Payment',
-    description: 'Work approved? Funds release in seconds directly to the freelancer\'s wallet. No delays, no fees, no middleman.',
-    accent: '#4caf50',
-    detail: '~$0.0005 transaction fee',
-  },
-];
-
 export default function HowItWorksPreview() {
+  const theme = useTheme();
+  
+  const steps = [
+    {
+      icon: WorkOutline,
+      number: '01',
+      title: 'Post or Find a Job',
+      description: 'Clients post jobs with SOL budgets. Freelancers browse and submit competitive bids with on-chain reputation.',
+      accent: theme.palette.primary.main,
+      detail: 'Budget locked on bid acceptance',
+    },
+    {
+      icon: Lock,
+      number: '02',
+      title: 'Smart Contract Escrow',
+      description: 'Funds lock in a Solana smart contract the moment a bid is accepted. Neither party can touch them unilaterally.',
+      accent: theme.palette.warning.main,
+      detail: 'Zero custody risk',
+    },
+    {
+      icon: Paid,
+      number: '03',
+      title: 'Instant Payment',
+      description: 'Work approved? Funds release in seconds directly to the freelancer\'s wallet. No delays, no fees, no middleman.',
+      accent: theme.palette.success.main,
+      detail: '~$0.0005 transaction fee',
+    },
+  ];
+
   return (
     <Container maxWidth="lg">
       <Box sx={{ textAlign: 'center', mb: 7 }}>
         <Typography
           variant="overline"
           sx={{
-            color: '#00ffc3',
+            color: 'primary.main',
             letterSpacing: 4,
             fontSize: '0.62rem',
             fontFamily: '"Orbitron", monospace',
@@ -75,7 +77,7 @@ export default function HowItWorksPreview() {
               left: '22%',
               right: '22%',
               height: '1px',
-              background: 'linear-gradient(90deg, transparent, rgba(0,255,195,0.25), rgba(0,255,195,0.25), transparent)',
+              background: `linear-gradient(90deg, transparent, ${theme.palette.primary.main}40, ${theme.palette.primary.main}40, transparent)`,
               zIndex: 0,
             }}
           />
@@ -89,11 +91,12 @@ export default function HowItWorksPreview() {
                   textAlign: 'center',
                   position: 'relative',
                   zIndex: 1,
-                  border: '1px solid rgba(0,255,195,0.08)',
+                  border: 1,
+                  borderColor: 'divider',
                   transition: 'all 0.25s ease',
                   '&:hover': {
                     borderColor: `${step.accent}30`,
-                    boxShadow: `0 0 30px ${step.accent}0a`,
+                    boxShadow: theme.palette.mode === 'dark' ? `0 0 30px ${step.accent}15` : `0 8px 30px ${step.accent}20`,
                     transform: 'translateY(-4px)',
                   },
                 }}
@@ -112,7 +115,7 @@ export default function HowItWorksPreview() {
                       mb: 3,
                       border: `2px solid ${step.accent}50`,
                       bgcolor: `${step.accent}08`,
-                      boxShadow: `0 0 20px ${step.accent}15`,
+                      boxShadow: theme.palette.mode === 'dark' ? `0 0 20px ${step.accent}15` : `0 4px 15px ${step.accent}15`,
                       position: 'relative',
                     }}
                   >
@@ -124,7 +127,7 @@ export default function HowItWorksPreview() {
                         top: -10,
                         right: -10,
                         bgcolor: step.accent,
-                        color: 'background.default',
+                        color: theme.palette.primary.contrastText,
                         fontFamily: '"Orbitron", sans-serif',
                         fontWeight: 700,
                         width: 26,

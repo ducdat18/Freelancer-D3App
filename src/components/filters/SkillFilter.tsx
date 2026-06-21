@@ -4,7 +4,8 @@ import {
   Autocomplete,
   TextField,
   Chip,
-  Stack
+  Stack,
+  useTheme
 } from '@mui/material';
 import { ALL_SKILLS, POPULAR_SKILLS } from '../../config/categories';
 
@@ -21,6 +22,9 @@ export default function SkillFilter({
   availableSkills = ALL_SKILLS,
   maxSkills = 10
 }: SkillFilterProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   const handleChange = (event: any, newValue: string[]) => {
     if (newValue.length <= maxSkills) {
       onChange(newValue);
@@ -49,6 +53,14 @@ export default function SkillFilter({
               {...getTagProps({ index })}
               key={option}
               size="small"
+              variant={isDark ? "outlined" : "filled"}
+              sx={{
+                fontWeight: 700,
+                fontSize: '0.7rem',
+                bgcolor: isDark ? 'transparent' : 'rgba(5,150,105,0.08)',
+                color: isDark ? 'primary.main' : 'primary.dark',
+                borderColor: isDark ? 'primary.main' : 'transparent',
+              }}
             />
           ))
         }
@@ -81,11 +93,16 @@ export default function SkillFilter({
                 label={skill}
                 size="small"
                 onClick={() => onChange([...selectedSkills, skill])}
+                variant="outlined"
                 sx={{
                   cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.7rem',
+                  borderColor: 'divider',
                   '&:hover': {
-                    backgroundColor: 'primary.light',
-                    color: 'primary.contrastText'
+                    backgroundColor: isDark ? 'rgba(0,255,195,0.08)' : 'rgba(5,150,105,0.08)',
+                    borderColor: 'primary.main',
+                    color: 'primary.main'
                   }
                 }}
               />

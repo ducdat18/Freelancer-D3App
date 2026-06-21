@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   CardContent,
+  useTheme,
 } from '@mui/material';
 import { Work, Person } from '@mui/icons-material';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -29,6 +30,10 @@ export default function Dashboard({ forceRole }: DashboardProps) {
   const { publicKey, connected } = useWallet();
   const { role } = useUserRoleContext();
   const { data: allJobs, isLoading } = useAllJobsQuery();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+  const secondaryMain = theme.palette.secondary.main;
 
   const activeRole = forceRole || role.primary;
 
@@ -80,8 +85,11 @@ export default function Dashboard({ forceRole }: DashboardProps) {
         {/* Page Header */}
         <Box
           sx={{
-            borderBottom: '1px solid rgba(0,255,195,0.08)',
-            background: 'linear-gradient(180deg, rgba(0,255,195,0.03) 0%, transparent 100%)',
+            borderBottom: 1,
+            borderColor: 'divider',
+            background: isDark 
+              ? 'linear-gradient(180deg, rgba(0,255,195,0.03) 0%, transparent 100%)'
+              : `linear-gradient(180deg, ${primaryMain}08 0%, transparent 100%)`,
             px: { xs: 2, md: 4 },
             py: { xs: 3, md: 4 },
           }}
@@ -91,12 +99,13 @@ export default function Dashboard({ forceRole }: DashboardProps) {
               sx={{
                 display: 'inline-flex', alignItems: 'center', gap: 1,
                 px: 1.5, py: 0.4, mb: 1.5,
-                bgcolor: 'rgba(0,255,195,0.06)', border: '1px solid rgba(0,255,195,0.15)',
+                bgcolor: isDark ? 'rgba(0,255,195,0.06)' : `${primaryMain}15`, 
+                border: 1, borderColor: isDark ? 'rgba(0,255,195,0.15)' : `${primaryMain}30`,
                 borderRadius: 1,
               }}
             >
-              <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#00ffc3', boxShadow: '0 0 6px #00ffc3' }} />
-              <Typography sx={{ fontFamily: '"Orbitron", monospace', fontSize: '0.58rem', letterSpacing: '0.12em', color: '#00ffc3' }}>
+              <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: primaryMain, boxShadow: isDark ? `0 0 6px ${primaryMain}` : 'none' }} />
+              <Typography sx={{ fontFamily: '"Orbitron", monospace', fontSize: '0.58rem', letterSpacing: '0.12em', color: primaryMain }}>
                 // GETTING STARTED
               </Typography>
             </Box>
@@ -105,7 +114,9 @@ export default function Dashboard({ forceRole }: DashboardProps) {
               fontWeight={800}
               sx={{
                 fontFamily: '"Orbitron", sans-serif',
-                background: 'linear-gradient(135deg, #fff 40%, #00ffc3 100%)',
+                background: isDark 
+                  ? `linear-gradient(135deg, #fff 40%, ${primaryMain} 100%)`
+                  : `linear-gradient(135deg, ${theme.palette.text.primary} 40%, ${primaryMain} 100%)`,
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                 lineHeight: 1.2, mb: 0.5,
               }}
@@ -125,12 +136,13 @@ export default function Dashboard({ forceRole }: DashboardProps) {
                 <Card
                   sx={{
                     cursor: 'pointer',
-                    border: '1px solid rgba(0,255,195,0.1)',
+                    border: 1,
+                    borderColor: 'divider',
                     transition: 'all 0.25s ease',
                     '&:hover': {
                       transform: 'translateY(-4px)',
-                      borderColor: 'rgba(0,255,195,0.3)',
-                      boxShadow: '0 0 32px rgba(0,255,195,0.08)',
+                      borderColor: isDark ? 'rgba(0,255,195,0.3)' : primaryMain,
+                      boxShadow: isDark ? '0 0 32px rgba(0,255,195,0.08)' : `0 4px 20px ${primaryMain}20`,
                     },
                   }}
                   onClick={() => router.push('/jobs/create')}
@@ -140,12 +152,14 @@ export default function Dashboard({ forceRole }: DashboardProps) {
                       sx={{
                         width: 72, height: 72, borderRadius: '50%', mx: 'auto', mb: 2.5,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: 'linear-gradient(135deg, rgba(0,255,195,0.15) 0%, rgba(0,255,195,0.05) 100%)',
-                        border: '1px solid rgba(0,255,195,0.2)',
-                        boxShadow: '0 0 24px rgba(0,255,195,0.1)',
+                        background: isDark 
+                          ? 'linear-gradient(135deg, rgba(0,255,195,0.15) 0%, rgba(0,255,195,0.05) 100%)'
+                          : `linear-gradient(135deg, ${primaryMain}20 0%, ${primaryMain}05 100%)`,
+                        border: 1, borderColor: isDark ? 'rgba(0,255,195,0.2)' : `${primaryMain}40`,
+                        boxShadow: isDark ? '0 0 24px rgba(0,255,195,0.1)' : `0 4px 15px ${primaryMain}15`,
                       }}
                     >
-                      <Work sx={{ fontSize: 36, color: '#00ffc3' }} />
+                      <Work sx={{ fontSize: 36, color: primaryMain }} />
                     </Box>
                     <Typography variant="h6" fontWeight={700} gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif', fontSize: '1rem' }}>
                       Post a Job
@@ -163,12 +177,13 @@ export default function Dashboard({ forceRole }: DashboardProps) {
                 <Card
                   sx={{
                     cursor: 'pointer',
-                    border: '1px solid rgba(153,69,255,0.1)',
+                    border: 1,
+                    borderColor: 'divider',
                     transition: 'all 0.25s ease',
                     '&:hover': {
                       transform: 'translateY(-4px)',
-                      borderColor: 'rgba(153,69,255,0.35)',
-                      boxShadow: '0 0 32px rgba(153,69,255,0.08)',
+                      borderColor: isDark ? 'rgba(153,69,255,0.35)' : secondaryMain,
+                      boxShadow: isDark ? '0 0 32px rgba(153,69,255,0.08)' : `0 4px 20px ${secondaryMain}20`,
                     },
                   }}
                   onClick={() => router.push('/jobs')}
@@ -178,12 +193,14 @@ export default function Dashboard({ forceRole }: DashboardProps) {
                       sx={{
                         width: 72, height: 72, borderRadius: '50%', mx: 'auto', mb: 2.5,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: 'linear-gradient(135deg, rgba(153,69,255,0.15) 0%, rgba(153,69,255,0.05) 100%)',
-                        border: '1px solid rgba(153,69,255,0.2)',
-                        boxShadow: '0 0 24px rgba(153,69,255,0.1)',
+                        background: isDark 
+                          ? 'linear-gradient(135deg, rgba(153,69,255,0.15) 0%, rgba(153,69,255,0.05) 100%)'
+                          : `linear-gradient(135deg, ${secondaryMain}20 0%, ${secondaryMain}05 100%)`,
+                        border: 1, borderColor: isDark ? 'rgba(153,69,255,0.2)' : `${secondaryMain}40`,
+                        boxShadow: isDark ? '0 0 24px rgba(153,69,255,0.1)' : `0 4px 15px ${secondaryMain}15`,
                       }}
                     >
-                      <Person sx={{ fontSize: 36, color: '#9945ff' }} />
+                      <Person sx={{ fontSize: 36, color: secondaryMain }} />
                     </Box>
                     <Typography variant="h6" fontWeight={700} gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif', fontSize: '1rem' }}>
                       Find Work
@@ -191,7 +208,7 @@ export default function Dashboard({ forceRole }: DashboardProps) {
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, lineHeight: 1.6 }}>
                       Browse open jobs, submit bids, and get paid in crypto directly to your wallet.
                     </Typography>
-                    <Button variant="outlined" size="small" sx={{ px: 3, borderColor: 'rgba(153,69,255,0.4)', color: '#9945ff', '&:hover': { borderColor: '#9945ff', bgcolor: 'rgba(153,69,255,0.06)' } }}>
+                    <Button variant="outlined" size="small" sx={{ px: 3, borderColor: `${secondaryMain}80`, color: secondaryMain, '&:hover': { borderColor: secondaryMain, bgcolor: `${secondaryMain}15` } }}>
                       Browse Jobs →
                     </Button>
                   </CardContent>
@@ -297,8 +314,11 @@ export default function Dashboard({ forceRole }: DashboardProps) {
       {/* Page Header */}
       <Box
         sx={{
-          borderBottom: '1px solid rgba(0,255,195,0.08)',
-          background: 'linear-gradient(180deg, rgba(0,255,195,0.03) 0%, transparent 100%)',
+          borderBottom: 1,
+          borderColor: 'divider',
+          background: isDark 
+            ? 'linear-gradient(180deg, rgba(0,255,195,0.03) 0%, transparent 100%)'
+            : `linear-gradient(180deg, ${primaryMain}08 0%, transparent 100%)`,
           px: { xs: 2, md: 4 },
           py: { xs: 3, md: 4 },
         }}
@@ -310,12 +330,13 @@ export default function Dashboard({ forceRole }: DashboardProps) {
                 sx={{
                   display: 'inline-flex', alignItems: 'center', gap: 1,
                   px: 1.5, py: 0.4, mb: 1.5,
-                  bgcolor: 'rgba(0,255,195,0.06)', border: '1px solid rgba(0,255,195,0.15)',
+                  bgcolor: isDark ? 'rgba(0,255,195,0.06)' : `${primaryMain}15`, 
+                  border: 1, borderColor: isDark ? 'rgba(0,255,195,0.15)' : `${primaryMain}30`,
                   borderRadius: 1,
                 }}
               >
-                <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#00ffc3', boxShadow: '0 0 6px #00ffc3' }} />
-                <Typography sx={{ fontFamily: '"Orbitron", monospace', fontSize: '0.58rem', letterSpacing: '0.12em', color: '#00ffc3' }}>
+                <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: primaryMain, boxShadow: isDark ? `0 0 6px ${primaryMain}` : 'none' }} />
+                <Typography sx={{ fontFamily: '"Orbitron", monospace', fontSize: '0.58rem', letterSpacing: '0.12em', color: primaryMain }}>
                   // DASHBOARD
                 </Typography>
               </Box>
@@ -324,7 +345,9 @@ export default function Dashboard({ forceRole }: DashboardProps) {
                 fontWeight={800}
                 sx={{
                   fontFamily: '"Orbitron", sans-serif',
-                  background: 'linear-gradient(135deg, #fff 40%, #00ffc3 100%)',
+                  background: isDark 
+                    ? `linear-gradient(135deg, #fff 40%, ${primaryMain} 100%)`
+                    : `linear-gradient(135deg, ${theme.palette.text.primary} 40%, ${primaryMain} 100%)`,
                   WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                   lineHeight: 1.2,
                 }}
@@ -337,7 +360,7 @@ export default function Dashboard({ forceRole }: DashboardProps) {
                 variant="outlined"
                 size="small"
                 onClick={() => router.push('/jobs')}
-                sx={{ fontSize: '0.78rem', borderColor: 'rgba(0,255,195,0.3)', color: '#00ffc3', '&:hover': { borderColor: '#00ffc3', bgcolor: 'rgba(0,255,195,0.06)' } }}
+                sx={{ fontSize: '0.78rem', borderColor: isDark ? 'rgba(0,255,195,0.3)' : `${primaryMain}80`, color: primaryMain, '&:hover': { borderColor: primaryMain, bgcolor: isDark ? 'rgba(0,255,195,0.06)' : `${primaryMain}15` } }}
               >
                 Browse Jobs
               </Button>
@@ -360,10 +383,10 @@ export default function Dashboard({ forceRole }: DashboardProps) {
           <Box sx={{ mb: 4 }}>
             <StatsHUD
               stats={[
-                { label: 'Open Jobs', value: openJobs.length, color: '#8084ee' },
-                { label: 'Active Jobs', value: inProgressJobs.length, color: '#00ffc3' },
-                { label: 'Completed', value: completedJobs.length, color: '#4caf50', suffix: 'done' },
-                { label: 'Total Jobs', value: totalJobs, color: '#e04d01' },
+                { label: 'Open Jobs', value: openJobs.length, color: secondaryMain },
+                { label: 'Active Jobs', value: inProgressJobs.length, color: primaryMain },
+                { label: 'Completed', value: completedJobs.length, color: theme.palette.success.main, suffix: 'done' },
+                { label: 'Total Jobs', value: totalJobs, color: theme.palette.warning.main },
               ]}
             />
           </Box>

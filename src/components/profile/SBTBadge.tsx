@@ -8,7 +8,8 @@ import {
   Rating,
   Chip,
   Avatar,
-  alpha
+  alpha,
+  useTheme
 } from '@mui/material';
 import {
   Shield,
@@ -45,14 +46,16 @@ function formatDate(timestamp: BN): string {
   });
 }
 
-function getRatingColor(rating: number): string {
-  if (rating >= 4) return '#00ffc3';
-  if (rating >= 3) return '#e04d01';
-  return '#ff00ff';
-}
-
 export default function SBTBadge({ sbt, userPubkey }: SBTBadgeProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
+  const getRatingColor = (rating: number): string => {
+    if (rating >= 4) return theme.palette.success.main;
+    if (rating >= 3) return theme.palette.warning.main;
+    return theme.palette.error.main;
+  };
 
   const ratingColor = getRatingColor(sbt.rating);
 
@@ -66,14 +69,17 @@ export default function SBTBadge({ sbt, userPubkey }: SBTBadgeProps) {
           opacity: sbt.revoked ? 0.6 : 1,
           '&:hover': {
             transform: 'translateY(-4px)',
-            boxShadow: 6,
+            boxShadow: isDark ? `0 0 20px ${ratingColor}20` : '0 8px 24px rgba(0,0,0,0.08)',
+            borderColor: ratingColor,
           },
-          border: sbt.revoked
-            ? '2px solid #ff00ff'
-            : `2px solid ${alpha(ratingColor, 0.4)}`,
-          background: sbt.revoked
-            ? undefined
-            : `linear-gradient(135deg, ${alpha(ratingColor, 0.08)} 0%, ${alpha(ratingColor, 0.02)} 100%)`,
+          border: 1,
+          borderColor: sbt.revoked
+            ? theme.palette.error.main
+            : alpha(ratingColor, 0.3),
+          background: isDark
+            ? `linear-gradient(135deg, ${alpha(ratingColor, 0.08)} 0%, ${alpha(ratingColor, 0.02)} 100%)`
+            : `linear-gradient(135deg, ${alpha(ratingColor, 0.05)} 0%, ${alpha(ratingColor, 0.01)} 100%)`,
+          backgroundImage: 'none',
         }}
       >
         {/* Revoked overlay */}
@@ -88,7 +94,7 @@ export default function SBTBadge({ sbt, userPubkey }: SBTBadgeProps) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              bgcolor: alpha('#ff00ff', 0.08),
+              bgcolor: alpha(theme.palette.error.main, 0.08),
               zIndex: 2,
               borderRadius: 'inherit',
               pointerEvents: 'none',
@@ -99,11 +105,12 @@ export default function SBTBadge({ sbt, userPubkey }: SBTBadgeProps) {
               label="REVOKED"
               color="error"
               sx={{
-                fontWeight: 'bold',
+                fontWeight: 800,
                 fontSize: '0.9rem',
                 py: 2,
                 px: 1,
                 transform: 'rotate(-12deg)',
+                fontFamily: '"Orbitron", sans-serif',
               }}
             />
           </Box>
@@ -122,10 +129,12 @@ export default function SBTBadge({ sbt, userPubkey }: SBTBadgeProps) {
             >
               <Avatar
                 sx={{
-                  bgcolor: alpha(ratingColor, 0.15),
+                  bgcolor: alpha(ratingColor, 0.1),
                   color: ratingColor,
                   width: 48,
                   height: 48,
+                  border: 1,
+                  borderColor: alpha(ratingColor, 0.2),
                 }}
               >
                 <Shield sx={{ fontSize: 28 }} />
@@ -136,13 +145,18 @@ export default function SBTBadge({ sbt, userPubkey }: SBTBadgeProps) {
                 size="small"
                 max={5}
                 precision={1}
+                sx={{
+                  '& .MuiRating-iconFilled': {
+                    color: ratingColor,
+                  }
+                }}
               />
             </Box>
 
             {/* Job title */}
             <Typography
               variant="subtitle1"
-              fontWeight="bold"
+              fontWeight={700}
               gutterBottom
               noWrap
               sx={{ lineHeight: 1.3 }}
@@ -155,13 +169,14 @@ export default function SBTBadge({ sbt, userPubkey }: SBTBadgeProps) {
               variant="body2"
               color="text.secondary"
               gutterBottom
+              sx={{ fontWeight: 500 }}
             >
               Rated by{' '}
               <Typography
                 component="span"
                 variant="body2"
                 fontFamily="monospace"
-                sx={{ fontWeight: 500 }}
+                sx={{ fontWeight: 700, color: 'text.primary' }}
               >
                 {truncateAddress(sbt.rater.toBase58())}
               </Typography>
@@ -173,7 +188,7 @@ export default function SBTBadge({ sbt, userPubkey }: SBTBadgeProps) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                mt: 1.5,
+                mt: 2,
                 mb: 1,
               }}
             >
@@ -181,9 +196,9 @@ export default function SBTBadge({ sbt, userPubkey }: SBTBadgeProps) {
                 label={formatSol(sbt.jobAmount)}
                 size="small"
                 variant="outlined"
-                sx={{ fontWeight: 500 }}
+                sx={{ fontWeight: 700, fontSize: '0.7rem', height: 22, borderColor: 'divider' }}
               />
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" color="text.secondary" fontWeight={600}>
                 {formatDate(sbt.issuedAt)}
               </Typography>
             </Box>
@@ -198,10 +213,10 @@ export default function SBTBadge({ sbt, userPubkey }: SBTBadgeProps) {
                   mt: 1.5,
                 }}
               >
-                <VerifiedUser sx={{ fontSize: 16, color: '#00ffc3' }} />
+                <VerifiedUser sx={{ fontSize: 14, color: theme.palette.success.main }} />
                 <Typography
                   variant="caption"
-                  sx={{ color: '#00ffc3', fontWeight: 500 }}
+                  sx={{ color: theme.palette.success.main, fontWeight: 700, fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: 0.5 }}
                 >
                   Verified on-chain
                 </Typography>

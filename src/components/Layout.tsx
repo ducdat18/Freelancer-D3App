@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import type { SvgIconProps } from '@mui/material'
 import {
   Box,
@@ -20,6 +21,13 @@ import {
   AppBar,
   Toolbar,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Stack,
+  Chip,
+  useTheme as useMuiTheme,
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
@@ -41,15 +49,21 @@ import SettingsIcon from '@mui/icons-material/Settings'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import LightModeIcon from '@mui/icons-material/LightMode'
+import DarkModeIcon from '@mui/icons-material/DarkMode'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import DownloadIcon from '@mui/icons-material/Download'
 import { useRouter } from 'next/router'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useWalletModal } from '@solana/wallet-adapter-react-ui'
+import { WalletReadyState } from '@solana/wallet-adapter-base'
 import Logo from './Logo'
 import { useQueryClient } from '@tanstack/react-query'
 import { useDevnetVerification } from '../hooks/useDevnetVerification'
 import { useDatabaseChat } from '../hooks/useDatabaseChat'
 import NotificationDropdown from './NotificationDropdown'
 import { queryKeys } from '../hooks/queries/queryKeys'
+import { useTheme } from '../contexts/ThemeContext'
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
@@ -104,7 +118,7 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/referral',           name: 'Referral',        Icon: ShareIcon },
       { path: '/identity',           name: 'Identity',        Icon: FingerprintIcon },
       { path: '/arbitrator/fees',    name: 'Arbitrator Fees', Icon: MonetizationOnIcon },
-      { path: '/arbitrator/staking', name: 'Arb. Staking',    Icon: SavingsIcon },
+      { path: '/arbitrator/staking', name: 'Juror Staking',    Icon: SavingsIcon },
       { path: '/settings/recovery',  name: 'Settings',        Icon: SettingsIcon },
     ],
   },
@@ -116,15 +130,18 @@ interface LayoutProps { children: ReactNode }
 
 export default function Layout({ children }: LayoutProps) {
   const router     = useRouter()
-  const { publicKey, connected, disconnect } = useWallet()
+  const { publicKey, connected, disconnect, wallets } = useWallet()
   const { setVisible }                       = useWalletModal()
   const queryClient                          = useQueryClient()
   const { isCorrectNetwork, showNetworkWarning } = useDevnetVerification()
   const { getAllConversations }               = useDatabaseChat()
+  const { mode, toggleTheme }                = useTheme()
+  const theme                                = useMuiTheme()
 
-  const [mobileOpen,   setMobileOpen]   = useState(false)
-  const [walletAnchor, setWalletAnchor] = useState<null | HTMLElement>(null)
-  const [unreadCount,  setUnreadCount]  = useState(0)
+  const [mobileOpen,    setMobileOpen]   = useState(false)
+  const [walletAnchor,  setWalletAnchor] = useState<null | HTMLElement>(null)
+  const [unreadCount,   setUnreadCount]  = useState(0)
+  const [noWalletOpen,  setNoWalletOpen] = useState(false)
 
   // Hydration-safe: always start true on server, sync from localStorage after mount
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -164,6 +181,12 @@ export default function Layout({ children }: LayoutProps) {
     ? `${publicKey.toBase58().slice(0, 5)}...${publicKey.toBase58().slice(-4)}`
     : null
 
+  const handleConnectClick = (e: React.MouseEvent<HTMLElement>) => {
+    if (connected) { setWalletAnchor(e.currentTarget); return }
+    const hasInstalled = wallets.some(w => w.readyState === WalletReadyState.Installed)
+    if (hasInstalled) { setVisible(true) } else { setNoWalletOpen(true) }
+  }
+
   // ─── sub-components ─────────────────────────────────────────────────────────
 
   const SideNavItem = ({ path, name, Icon, prefetch, messageBadge }: NavEntry) => {
@@ -185,24 +208,25 @@ export default function Layout({ children }: LayoutProps) {
             sx={{
               borderRadius: '6px',
               mx: 1,
-              px: isExpanded ? 1.5 : 0,
+              pl: 2,
+              pr: isExpanded ? 1.5 : 0,
               py: 0.75,
-              justifyContent: isExpanded ? 'flex-start' : 'center',
+              justifyContent: 'flex-start',
               color: active ? 'primary.main' : 'text.secondary',
-              bgcolor: active ? 'rgba(0,255,195,0.07)' : 'transparent',
-              borderLeft: active ? '2px solid #00ffc3' : '2px solid transparent',
+              bgcolor: active ? (theme.palette.mode === 'dark' ? 'rgba(0,255,195,0.07)' : 'rgba(0,166,128,0.07)') : 'transparent',
+              borderLeft: active ? `2px solid ${theme.palette.primary.main}` : '2px solid transparent',
               '& .MuiListItemIcon-root': { color: 'inherit' },
               '&:hover': {
-                bgcolor: 'rgba(0,255,195,0.05)',
+                bgcolor: theme.palette.mode === 'dark' ? 'rgba(0,255,195,0.05)' : 'rgba(0,166,128,0.05)',
                 color: 'primary.main',
-                borderLeft: '2px solid rgba(0,255,195,0.5)',
+                borderLeft: `2px solid ${theme.palette.primary.main}80`,
               },
               transition: 'all 0.15s',
             }}
           >
             <ListItemIcon
               sx={{
-                minWidth: isExpanded ? 32 : 'auto',
+                minWidth: 32,
                 '& svg': active ? { filter: 'drop-shadow(0 0 4px rgba(0,255,195,0.5))' } : {},
               }}
             >
@@ -226,18 +250,18 @@ export default function Layout({ children }: LayoutProps) {
       <Typography
         sx={{
           px: 2, pt: 1.5, pb: 0.5,
-          fontSize: '0.6rem',
+          fontSize: '0.65rem',
           fontFamily: '"Orbitron", sans-serif',
-          fontWeight: 600,
+          fontWeight: 700,
           letterSpacing: '0.12em',
-          color: 'rgba(0,255,195,0.3)',
+          color: theme.palette.mode === 'dark' ? 'rgba(0,255,195,0.4)' : 'text.secondary',
           userSelect: 'none',
         }}
       >
         {label}
       </Typography>
     ) : (
-      <Divider sx={{ my: 0.75, mx: 1.5, borderColor: 'rgba(0,255,195,0.08)' }} />
+      <Divider sx={{ my: 0.75, mx: 1.5, borderColor: 'divider' }} />
     )
 
   // ─── sidebar ────────────────────────────────────────────────────────────────
@@ -258,7 +282,8 @@ export default function Layout({ children }: LayoutProps) {
           px: isExpanded ? 2 : 0.75,
           minHeight: 64,
           flexShrink: 0,
-          borderBottom: '1px solid rgba(0,255,195,0.1)',
+          borderBottom: 1,
+          borderColor: 'divider',
           transition: 'padding 0.2s',
         }}
       >
@@ -269,31 +294,49 @@ export default function Layout({ children }: LayoutProps) {
           <Logo size={isExpanded ? 32 : 28} showText={false} />
           {isExpanded && (
             <Box sx={{ overflow: 'hidden' }}>
-              <Typography noWrap sx={{ fontFamily: '"Orbitron", sans-serif', fontWeight: 700, fontSize: '0.82rem', letterSpacing: '0.04em', background: 'linear-gradient(135deg, #00ffc3 0%, #8084ee 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <Typography noWrap sx={{ fontFamily: '"Orbitron", sans-serif', fontWeight: 700, fontSize: '0.82rem', letterSpacing: '0.04em', background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 Lancer Lab
               </Typography>
-              <Typography sx={{ fontFamily: '"Rajdhani", sans-serif', fontSize: '0.58rem', letterSpacing: '0.12em', color: 'rgba(0,255,195,0.35)', textTransform: 'uppercase' }}>
+              <Typography sx={{ fontFamily: '"Rajdhani", sans-serif', fontSize: '0.58rem', letterSpacing: '0.12em', color: theme.palette.mode === 'dark' ? 'rgba(0,255,195,0.4)' : 'text.secondary', textTransform: 'uppercase', fontWeight: 600 }}>
                 Decentralized
               </Typography>
             </Box>
           )}
         </Box>
 
-        {/* Collapse/pin toggle — always visible on desktop so icon order stays consistent */}
-        <Tooltip title={sidebarOpen ? 'Collapse' : 'Pin open'} placement="right" arrow>
-          <IconButton
-            size="small"
-            onClick={toggleSidebar}
-            sx={{
-              display: { xs: 'none', md: 'flex' },
-              flexShrink: 0,
-              color: 'text.disabled',
-              '&:hover': { color: 'primary.main', bgcolor: 'rgba(0,255,195,0.08)' },
-            }}
-          >
-            <ChevronLeftIcon sx={{ fontSize: isExpanded ? 18 : 14, transform: sidebarOpen ? 'none' : 'rotate(180deg)', transition: 'transform 0.2s' }} />
-          </IconButton>
-        </Tooltip>
+        {/* Theme Toggle & Collapse/pin toggle */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Tooltip title={mode === 'dark' ? 'Light Mode' : 'Dark Mode'} placement="right" arrow>
+            <IconButton
+              size="small"
+              onClick={toggleTheme}
+              sx={{
+                display: { xs: 'none', md: 'flex' },
+                flexShrink: 0,
+                color: 'text.secondary',
+                '&:hover': { color: 'primary.main', bgcolor: theme.palette.mode === 'dark' ? 'rgba(0, 255, 195, 0.08)' : 'rgba(5, 150, 105, 0.08)' },
+              }}
+            >
+              {mode === 'dark' ? <LightModeIcon sx={{ fontSize: 18 }} /> : <DarkModeIcon sx={{ fontSize: 18 }} />}
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title={sidebarOpen ? 'Collapse' : 'Pin open'} placement="right" arrow>
+            <IconButton
+              size="small"
+              onClick={toggleSidebar}
+              sx={{
+                display: { xs: 'none', md: 'flex' },
+                flexShrink: 0,
+                color: 'text.secondary',
+                '&:hover': { color: 'primary.main', bgcolor: theme.palette.mode === 'dark' ? 'rgba(0, 255, 195, 0.08)' : 'rgba(5, 150, 105, 0.08)' },
+              }}
+            >
+              <ChevronLeftIcon sx={{ fontSize: isExpanded ? 18 : 14, transform: sidebarOpen ? 'none' : 'rotate(180deg)', transition: 'transform 0.2s' }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
+
       </Box>
 
       {/* Wallet */}
@@ -302,7 +345,8 @@ export default function Layout({ children }: LayoutProps) {
           px: isExpanded ? 1.5 : 1,
           py: 1.25,
           flexShrink: 0,
-          borderBottom: '1px solid rgba(0,255,195,0.08)',
+          borderBottom: 1,
+          borderColor: 'divider',
           display: 'flex',
           flexDirection: 'column',
           alignItems: isExpanded ? 'stretch' : 'center',
@@ -315,7 +359,7 @@ export default function Layout({ children }: LayoutProps) {
             fullWidth size="small"
             variant={connected ? 'outlined' : 'contained'}
             startIcon={<AccountBalanceWalletIcon sx={{ fontSize: '15px !important' }} />}
-            onClick={e => connected ? setWalletAnchor(e.currentTarget) : setVisible(true)}
+            onClick={handleConnectClick}
             sx={{
               textTransform: 'none',
               justifyContent: 'flex-start',
@@ -331,7 +375,7 @@ export default function Layout({ children }: LayoutProps) {
           <Tooltip title={connected && shortAddr ? shortAddr : 'Connect Wallet'} placement="right" arrow>
             <IconButton
               size="small"
-              onClick={e => connected ? setWalletAnchor(e.currentTarget) : setVisible(true)}
+              onClick={handleConnectClick}
               sx={{ color: connected ? (isCorrectNetwork ? 'primary.main' : 'error.main') : 'text.secondary' }}
             >
               <AccountBalanceWalletIcon sx={{ fontSize: 18 }} />
@@ -365,19 +409,20 @@ export default function Layout({ children }: LayoutProps) {
       </Box>
 
       {/* About Us */}
-      <Box sx={{ borderTop: '1px solid rgba(0,255,195,0.08)', flexShrink: 0 }}>
+      <Box sx={{ borderTop: 1, borderColor: 'divider', flexShrink: 0 }}>
         <Tooltip title={!isExpanded ? 'About Us' : ''} placement="right" arrow>
           <ListItemButton
             onClick={() => { router.push('/about'); setMobileOpen(false) }}
             sx={{
               py: 1,
-              px: isExpanded ? 2 : 0,
-              justifyContent: isExpanded ? 'flex-start' : 'center',
-              color: isActive('/about') ? 'primary.main' : 'text.disabled',
-              '&:hover': { color: 'text.secondary', bgcolor: 'rgba(255,255,255,0.03)' },
+              pl: 2,
+              pr: isExpanded ? 2 : 0,
+              justifyContent: 'flex-start',
+              color: isActive('/about') ? 'primary.main' : 'text.secondary',
+              '&:hover': { color: 'primary.main', bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)' },
             }}
           >
-            <ListItemIcon sx={{ minWidth: isExpanded ? 30 : 'auto', color: 'inherit' }}>
+            <ListItemIcon sx={{ minWidth: 30, color: 'inherit' }}>
               <InfoOutlinedIcon sx={{ fontSize: 18 }} />
             </ListItemIcon>
             {isExpanded && (
@@ -409,6 +454,9 @@ export default function Layout({ children }: LayoutProps) {
             <Logo size={26} showText={false} />
           </Box>
           <Box sx={{ flexGrow: 1 }} />
+          <IconButton color="inherit" onClick={toggleTheme}>
+            {mode === 'dark' ? <LightModeIcon sx={{ fontSize: 20 }} /> : <DarkModeIcon sx={{ fontSize: 20 }} />}
+          </IconButton>
           {connected && (
             <NotificationDropdown />
           )}
@@ -416,7 +464,7 @@ export default function Layout({ children }: LayoutProps) {
             size="small"
             variant={connected ? 'outlined' : 'contained'}
             startIcon={<AccountBalanceWalletIcon />}
-            onClick={e => connected ? setWalletAnchor(e.currentTarget) : setVisible(true)}
+            onClick={handleConnectClick}
             sx={{
               textTransform: 'none',
               fontSize: '0.72rem',
@@ -471,6 +519,96 @@ export default function Layout({ children }: LayoutProps) {
         </MenuItem>
       </Menu>
 
+      {/* No Wallet Detected Dialog */}
+      <Dialog
+        open={noWalletOpen}
+        onClose={() => setNoWalletOpen(false)}
+        PaperProps={{
+          sx: {
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 2,
+            maxWidth: 420,
+            width: '100%',
+          },
+        }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <AccountBalanceWalletIcon sx={{ color: 'primary.main' }} />
+            <Typography variant="h6" fontWeight={700}>No Wallet Detected</Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            You need a Solana wallet to interact with FreelanceChain. Install a browser extension below, or use Torus to sign in with Google — no extension required.
+          </Typography>
+
+          <Stack spacing={1.5}>
+            {/* Phantom */}
+            <Button
+              fullWidth
+              variant="outlined"
+              endIcon={<OpenInNewIcon fontSize="small" />}
+              href="https://phantom.app/download"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ justifyContent: 'space-between', textTransform: 'none', borderColor: '#ab9ff2', color: '#ab9ff2', '&:hover': { borderColor: '#ab9ff2', bgcolor: 'rgba(171,159,242,0.08)' } }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box component="img" src="/wallet-icons/phantom.png" onError={(e: any) => { e.target.style.display = 'none' }} sx={{ width: 22, height: 22, borderRadius: '50%' }} />
+                <Box sx={{ textAlign: 'left' }}>
+                  <Typography variant="body2" fontWeight={600}>Phantom</Typography>
+                  <Typography variant="caption" color="text.secondary">Most popular Solana wallet</Typography>
+                </Box>
+              </Box>
+              <Chip label="Recommended" size="small" sx={{ bgcolor: 'rgba(171,159,242,0.15)', color: '#ab9ff2', fontSize: '0.65rem', height: 20 }} />
+            </Button>
+
+            {/* Solflare */}
+            <Button
+              fullWidth
+              variant="outlined"
+              endIcon={<OpenInNewIcon fontSize="small" />}
+              href="https://solflare.com/download"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ justifyContent: 'space-between', textTransform: 'none', borderColor: 'divider', color: 'text.primary', '&:hover': { borderColor: 'primary.main', bgcolor: 'rgba(0,255,195,0.04)' } }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box component="img" src="/wallet-icons/solflare.png" onError={(e: any) => { e.target.style.display = 'none' }} sx={{ width: 22, height: 22, borderRadius: '50%' }} />
+                <Box sx={{ textAlign: 'left' }}>
+                  <Typography variant="body2" fontWeight={600}>Solflare</Typography>
+                  <Typography variant="caption" color="text.secondary">Web + extension wallet</Typography>
+                </Box>
+              </Box>
+            </Button>
+
+            {/* Torus — web-based, no install */}
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => { setNoWalletOpen(false); setVisible(true) }}
+              sx={{ justifyContent: 'space-between', textTransform: 'none', bgcolor: 'rgba(0,255,195,0.12)', color: 'primary.main', border: '1px solid', borderColor: 'primary.main', boxShadow: 'none', '&:hover': { bgcolor: 'rgba(0,255,195,0.2)', boxShadow: 'none' } }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box sx={{ textAlign: 'left' }}>
+                  <Typography variant="body2" fontWeight={600}>Continue with Torus</Typography>
+                  <Typography variant="caption" color="text.secondary">Sign in with Google — no extension needed</Typography>
+                </Box>
+              </Box>
+              <Chip label="No install" size="small" sx={{ bgcolor: 'rgba(0,255,195,0.15)', color: 'primary.main', fontSize: '0.65rem', height: 20 }} />
+            </Button>
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button size="small" onClick={() => setNoWalletOpen(false)} sx={{ textTransform: 'none', color: 'text.secondary' }}>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Main */}
       <Box
         component="main"
@@ -483,9 +621,20 @@ export default function Layout({ children }: LayoutProps) {
           </Alert>
         )}
 
-        <Box sx={{ flexGrow: 1, py: 3 }}>
-          {children}
-        </Box>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={router.pathname}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            style={{ flexGrow: 1 }}
+          >
+            <Box sx={{ flexGrow: 1, py: 3 }}>
+              {children}
+            </Box>
+          </motion.div>
+        </AnimatePresence>
       </Box>
 
     </Box>

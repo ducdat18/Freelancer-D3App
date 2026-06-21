@@ -5,7 +5,7 @@ export type PublicKey = SolanaPublicKey;
 export { BN };
 
 // Helper functions for type conversion
-export const bnToNumber = (bn: BN): number => bn.toNumber();
+export const bnToNumber = (bn: BN | number): number => typeof bn === 'number' ? bn : bn.toNumber();
 export const bnToString = (bn: BN): string => bn.toString();
 export const lamportsToSol = (lamports: number | BN): number => {
   const value = typeof lamports === 'number' ? lamports : lamports.toNumber();

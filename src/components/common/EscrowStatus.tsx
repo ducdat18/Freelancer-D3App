@@ -1,4 +1,4 @@
-import { Box, Typography, LinearProgress } from '@mui/material'
+import { Box, Typography, LinearProgress, useTheme } from '@mui/material'
 import {
   Lock,
   LockOpen,
@@ -16,57 +16,54 @@ interface EscrowStatusProps {
   size?: 'small' | 'medium' | 'large'
 }
 
-const statusConfig = {
-  awaiting_bids: {
-    label: 'Awaiting Bids',
-    color: 'default' as const,
-    icon: HourglassEmpty,
-    bgcolor: 'rgba(128,132,238,0.08)',
-    textColor: '#8084ee',
-  },
-  pending: {
-    label: 'Pending Deposit',
-    color: 'warning' as const,
-    icon: HourglassEmpty,
-    bgcolor: 'rgba(224,77,1,0.08)',
-    textColor: '#e04d01',
-  },
-  locked: {
-    label: 'Funds Locked',
-    color: 'info' as const,
-    icon: Lock,
-    bgcolor: 'rgba(0,255,195,0.05)',
-    textColor: '#00ffc3',
-  },
-  released: {
-    label: 'Funds Released',
-    color: 'success' as const,
-    icon: CheckCircle,
-    bgcolor: 'rgba(0,255,195,0.08)',
-    textColor: '#00ffc3',
-  },
-  disputed: {
-    label: 'In Dispute',
-    color: 'error' as const,
-    icon: Warning,
-    bgcolor: 'rgba(255,0,255,0.08)',
-    textColor: '#ff00ff',
-  },
-  refunded: {
-    label: 'Refunded',
-    color: 'default' as const,
-    icon: LockOpen,
-    bgcolor: 'rgba(11,25,42,0.5)',
-    textColor: '#a5a8f3',
-  },
-}
-
 export default function EscrowStatus({
   status,
   amount,
   showAmount = true,
   size = 'medium',
 }: EscrowStatusProps) {
+  const theme = useTheme()
+  const isDark = theme.palette.mode === 'dark'
+
+  const statusConfig = {
+    awaiting_bids: {
+      label: 'Awaiting Bids',
+      icon: HourglassEmpty,
+      bgcolor: isDark ? 'rgba(128,132,238,0.08)' : 'rgba(99,102,241,0.08)',
+      textColor: theme.palette.info.main,
+    },
+    pending: {
+      label: 'Pending Deposit',
+      icon: HourglassEmpty,
+      bgcolor: isDark ? 'rgba(224,77,1,0.08)' : 'rgba(224,77,1,0.05)',
+      textColor: theme.palette.warning.main,
+    },
+    locked: {
+      label: 'Funds Locked',
+      icon: Lock,
+      bgcolor: isDark ? 'rgba(0,255,195,0.05)' : 'rgba(0,166,128,0.05)',
+      textColor: theme.palette.primary.main,
+    },
+    released: {
+      label: 'Funds Released',
+      icon: CheckCircle,
+      bgcolor: isDark ? 'rgba(0,255,195,0.08)' : 'rgba(0,166,128,0.08)',
+      textColor: theme.palette.success.main,
+    },
+    disputed: {
+      label: 'In Dispute',
+      icon: Warning,
+      bgcolor: isDark ? 'rgba(255,0,255,0.08)' : 'rgba(255,0,255,0.05)',
+      textColor: theme.palette.error.main,
+    },
+    refunded: {
+      label: 'Refunded',
+      icon: LockOpen,
+      bgcolor: isDark ? 'rgba(11,25,42,0.5)' : 'rgba(0,0,0,0.05)',
+      textColor: theme.palette.text.secondary,
+    },
+  }
+
   const config = statusConfig[status]
   const Icon = config.icon
 
@@ -88,6 +85,8 @@ export default function EscrowStatus({
           borderRadius: 2,
           padding: sizeMap[size].padding,
           width: 'fit-content',
+          border: 1,
+          borderColor: isDark ? 'transparent' : `${config.textColor}30`,
         }}
       >
         <Icon sx={{ fontSize: sizeMap[size].icon }} />
@@ -116,7 +115,7 @@ export default function EscrowStatus({
             sx={{
               height: 4,
               borderRadius: 2,
-              bgcolor: 'rgba(11,25,42,0.5)',
+              bgcolor: isDark ? 'rgba(11,25,42,0.5)' : 'rgba(0,0,0,0.05)',
               '& .MuiLinearProgress-bar': {
                 bgcolor: config.textColor,
               },

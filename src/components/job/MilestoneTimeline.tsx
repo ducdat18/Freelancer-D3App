@@ -4,6 +4,7 @@ import {
   Typography,
   CircularProgress,
   Alert,
+  useTheme,
 } from '@mui/material';
 import LoadingSpinner from '../LoadingSpinner';
 import type { PublicKey } from '../../types/solana';
@@ -21,24 +22,12 @@ type MilestoneStatusKey =
   | 'disputed'
   | 'cancelled';
 
-const STATUS_COLORS: Record<MilestoneStatusKey, string> = {
-  pending: '#9e9e9e',
-  funded: '#00ffc3',
-  inProgress: '#e04d01',
-  submitted: '#ff7033',
-  approved: '#00ffc3',
-  rejected: '#ff00ff',
-  disputed: '#ff00ff',
-  cancelled: '#9e9e9e',
-};
-
 function getStatusKey(status: Record<string, unknown>): MilestoneStatusKey {
   const keys = Object.keys(status);
   if (keys.length === 0) return 'pending';
   const key = keys[0].toLowerCase();
   if (key === 'inprogress' || key === 'in_progress') return 'inProgress';
-  if (key in STATUS_COLORS) return key as MilestoneStatusKey;
-  return 'pending';
+  return key as MilestoneStatusKey;
 }
 
 interface MilestoneTimelineProps {
@@ -54,6 +43,20 @@ export default function MilestoneTimeline({
   isFreelancer,
   freelancerPubkey,
 }: MilestoneTimelineProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  
+  const STATUS_COLORS: Record<MilestoneStatusKey, string> = {
+    pending: theme.palette.text.disabled,
+    funded: theme.palette.primary.main,
+    inProgress: theme.palette.warning.main,
+    submitted: theme.palette.info.main,
+    approved: theme.palette.success.main,
+    rejected: theme.palette.error.main,
+    disputed: theme.palette.error.main,
+    cancelled: theme.palette.text.disabled,
+  };
+
   const { fetchAllMilestones, fetchMilestoneConfig } = useMilestones();
 
   const [milestones, setMilestones] = useState<MilestoneData[]>([]);
@@ -132,7 +135,7 @@ export default function MilestoneTimeline({
       <Box sx={{ position: 'relative' }}>
         {milestones.map((milestone, index) => {
           const statusKey = getStatusKey(milestone.status);
-          const color = STATUS_COLORS[statusKey];
+          const color = STATUS_COLORS[statusKey] || theme.palette.text.disabled;
           const isLast = index === milestones.length - 1;
 
           return (
@@ -150,13 +153,13 @@ export default function MilestoneTimeline({
                 {/* Dot */}
                 <Box
                   sx={{
-                    width: 16,
-                    height: 16,
+                    width: 14,
+                    height: 14,
                     borderRadius: '50%',
                     bgcolor: color,
-                    border: '3px solid',
-                    borderColor: statusKey === 'approved' ? 'success.light' : 'background.paper',
-                    boxShadow: `0 0 0 2px ${color}`,
+                    border: '2px solid',
+                    borderColor: theme.palette.background.paper,
+                    boxShadow: isDark ? `0 0 8px ${color}60` : `0 0 0 2px ${color}30`,
                     flexShrink: 0,
                     mt: 1.5,
                   }}

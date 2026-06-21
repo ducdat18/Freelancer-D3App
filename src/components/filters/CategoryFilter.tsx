@@ -7,7 +7,8 @@ import {
   Chip,
   Box,
   OutlinedInput,
-  SelectChangeEvent
+  SelectChangeEvent,
+  useTheme
 } from '@mui/material';
 import { JOB_CATEGORIES, JobCategory } from '../../config/categories';
 
@@ -22,6 +23,9 @@ export default function CategoryFilter({
   onChange,
   multiple = true
 }: CategoryFilterProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   const handleChange = (event: SelectChangeEvent<string[]>) => {
     const value = event.target.value;
     onChange(typeof value === 'string' ? value.split(',') : value);
@@ -39,13 +43,32 @@ export default function CategoryFilter({
         renderValue={(selected) => (
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
             {selected.map((value) => (
-              <Chip key={value} label={value} size="small" />
+              <Chip 
+                key={value} 
+                label={value} 
+                size="small" 
+                variant={isDark ? "outlined" : "filled"}
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '0.7rem',
+                  bgcolor: isDark ? 'transparent' : 'rgba(5,150,105,0.08)',
+                  color: isDark ? 'primary.main' : 'primary.dark',
+                  borderColor: isDark ? 'primary.main' : 'transparent',
+                }}
+              />
             ))}
           </Box>
         )}
       >
         {JOB_CATEGORIES.map((category) => (
-          <MenuItem key={category} value={category}>
+          <MenuItem 
+            key={category} 
+            value={category}
+            sx={{
+              fontWeight: selectedCategories.includes(category) ? 700 : 500,
+              fontSize: '0.875rem'
+            }}
+          >
             {category}
           </MenuItem>
         ))}

@@ -14,7 +14,8 @@ import {
   Chip,
   Stack,
   TextField,
-  Grid
+  Grid,
+  useTheme
 } from '@mui/material';
 import {
   Delete,
@@ -47,6 +48,8 @@ export default function PortfolioGallery({
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   // New item form state
   const [newItem, setNewItem] = useState({
@@ -146,6 +149,7 @@ export default function PortfolioGallery({
             variant="outlined"
             startIcon={<Add />}
             onClick={() => setAddDialogOpen(true)}
+            sx={{ fontWeight: 700, borderRadius: 1.5, px: 3 }}
           >
             Add Portfolio Item
           </Button>
@@ -162,11 +166,16 @@ export default function PortfolioGallery({
                 cursor: 'pointer',
                 '&:hover': {
                   '& .MuiImageListItemBar-root': {
-                    opacity: 1
-                  }
+                    opacity: 1,
+                    background: 'rgba(0,0,0,0.85)',
+                  },
+                  transform: 'scale(1.02)',
                 },
                 borderRadius: 2,
-                overflow: 'hidden'
+                overflow: 'hidden',
+                transition: 'all 0.2s ease',
+                border: 1,
+                borderColor: 'divider',
               }}
               onClick={() => handleViewItem(item)}
             >
@@ -178,19 +187,20 @@ export default function PortfolioGallery({
                 objectFit="cover"
               />
               <ImageListItemBar
-                title={item.title}
+                title={<Typography fontWeight={700} sx={{ fontSize: '0.9rem' }}>{item.title}</Typography>}
                 subtitle={item.description?.substring(0, 50) + (item.description && item.description.length > 50 ? '...' : '')}
                 sx={{
-                  opacity: 0.9,
-                  transition: 'opacity 0.3s'
+                  opacity: 0,
+                  transition: 'opacity 0.3s',
+                  background: 'rgba(0,0,0,0.7)',
                 }}
                 actionIcon={
                   editable && onItemRemove ? (
                     <IconButton
-                      sx={{ color: 'white' }}
+                      sx={{ color: theme.palette.error.main }}
                       onClick={(e) => handleDelete(item.id, e)}
                     >
-                      <Delete />
+                      <Delete fontSize="small" />
                     </IconButton>
                   ) : undefined
                 }
@@ -199,13 +209,13 @@ export default function PortfolioGallery({
           ))}
         </ImageList>
       ) : (
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
+        <Box sx={{ textAlign: 'center', py: 8, border: 1, borderStyle: 'dashed', borderColor: 'divider', borderRadius: 3 }}>
+          <Typography variant="h6" color="text.secondary" gutterBottom fontWeight={600}>
             No portfolio items yet
           </Typography>
           {editable && (
             <Typography variant="body2" color="text.secondary">
-              Add your best work to showcase your skills
+              Showcase your best work to land more jobs
             </Typography>
           )}
         </Box>
@@ -217,52 +227,61 @@ export default function PortfolioGallery({
         onClose={handleCloseView}
         maxWidth="md"
         fullWidth
+        PaperProps={{ sx: { backgroundImage: 'none' } }}
       >
         {selectedItem && (
           <>
-            <DialogTitle>
-              {selectedItem.title}
+            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pr: 6 }}>
+              <Typography variant="h6" fontWeight={700}>{selectedItem.title}</Typography>
               <IconButton
                 onClick={handleCloseView}
                 sx={{ position: 'absolute', right: 8, top: 8 }}
+                size="small"
               >
                 <Close />
               </IconButton>
             </DialogTitle>
-            <DialogContent>
-              <Box sx={{ mb: 2 }}>
+            <DialogContent dividers={!isDark}>
+              <Box sx={{ mb: 3, border: 1, borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
                 <IPFSImage
                   hash={selectedItem.imageUri}
                   alt={selectedItem.title}
                   width="100%"
                   height={400}
                   objectFit="contain"
-                  borderRadius={8}
+                  borderRadius={0}
                 />
               </Box>
               {selectedItem.description && (
-                <Typography variant="body1" paragraph>
+                <Typography variant="body1" paragraph sx={{ lineHeight: 1.7, color: 'text.primary' }}>
                   {selectedItem.description}
                 </Typography>
               )}
               {selectedItem.tags && selectedItem.tags.length > 0 && (
-                <Box sx={{ mb: 2 }}>
+                <Box sx={{ mb: 3 }}>
                   <Stack direction="row" spacing={1} flexWrap="wrap">
                     {selectedItem.tags.map(tag => (
-                      <Chip key={tag} label={tag} size="small" />
+                      <Chip 
+                        key={tag} 
+                        label={tag} 
+                        size="small" 
+                        variant="outlined"
+                        sx={{ fontWeight: 600, fontSize: '0.7rem' }}
+                      />
                     ))}
                   </Stack>
                 </Box>
               )}
               {selectedItem.link && (
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   startIcon={<OpenInNew />}
                   href={selectedItem.link}
                   target="_blank"
                   rel="noopener noreferrer"
+                  sx={{ fontWeight: 700 }}
                 >
-                  View Project
+                  View Live Project
                 </Button>
               )}
             </DialogContent>
@@ -276,9 +295,10 @@ export default function PortfolioGallery({
         onClose={() => setAddDialogOpen(false)}
         maxWidth="sm"
         fullWidth
+        PaperProps={{ sx: { backgroundImage: 'none' } }}
       >
-        <DialogTitle>Add Portfolio Item</DialogTitle>
-        <DialogContent>
+        <DialogTitle sx={{ fontWeight: 700 }}>Add Portfolio Item</DialogTitle>
+        <DialogContent dividers={!isDark}>
           <Stack spacing={3} sx={{ mt: 1 }}>
             {/* Image Upload */}
             <Box>
@@ -287,8 +307,9 @@ export default function PortfolioGallery({
                 variant="outlined"
                 fullWidth
                 disabled={uploading}
+                sx={{ borderStyle: 'dashed', py: 2, fontWeight: 700 }}
               >
-                {newItem.imageUri ? 'Change Image' : 'Upload Image'}
+                {newItem.imageUri ? 'Change Image' : 'Upload Project Image'}
                 <input
                   type="file"
                   hidden
@@ -297,14 +318,14 @@ export default function PortfolioGallery({
                 />
               </Button>
               {newItem.imageUri && (
-                <Box sx={{ mt: 2 }}>
+                <Box sx={{ mt: 2, border: 1, borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
                   <IPFSImage
                     hash={newItem.imageUri}
                     alt="Preview"
                     width="100%"
                     height={200}
                     objectFit="contain"
-                    borderRadius={8}
+                    borderRadius={0}
                   />
                 </Box>
               )}
@@ -312,16 +333,17 @@ export default function PortfolioGallery({
 
             {/* Title */}
             <TextField
-              label="Title"
+              label="Project Title"
               value={newItem.title}
               onChange={(e) => setNewItem(prev => ({ ...prev, title: e.target.value }))}
               required
               fullWidth
+              variant="outlined"
             />
 
             {/* Description */}
             <TextField
-              label="Description"
+              label="Project Description"
               value={newItem.description}
               onChange={(e) => setNewItem(prev => ({ ...prev, description: e.target.value }))}
               multiline
@@ -331,7 +353,7 @@ export default function PortfolioGallery({
 
             {/* Link */}
             <TextField
-              label="Project Link (optional)"
+              label="Project URL (optional)"
               value={newItem.link}
               onChange={(e) => setNewItem(prev => ({ ...prev, link: e.target.value }))}
               placeholder="https://..."
@@ -354,7 +376,7 @@ export default function PortfolioGallery({
                 }}
               />
               {newItem.tags.length > 0 && (
-                <Box sx={{ mt: 1 }}>
+                <Box sx={{ mt: 1.5 }}>
                   <Stack direction="row" spacing={1} flexWrap="wrap">
                     {newItem.tags.map(tag => (
                       <Chip
@@ -362,6 +384,7 @@ export default function PortfolioGallery({
                         label={tag}
                         size="small"
                         onDelete={() => handleRemoveTag(tag)}
+                        sx={{ fontWeight: 600 }}
                       />
                     ))}
                   </Stack>
@@ -370,14 +393,15 @@ export default function PortfolioGallery({
             </Box>
           </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setAddDialogOpen(false)}>Cancel</Button>
+        <DialogActions sx={{ p: 2.5 }}>
+          <Button onClick={() => setAddDialogOpen(false)} sx={{ fontWeight: 700 }}>Cancel</Button>
           <Button
             onClick={handleAddItem}
             variant="contained"
             disabled={!newItem.title || !newItem.imageUri || uploading}
+            sx={{ fontWeight: 700, px: 4 }}
           >
-            Add Item
+            {uploading ? 'Uploading...' : 'Save Item'}
           </Button>
         </DialogActions>
       </Dialog>

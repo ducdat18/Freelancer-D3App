@@ -12,6 +12,7 @@ import {
   Alert,
   CircularProgress,
   Paper,
+  useTheme,
 } from '@mui/material'
 import { CheckCircle, Download } from '@mui/icons-material'
 import RatingStars from '../common/RatingStars'
@@ -49,6 +50,8 @@ export default function ApprovalModal({
   const [rating, setRating] = useState(5)
   const [review, setReview] = useState('')
   const [error, setError] = useState('')
+  const theme = useTheme()
+  const isDark = theme.palette.mode === 'dark'
 
   const handleApprove = async () => {
     if (rating === 0) {
@@ -95,24 +98,24 @@ export default function ApprovalModal({
         </Box>
       </DialogTitle>
 
-      <DialogContent>
+      <DialogContent dividers={!isDark}>
         <Alert severity="info" sx={{ mb: 3 }}>
           By approving this job, the escrow funds will be automatically released to the freelancer.
           This action cannot be undone.
         </Alert>
 
-        <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
-          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+        <Paper variant="outlined" sx={{ p: 2, mb: 3, border: 1, borderColor: 'divider', bgcolor: isDark ? 'background.paper' : 'grey.50' }}>
+          <Typography variant="caption" color="text.secondary" gutterBottom sx={{ display: 'block', fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
             Job Details
           </Typography>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" gutterBottom fontWeight={700}>
             {job.title}
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="body2" color="text.secondary">
               Freelancer: <strong>{job.freelancer.name || job.freelancer.address}</strong>
             </Typography>
-            <Typography variant="h6" color="primary.main">
+            <Typography variant="h6" color="primary.main" fontWeight={700}>
               {job.amount}
             </Typography>
           </Box>
@@ -121,13 +124,13 @@ export default function ApprovalModal({
 
         {job.deliverables && job.deliverables.length > 0 && (
           <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle2" gutterBottom>
+            <Typography variant="subtitle2" gutterBottom fontWeight={700}>
               Submitted Deliverables ({job.deliverables.length})
             </Typography>
             {job.deliverables.map((deliverable, index) => (
-              <Paper key={index} variant="outlined" sx={{ p: 2, mb: 2 }}>
+              <Paper key={index} variant="outlined" sx={{ p: 2, mb: 2, border: 1, borderColor: 'divider' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
-                  <Typography variant="body2">{deliverable.description}</Typography>
+                  <Typography variant="body2" fontWeight={500}>{deliverable.description}</Typography>
                   <Button
                     size="small"
                     startIcon={<Download />}
@@ -146,7 +149,7 @@ export default function ApprovalModal({
 
         <Divider sx={{ my: 3 }} />
 
-        <Typography variant="subtitle1" gutterBottom fontWeight={600}>
+        <Typography variant="subtitle1" gutterBottom fontWeight={700}>
           Rate & Review Freelancer
         </Typography>
 
@@ -183,7 +186,7 @@ export default function ApprovalModal({
         )}
       </DialogContent>
 
-      <DialogActions sx={{ p: 3, pt: 0 }}>
+      <DialogActions sx={{ p: 3 }}>
         <Button onClick={handleClose} disabled={loading}>
           Cancel
         </Button>

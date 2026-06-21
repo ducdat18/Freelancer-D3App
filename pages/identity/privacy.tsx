@@ -22,6 +22,8 @@ import {
   CircularProgress,
   IconButton,
   Tooltip,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import {
   Shield,
@@ -65,6 +67,10 @@ export default function PrivacyPage() {
   const [revoking, setRevoking] = useState<number | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
+  
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
 
   useEffect(() => {
     if (publicKey) {
@@ -140,25 +146,25 @@ export default function PrivacyPage() {
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 4 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5 }}>
             <Shield sx={{ fontSize: 40, color: 'primary.main' }} />
-            <Typography variant="h4" fontWeight={700}>
+            <Typography variant="h4" fontWeight={800} sx={{ fontFamily: '"Orbitron", sans-serif' }}>
               Privacy & Selective Disclosure
             </Typography>
           </Box>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 500, maxWidth: 700 }}>
             Manage your zero-knowledge credentials to selectively disclose information without revealing exact values.
           </Typography>
         </Box>
 
         {/* Messages */}
         {(error || localError) && (
-          <Alert severity="error" sx={{ mb: 3 }} onClose={() => setLocalError(null)}>
+          <Alert severity="error" sx={{ mb: 3, fontWeight: 500 }} onClose={() => setLocalError(null)}>
             {error || localError}
           </Alert>
         )}
         {successMessage && (
-          <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccessMessage(null)}>
+          <Alert severity="success" sx={{ mb: 3, fontWeight: 600 }} onClose={() => setSuccessMessage(null)}>
             {successMessage}
           </Alert>
         )}
@@ -166,23 +172,23 @@ export default function PrivacyPage() {
         <Grid container spacing={3}>
           {/* ZK Proof Explanation */}
           <Grid size={{ xs: 12 }}>
-            <Paper sx={{ p: 3, mb: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <Paper sx={{ p: 3, mb: 1, border: 1, borderColor: 'divider', backgroundImage: 'none', borderRadius: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
                 <Info color="info" />
                 <Typography variant="h6" fontWeight={700}>
                   How Zero-Knowledge Proofs Work
                 </Typography>
               </Box>
-              <Divider sx={{ mb: 2 }} />
-              <Typography variant="body2" color="text.secondary" paragraph>
+              <Divider sx={{ mb: 2.5 }} />
+              <Typography variant="body2" color="text.secondary" paragraph sx={{ lineHeight: 1.7, fontWeight: 500 }}>
                 Zero-Knowledge (ZK) proofs allow you to prove statements about your data without revealing the underlying information.
                 For example, you can prove your reputation score is above a threshold without disclosing the exact number.
               </Typography>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                Each credential is verified on-chain using cryptographic commitments. Your private data never leaves your device --
+              <Typography variant="body2" color="text.secondary" paragraph sx={{ lineHeight: 1.7, fontWeight: 500 }}>
+                Each credential is verified on-chain using cryptographic commitments. Your private data never leaves your device —
                 only the proof is submitted and stored on the Solana blockchain.
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7, fontWeight: 500 }}>
                 Credentials can be selectively disclosed to clients or employers. You control which credentials are shared and can
                 revoke them at any time.
               </Typography>
@@ -191,14 +197,14 @@ export default function PrivacyPage() {
 
           {/* Existing Credentials */}
           <Grid size={{ xs: 12, md: 7 }}>
-            <Paper sx={{ p: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <VerifiedUser color="primary" />
+            <Paper sx={{ p: 3, border: 1, borderColor: 'divider', backgroundImage: 'none', borderRadius: 3, height: '100%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                <VerifiedUser sx={{ color: primaryMain }} />
                 <Typography variant="h6" fontWeight={700}>
                   Your ZK Credentials
                 </Typography>
               </Box>
-              <Divider sx={{ mb: 2 }} />
+              <Divider sx={{ mb: 2.5 }} />
 
               {loading && !credentials.length ? (
                 <LoadingSpinner message="Loading credentials..." />
@@ -212,33 +218,38 @@ export default function PrivacyPage() {
                   <Table size="small">
                     <TableHead>
                       <TableRow>
-                        <TableCell>Type</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell>Created</TableCell>
-                        <TableCell>Valid Until</TableCell>
-                        <TableCell align="right">Actions</TableCell>
+                        <TableCell sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: 1 }}>Type</TableCell>
+                        <TableCell sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: 1 }}>Status</TableCell>
+                        <TableCell sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: 1 }}>Created</TableCell>
+                        <TableCell sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: 1 }}>Valid Until</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: 1 }}>Actions</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {credentials.map((cred, index) => {
                         const status = getCredentialStatus(cred);
                         return (
-                          <TableRow key={index}>
+                          <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                             <TableCell>
-                              <Typography variant="body2" fontWeight={600}>
+                              <Typography variant="body2" fontWeight={700}>
                                 {cred.credentialType.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                               </Typography>
                             </TableCell>
                             <TableCell>
-                              <Chip label={status.label} color={status.color} size="small" />
+                              <Chip 
+                                label={status.label.toUpperCase()} 
+                                color={status.color} 
+                                size="small" 
+                                sx={{ fontWeight: 800, fontSize: '0.6rem', height: 20 }}
+                              />
                             </TableCell>
                             <TableCell>
-                              <Typography variant="caption" color="text.secondary">
+                              <Typography variant="caption" color="text.secondary" fontWeight={600}>
                                 {new Date(cred.submittedAt * 1000).toLocaleDateString()}
                               </Typography>
                             </TableCell>
                             <TableCell>
-                              <Typography variant="caption" color="text.secondary">
+                              <Typography variant="caption" color="text.secondary" fontWeight={600}>
                                 {cred.validUntil
                                   ? new Date(cred.validUntil * 1000).toLocaleDateString()
                                   : 'No expiry'}
@@ -246,17 +257,18 @@ export default function PrivacyPage() {
                             </TableCell>
                             <TableCell align="right">
                               {!cred.revoked && (
-                                <Tooltip title="Revoke credential">
+                                <Tooltip title="Revoke credential" arrow>
                                   <IconButton
                                     color="error"
                                     size="small"
                                     disabled={revoking === cred.credentialIndex}
                                     onClick={() => handleRevoke(cred.credentialIndex)}
+                                    sx={{ bgcolor: isDark ? 'rgba(244,67,54,0.05)' : 'rgba(244,67,54,0.03)', '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.1) } }}
                                   >
                                     {revoking === cred.credentialIndex ? (
-                                      <CircularProgress size={18} />
+                                      <CircularProgress size={18} color="inherit" />
                                     ) : (
-                                      <Delete />
+                                      <Delete fontSize="small" />
                                     )}
                                   </IconButton>
                                 </Tooltip>
@@ -274,16 +286,16 @@ export default function PrivacyPage() {
 
           {/* Create New Credential */}
           <Grid size={{ xs: 12, md: 5 }}>
-            <Paper sx={{ p: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <Lock color="primary" />
+            <Paper sx={{ p: 3, border: 1, borderColor: 'divider', backgroundImage: 'none', borderRadius: 3, height: '100%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                <Lock sx={{ color: primaryMain }} />
                 <Typography variant="h6" fontWeight={700}>
                   Create ZK Credential
                 </Typography>
               </Box>
-              <Divider sx={{ mb: 2 }} />
+              <Divider sx={{ mb: 2.5 }} />
 
-              <FormControl fullWidth sx={{ mb: 2 }}>
+              <FormControl fullWidth sx={{ mb: 3 }}>
                 <InputLabel>Credential Type</InputLabel>
                 <Select
                   value={selectedType}
@@ -291,7 +303,7 @@ export default function PrivacyPage() {
                   onChange={(e) => setSelectedType(e.target.value)}
                 >
                   {credentialTypes.map((type) => (
-                    <MenuItem key={type.value} value={type.value}>
+                    <MenuItem key={type.value} value={type.value} sx={{ fontWeight: 500 }}>
                       {type.label}
                     </MenuItem>
                   ))}
@@ -300,18 +312,21 @@ export default function PrivacyPage() {
 
               {/* Selected type description */}
               {selectedType && (
-                <Alert severity="info" sx={{ mb: 2 }}>
-                  {credentialTypes.find(t => t.value === selectedType)?.description}
-                </Alert>
+                <Box sx={{ mb: 4, p: 2, borderRadius: 1.5, bgcolor: isDark ? 'rgba(33,150,243,0.08)' : 'rgba(33,150,243,0.05)', border: 1, borderColor: alpha(theme.palette.info.main, 0.2) }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, lineHeight: 1.6 }}>
+                    {credentialTypes.find(t => t.value === selectedType)?.description}
+                  </Typography>
+                </Box>
               )}
 
               <Button
                 fullWidth
                 variant="contained"
                 color="primary"
-                startIcon={submitting ? <CircularProgress size={18} /> : <Add />}
+                startIcon={submitting ? <CircularProgress size={18} color="inherit" /> : <Add />}
                 disabled={submitting || !publicKey}
                 onClick={handleCreateCredential}
+                sx={{ py: 1.5, fontWeight: 800, fontFamily: '"Orbitron", sans-serif', letterSpacing: 1 }}
               >
                 {submitting ? 'Creating...' : 'Create Credential'}
               </Button>

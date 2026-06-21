@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import { useWallet } from '@solana/wallet-adapter-react';
 
 interface LogEntry {
@@ -13,13 +13,6 @@ interface TerminalLogProps {
   maxEntries?: number;
   title?: string;
 }
-
-const TYPE_COLORS: Record<string, string> = {
-  info: '#8084ee',
-  success: '#00ffc3',
-  warning: '#e04d01',
-  error: '#ff00ff',
-};
 
 const TYPE_PREFIXES: Record<string, string> = {
   info: 'INFO',
@@ -40,6 +33,16 @@ export default function TerminalLog({
   maxEntries = 12,
   title = 'SYSTEM LOG',
 }: TerminalLogProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  
+  const typeColors: Record<string, string> = {
+    info: theme.palette.info.main,
+    success: theme.palette.success.main,
+    warning: theme.palette.warning.main,
+    error: theme.palette.error.main,
+  };
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const { connected, publicKey } = useWallet();
   const [displayedEntries, setDisplayedEntries] = useState<LogEntry[]>([]);
@@ -88,8 +91,9 @@ export default function TerminalLog({
   return (
     <Box
       sx={{
-        background: 'rgba(7, 5, 17, 0.9)',
-        border: '1px solid rgba(0, 255, 195, 0.15)',
+        background: isDark ? 'rgba(7, 5, 17, 0.9)' : '#ffffff',
+        border: `1px solid ${isDark ? 'rgba(0, 255, 195, 0.15)' : 'rgba(0,0,0,0.08)'}`,
+        boxShadow: isDark ? 'none' : '0 2px 12px rgba(0,0,0,0.03)',
         borderRadius: 2,
         overflow: 'hidden',
         height: '100%',
@@ -102,24 +106,26 @@ export default function TerminalLog({
         sx={{
           px: 2,
           py: 1,
-          borderBottom: '1px solid rgba(0, 255, 195, 0.1)',
+          borderBottom: `1px solid ${isDark ? 'rgba(0, 255, 195, 0.1)' : 'rgba(0,0,0,0.08)'}`,
           display: 'flex',
           alignItems: 'center',
           gap: 1,
+          bgcolor: isDark ? 'transparent' : '#f8fafc',
         }}
       >
         <Box sx={{ display: 'flex', gap: 0.75 }}>
-          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#ff00ff' }} />
-          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#e04d01' }} />
-          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#00ffc3' }} />
+          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: theme.palette.error.main }} />
+          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: theme.palette.warning.main }} />
+          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: theme.palette.success.main }} />
         </Box>
         <Typography
           sx={{
             fontFamily: '"Orbitron", monospace',
             fontSize: '0.65rem',
             letterSpacing: '0.1em',
-            color: 'rgba(0, 255, 195, 0.5)',
+            color: isDark ? 'rgba(0, 255, 195, 0.5)' : theme.palette.text.secondary,
             ml: 1,
+            fontWeight: 600,
           }}
         >
           {title}
@@ -140,20 +146,20 @@ export default function TerminalLog({
       >
         {displayedEntries.map((entry, i) => (
           <Box key={i} sx={{ display: 'flex', gap: 1, mb: 0.25 }}>
-            <Box component="span" sx={{ color: 'rgba(224, 230, 237, 0.3)', minWidth: '70px' }}>
+            <Box component="span" sx={{ color: isDark ? 'rgba(224, 230, 237, 0.3)' : 'rgba(15, 23, 42, 0.4)', minWidth: '70px' }}>
               [{entry.timestamp}]
             </Box>
             <Box
               component="span"
               sx={{
-                color: TYPE_COLORS[entry.type],
+                color: typeColors[entry.type],
                 minWidth: '36px',
                 fontWeight: 600,
               }}
             >
               {TYPE_PREFIXES[entry.type]}
             </Box>
-            <Box component="span" sx={{ color: '#e0e6ed' }}>
+            <Box component="span" sx={{ color: isDark ? '#e0e6ed' : '#334155' }}>
               {entry.message}
             </Box>
           </Box>
@@ -162,7 +168,7 @@ export default function TerminalLog({
         <Box
           component="span"
           sx={{
-            color: '#00ffc3',
+            color: theme.palette.primary.main,
             animation: 'blink 1s step-end infinite',
             '@keyframes blink': {
               '0%, 100%': { opacity: 1 },

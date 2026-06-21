@@ -5,6 +5,7 @@ import {
   CardContent,
   Typography,
   Alert,
+  useTheme,
 } from '@mui/material';
 import { EmojiEvents } from '@mui/icons-material';
 import LoadingSpinner from '../LoadingSpinner';
@@ -35,6 +36,9 @@ interface BidsListProps {
 export default function BidsList({ jobPda, clientAddress, jobBudgetSol = 0, jobTitle, jobDescription, onBidAccepted }: BidsListProps) {
   const { publicKey } = useWallet();
   const { addNotification } = useNotificationContext();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   // ✅ PERFORMANCE: Use optimized hook with React Query caching
   const { bids, loading, error, refetch } = useOptimizedJobBids(jobPda);
 
@@ -266,7 +270,7 @@ export default function BidsList({ jobPda, clientAddress, jobBudgetSol = 0, jobT
 
   if (bids.length === 0) {
     return (
-      <Card>
+      <Card sx={{ border: 1, borderColor: 'divider' }}>
         <CardContent sx={{ textAlign: 'center', py: 4 }}>
           <Typography variant="h6" color="text.secondary">
             No bids yet
@@ -283,10 +287,10 @@ export default function BidsList({ jobPda, clientAddress, jobBudgetSol = 0, jobT
 
   return (
     <>
-      <Card>
+      <Card sx={{ border: 1, borderColor: 'divider' }}>
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <EmojiEvents sx={{ color: '#FFD700', fontSize: 22 }} />
+            <EmojiEvents sx={{ color: isDark ? '#FFD700' : '#B8860B', fontSize: 22 }} />
             <Typography variant="h6" fontWeight={600}>
               {bids.length} Contractor{bids.length !== 1 ? 's' : ''} Competing
             </Typography>

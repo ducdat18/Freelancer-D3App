@@ -1,6 +1,6 @@
 import type { AppProps } from 'next/app';
 import { useMemo, useEffect } from 'react';
-import { ThemeProvider, CssBaseline } from '@mui/material';
+import { CssBaseline } from '@mui/material';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
@@ -11,10 +11,8 @@ import {
 } from '@solana/wallet-adapter-wallets';
 import { web3 } from '@coral-xyz/anchor';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AnimatePresence, motion } from 'framer-motion';
-import { pageTransition } from '../src/utils/animations';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { cryptoTheme } from '../src/config/theme';
+import { AppThemeProvider } from '../src/contexts/ThemeContext';
 import { NotificationProvider } from '../src/contexts/NotificationContext';
 import { UserRoleProvider } from '../src/contexts/UserRoleContext';
 import { useRealtimeNotifications } from '../src/hooks/useRealtimeNotifications';
@@ -100,21 +98,10 @@ export default function App({ Component, pageProps, router }: AppProps) {
               {/* WebSocket-to-cache sync (auto-disables on public devnet) */}
               <WebSocketSyncWrapper />
               <ReferralCaptureWrapper router={router} />
-              <ThemeProvider theme={cryptoTheme}>
+              <AppThemeProvider>
                 <CssBaseline />
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={router.route}
-                    variants={pageTransition}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                    style={{ minHeight: '100vh' }}
-                  >
-                    <Component {...pageProps} />
-                  </motion.div>
-                </AnimatePresence>
-              </ThemeProvider>
+                <Component {...pageProps} />
+              </AppThemeProvider>
               </UserRoleProvider>
             </NotificationProvider>
             {/* React Query Devtools - Only in development */}

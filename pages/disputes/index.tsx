@@ -13,7 +13,12 @@ import {
   Select,
   FormControl,
   InputLabel,
+  useTheme,
+  alpha,
 } from '@mui/material';
+import GavelIcon from '@mui/icons-material/Gavel';
+import HowToVoteIcon from '@mui/icons-material/HowToVote';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useRouter } from 'next/router';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { web3 } from '@coral-xyz/anchor';
@@ -82,20 +87,18 @@ export default function DisputeResolution() {
       setLoading(true);
       setError(null);
       try {
-        console.log('🔄 Fetching disputes from blockchain...');
         const fetchedDisputes = await fetchDisputes();
-        console.log(`✅ Fetched ${fetchedDisputes.length} disputes`);
-        
+
         // Fetch work submissions for each dispute
         const disputesWithWork = await Promise.all(
           (fetchedDisputes as DisputeAccount[]).map(async (dispute) => {
             try {
               if (!program) return dispute;
-              
+
               const [workSubmissionPda] = deriveWorkSubmissionPDA(dispute.account.job);
               // @ts-ignore
               const workSubmission = await program.account.workSubmission.fetch(workSubmissionPda);
-              
+
               return {
                 ...dispute,
                 workSubmission: {
@@ -103,14 +106,13 @@ export default function DisputeResolution() {
                   submittedAt: workSubmission.submittedAt.toNumber(),
                 },
               };
-            } catch (err) {
-              // Work submission might not exist
+            } catch {
               return dispute;
             }
           })
         );
-        
-        setDisputes(disputesWithWork);
+
+        setDisputes(disputesWithWork as DisputeAccount[]);
 
         // Fetch user's votes for all disputes
         if (publicKey) {
@@ -126,7 +128,6 @@ export default function DisputeResolution() {
           setUserVotes(votes);
         }
       } catch (err) {
-        console.error('Error loading disputes:', err);
         setError('Failed to load disputes. Please try again.');
       } finally {
         setLoading(false);
@@ -168,7 +169,6 @@ export default function DisputeResolution() {
         // Reputation account doesn't exist yet - auto initialize it
         if (err.message?.includes('does not exist') || err.message?.includes('no data')) {
           try {
-            console.log('Auto-initializing reputation for voting...');
             await initializeReputation();
             
             // Wait a bit for transaction to confirm
@@ -177,14 +177,11 @@ export default function DisputeResolution() {
             // Fetch again after initialization
             try {
               reputation = await fetchReputation(publicKey);
-              console.log('✅ Reputation initialized successfully:', reputation);
             } catch (fetchErr) {
-              console.log('⚠️ Reputation initialized but fetch still fails, continuing anyway...');
               // Continue anyway - the account exists on chain even if fetch fails
               reputation = { averageRating: 0, totalReviews: 0, completedJobs: 0 };
             }
           } catch (initErr: any) {
-            console.error('Failed to auto-initialize reputation:', initErr);
             setError('Failed to initialize reputation account. Please try again.');
             return;
           }
@@ -226,7 +223,6 @@ export default function DisputeResolution() {
       }));
 
       // Wait a bit for transaction to confirm and auto-resolve
-      console.log('⏳ Waiting for transaction to confirm and auto-resolve...');
       await new Promise(resolve => setTimeout(resolve, 3000));
 
       // Refresh disputes to get updated state (should be auto-resolved if 2 votes)
@@ -272,7 +268,6 @@ export default function DisputeResolution() {
         setSuccessMessage(`✅ Vote submitted successfully! You voted for ${vote === 'client' ? 'Client' : 'Freelancer'}`);
       }
     } catch (err: any) {
-      console.error('Error voting:', err);
       if (err.message?.includes('InsufficientReputation')) {
         setError('Your reputation is not high enough to vote (need rating >= 4.0, reviews >= 5)');
       } else if (err.message?.includes('CannotVoteOwnDispute')) {
@@ -350,7 +345,6 @@ export default function DisputeResolution() {
 
     try {
       setResolvingDispute(dispute.publicKey.toBase58());
-      console.log('🔄 Manually resolving old dispute...');
       
       await resolveDispute(
         dispute.publicKey,
@@ -390,7 +384,6 @@ export default function DisputeResolution() {
       // Auto-switch to resolved tab
       setActiveTab('resolved');
     } catch (err: any) {
-      console.error('Error resolving dispute:', err);
       setError(`Failed to resolve dispute: ${err.message || 'Unknown error'}`);
     } finally {
       setResolvingDispute(null);
@@ -411,17 +404,65 @@ export default function DisputeResolution() {
     return 'open';
   };
 
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+
+  const openCount = disputes.filter(d => d.account.status.open).length;
+  const votingCount = disputes.filter(d => d.account.status.open && (d.account.votesForClient > 0 || d.account.votesForFreelancer > 0)).length;
+  const resolvedCount = disputes.filter(d => d.account.status.resolved || (d.account.status as any).resolvedClient || (d.account.status as any).resolvedFreelancer).length;
+
   return (
     <Layout>
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Typography variant="h4" gutterBottom fontWeight={700}>
-          Dispute Resolution
-        </Typography>
-        <Typography variant="body1" color="text.secondary" gutterBottom>
-          Community-driven dispute resolution through decentralized voting
-        </Typography>
+        {/* Header */}
+        <Box
+          sx={{
+            mb: 4,
+            pb: 4,
+            borderBottom: 1,
+            borderColor: 'divider',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5 }}>
+            <GavelIcon sx={{ color: 'primary.main', fontSize: 36 }} />
+            <Typography variant="h4" fontWeight={800} sx={{ fontFamily: '"Orbitron", sans-serif' }}>
+              Dispute Resolution
+            </Typography>
+          </Box>
+          <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 500, maxWidth: 600, mb: 3 }}>
+            Community-driven arbitration — arbitrators review evidence and vote to release escrow to the rightful party.
+          </Typography>
 
-        <Paper sx={{ mt: 3, mb: 3 }}>
+          {/* Stats */}
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            {[
+              { icon: <GavelIcon sx={{ fontSize: 18 }} />, label: 'Open', value: openCount, color: theme.palette.warning.main },
+              { icon: <HowToVoteIcon sx={{ fontSize: 18 }} />, label: 'Voting', value: votingCount, color: theme.palette.info.main },
+              { icon: <CheckCircleIcon sx={{ fontSize: 18 }} />, label: 'Resolved', value: resolvedCount, color: theme.palette.success.main },
+            ].map(stat => (
+              <Box
+                key={stat.label}
+                sx={{
+                  display: 'flex', alignItems: 'center', gap: 1,
+                  px: 2, py: 1, borderRadius: 2,
+                  bgcolor: isDark ? alpha(stat.color, 0.08) : alpha(stat.color, 0.05),
+                  border: 1, borderColor: alpha(stat.color, 0.2),
+                }}
+              >
+                <Box sx={{ color: stat.color }}>{stat.icon}</Box>
+                <Typography variant="body2" fontWeight={700} sx={{ color: stat.color, fontFamily: '"Orbitron", monospace', fontSize: '0.8rem' }}>
+                  {stat.value}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" fontWeight={600} sx={{ fontSize: '0.75rem' }}>
+                  {stat.label}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+
+        <Paper sx={{ mb: 3, border: 1, borderColor: 'divider', backgroundImage: 'none' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)}>
               <Tab label={`All Disputes (${disputes.length})`} value="all" />
@@ -486,7 +527,6 @@ export default function DisputeResolution() {
                     setSuccessMessage('✅ Reputation initialized! You can now build your reputation by completing jobs.');
                     setError(null);
                   } catch (err: any) {
-                    console.error('Error initializing reputation:', err);
                     setError(`Failed to initialize reputation: ${err.message || 'Unknown error'}`);
                   } finally {
                     setInitializingReputation(false);
@@ -507,39 +547,6 @@ export default function DisputeResolution() {
             {error}
           </Alert>
         ) : null}
-
-        <Box sx={{ mb: 3 }}>
-          <Paper 
-            sx={{ 
-              p: 3, 
-              bgcolor: '#ffffff',
-              border: '2px solid #1976d2',
-              borderRadius: 2,
-              boxShadow: 2,
-            }}
-          >
-            <Typography variant="subtitle1" fontWeight={700} gutterBottom sx={{ color: '#1565c0', mb: 2 }}>
-              ⚖️ How Dispute Resolution Works
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 2 }}>
-              <Typography variant="body2" sx={{ color: '#1565c0', fontWeight: 600, fontSize: '0.95rem' }}>
-                • When a dispute is opened, the escrow funds are locked
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#1565c0', fontWeight: 600, fontSize: '0.95rem' }}>
-                • Arbitrators with high reputation (rating ≥ 4.0, reviews ≥ 5) can vote
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#1565c0', fontWeight: 600, fontSize: '0.95rem' }}>
-                • Arbitrators review evidence and vote for either the client or freelancer
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#1565c0', fontWeight: 600, fontSize: '0.95rem' }}>
-                • After 2 votes, the dispute can be resolved based on majority
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#1565c0', fontWeight: 600, fontSize: '0.95rem' }}>
-                • Arbitrators receive 2% of the disputed amount as compensation
-              </Typography>
-            </Box>
-          </Paper>
-        </Box>
 
         {activeTab === 'juror-dashboard' ? (
           <Box sx={{ mt: 3 }}>

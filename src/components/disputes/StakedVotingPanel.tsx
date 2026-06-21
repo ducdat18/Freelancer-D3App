@@ -9,6 +9,8 @@ import {
   Chip,
   CircularProgress,
   Divider,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import LoadingSpinner from '../LoadingSpinner';
 import {
@@ -54,6 +56,11 @@ export default function StakedVotingPanel({
   const [voting, setVoting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+  const warningMain = theme.palette.warning.main;
 
   const isSelected =
     publicKey &&
@@ -121,7 +128,7 @@ export default function StakedVotingPanel({
 
   if (!publicKey) {
     return (
-      <Card>
+      <Card sx={{ border: 1, borderColor: 'divider' }}>
         <CardContent>
           <Alert severity="info">
             Please connect your wallet to participate in voting.
@@ -149,15 +156,16 @@ export default function StakedVotingPanel({
   return (
     <Card
       sx={{
-        border: '1px solid',
+        border: 1,
         borderColor: 'divider',
         borderRadius: 2,
+        backgroundImage: 'none',
       }}
     >
-      <CardContent>
+      <CardContent sx={{ p: 3 }}>
         {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-          <HowToVote color="primary" />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+          <HowToVote sx={{ color: primaryMain }} />
           <Typography variant="h6" fontWeight={700}>
             Cast Your Vote
           </Typography>
@@ -167,6 +175,7 @@ export default function StakedVotingPanel({
               color="success"
               size="small"
               icon={<CheckCircle />}
+              sx={{ fontWeight: 700 }}
             />
           )}
           {selectionData?.resolved && (
@@ -174,6 +183,7 @@ export default function StakedVotingPanel({
               label="Resolved"
               color="default"
               size="small"
+              sx={{ fontWeight: 700 }}
             />
           )}
         </Box>
@@ -192,15 +202,14 @@ export default function StakedVotingPanel({
 
         {/* Not selected warning */}
         {!isSelected && !hasVoted && (
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            You are not selected as a juror for this dispute. Only selected jurors
-            can vote.
+          <Alert severity="warning" sx={{ mb: 2, fontWeight: 500 }}>
+            You are not selected as a juror for this dispute.
           </Alert>
         )}
 
         {/* Deadline passed warning */}
         {deadlinePassed && !selectionData?.resolved && !hasVoted && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert severity="error" sx={{ mb: 2, fontWeight: 500 }}>
             The voting deadline has passed. No more votes can be cast.
           </Alert>
         )}
@@ -211,50 +220,51 @@ export default function StakedVotingPanel({
             sx={{
               p: 2.5,
               borderRadius: 2,
-              bgcolor: 'rgba(0,255,195,0.08)',
-              border: '1px solid rgba(0,255,195,0.2)',
-              mb: 2,
+              bgcolor: isDark ? 'rgba(0,255,195,0.08)' : 'rgba(5,150,105,0.05)',
+              border: 1,
+              borderColor: isDark ? 'rgba(0,255,195,0.2)' : 'rgba(5,150,105,0.2)',
+              mb: 3,
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
               <CheckCircle color="success" fontSize="small" />
-              <Typography variant="subtitle2" fontWeight={700} color="success.main">
-                Your Vote Has Been Recorded
+              <Typography variant="subtitle2" fontWeight={800} color="success.main" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                Your Vote Recorded
               </Typography>
             </Box>
 
-            <Box sx={{ display: 'flex', gap: 3, mb: 1.5 }}>
+            <Box sx={{ display: 'flex', gap: 3, mb: 1.5, flexWrap: 'wrap' }}>
               <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Voted For
+                <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                  VOTED FOR
                 </Typography>
-                <Typography variant="body2" fontWeight={600}>
+                <Typography variant="body2" fontWeight={700} sx={{ mt: 0.5 }}>
                   {voteRecord.voteForClient ? 'Client' : 'Freelancer'}
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Stake Locked
+                <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                  STAKE LOCKED
                 </Typography>
-                <Typography variant="body2" fontWeight={600}>
+                <Typography variant="body2" fontWeight={700} sx={{ mt: 0.5 }}>
                   {(voteRecord.stakeLocked.toNumber() / 1_000_000_000).toFixed(4)} tokens
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Voted At
+                <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                  TIMESTAMP
                 </Typography>
-                <Typography variant="body2" fontWeight={600}>
+                <Typography variant="body2" fontWeight={600} sx={{ mt: 0.5 }}>
                   {new Date(voteRecord.votedAt.toNumber() * 1000).toLocaleString()}
                 </Typography>
               </Box>
             </Box>
 
             {!selectionData?.resolved && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2, pt: 2, borderTop: 1, borderColor: 'divider' }}>
                 <HourglassBottom fontSize="small" color="warning" />
-                <Typography variant="body2" color="warning.main" fontWeight={600}>
-                  Waiting for resolution...
+                <Typography variant="caption" color="warning.main" fontWeight={700} sx={{ textTransform: 'uppercase' }}>
+                  Awaiting final resolution...
                 </Typography>
               </Box>
             )}
@@ -267,15 +277,16 @@ export default function StakedVotingPanel({
             sx={{
               p: 2,
               borderRadius: 2,
-              bgcolor: 'rgba(0,255,195,0.05)',
-              border: '1px solid rgba(0,255,195,0.15)',
-              mb: 2,
+              bgcolor: isDark ? 'rgba(0,255,195,0.05)' : 'rgba(5,150,105,0.03)',
+              border: 1,
+              borderColor: 'divider',
+              mb: 3,
             }}
           >
-            <Typography variant="caption" color="text.secondary">
-              Your stake that will be locked upon voting
+            <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              Your stake that will be locked upon voting:
             </Typography>
-            <Typography variant="h6" fontWeight={700} color="primary.main">
+            <Typography variant="h6" fontWeight={800} color="primary.main" sx={{ mt: 0.5 }}>
               {(stakeData.amount.toNumber() / 1_000_000_000).toFixed(4)} tokens
             </Typography>
           </Box>
@@ -288,12 +299,12 @@ export default function StakedVotingPanel({
             icon={<Warning />}
             sx={{ mb: 3 }}
           >
-            <Typography variant="body2" fontWeight={600}>
+            <Typography variant="body2" fontWeight={700}>
               Minority Slashing Warning
             </Typography>
-            <Typography variant="body2">
+            <Typography variant="body2" sx={{ mt: 0.5, lineHeight: 1.5 }}>
               If you vote with the minority, a percentage of your staked tokens
-              will be slashed. Vote carefully after reviewing all evidence.
+              will be slashed. Review all evidence carefully.
             </Typography>
           </Alert>
         )}
@@ -312,17 +323,18 @@ export default function StakedVotingPanel({
                 flex: 1,
                 p: 1.5,
                 borderRadius: 1.5,
-                bgcolor: 'rgba(0,255,195,0.05)',
-                border: '1px solid rgba(0,255,195,0.15)',
+                bgcolor: isDark ? 'rgba(0,255,195,0.05)' : 'rgba(5,150,105,0.05)',
+                border: 1,
+                borderColor: isDark ? 'rgba(0,255,195,0.15)' : 'rgba(5,150,105,0.15)',
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-                <Person sx={{ fontSize: 16, color: '#00ffc3' }} />
-                <Typography variant="caption" color="#00ffc3" fontWeight={600}>
-                  Client
+                <Person sx={{ fontSize: 16, color: primaryMain }} />
+                <Typography variant="caption" color="primary.main" fontWeight={700}>
+                  CLIENT
                 </Typography>
               </Box>
-              <Typography variant="body2" fontFamily="monospace" fontSize="0.75rem">
+              <Typography variant="body2" fontFamily="monospace" fontSize="0.75rem" fontWeight={600}>
                 {clientPubkey.toString().slice(0, 4)}...{clientPubkey.toString().slice(-4)}
               </Typography>
             </Box>
@@ -331,17 +343,18 @@ export default function StakedVotingPanel({
                 flex: 1,
                 p: 1.5,
                 borderRadius: 1.5,
-                bgcolor: 'rgba(224,77,1,0.08)',
-                border: '1px solid rgba(224,77,1,0.15)',
+                bgcolor: isDark ? 'rgba(224,77,1,0.08)' : 'rgba(224,77,1,0.05)',
+                border: 1,
+                borderColor: isDark ? 'rgba(224,77,1,0.15)' : 'rgba(224,77,1,0.15)',
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-                <Work sx={{ fontSize: 16, color: '#e04d01' }} />
-                <Typography variant="caption" color="#e04d01" fontWeight={600}>
-                  Freelancer
+                <Work sx={{ fontSize: 16, color: warningMain }} />
+                <Typography variant="caption" color="warning.main" fontWeight={700}>
+                  FREELANCER
                 </Typography>
               </Box>
-              <Typography variant="body2" fontFamily="monospace" fontSize="0.75rem">
+              <Typography variant="body2" fontFamily="monospace" fontSize="0.75rem" fontWeight={600}>
                 {freelancerPubkey.toString().slice(0, 4)}...{freelancerPubkey.toString().slice(-4)}
               </Typography>
             </Box>
@@ -352,34 +365,28 @@ export default function StakedVotingPanel({
 
         {/* Voting Buttons */}
         {!hasVoted && (
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
             <Button
               variant="contained"
               fullWidth
               disabled={!!isDisabled || voting}
               onClick={() => handleVote(true)}
+              color="primary"
               sx={{
-                py: 2,
-                fontSize: '1rem',
-                fontWeight: 700,
-                textTransform: 'none',
-                background: 'linear-gradient(135deg, #00ffc3 0%, #00d9a6 100%)',
-                boxShadow: '0 4px 12px rgba(0,255,195,0.3)',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #00d9a6 0%, #00b388 100%)',
-                  boxShadow: '0 6px 16px rgba(0,255,195,0.4)',
-                },
-                '&:disabled': {
-                  background: 'rgba(255, 255, 255, 0.08)',
-                },
+                py: 1.5,
+                fontSize: '0.9rem',
+                fontWeight: 800,
+                fontFamily: '"Orbitron", sans-serif',
+                letterSpacing: 1,
+                boxShadow: isDark ? `0 4px 15px ${theme.palette.primary.main}40` : 'none',
               }}
             >
               {voting ? (
-                <CircularProgress size={24} sx={{ color: 'white' }} />
+                <CircularProgress size={24} color="inherit" />
               ) : (
                 <>
-                  <Person sx={{ mr: 1 }} />
-                  Vote for Client
+                  <Person sx={{ mr: 1, fontSize: 20 }} />
+                  VOTE CLIENT
                 </>
               )}
             </Button>
@@ -389,28 +396,22 @@ export default function StakedVotingPanel({
               fullWidth
               disabled={!!isDisabled || voting}
               onClick={() => handleVote(false)}
+              color="warning"
               sx={{
-                py: 2,
-                fontSize: '1rem',
-                fontWeight: 700,
-                textTransform: 'none',
-                background: 'linear-gradient(135deg, #e04d01 0%, #ff7033 100%)',
-                boxShadow: '0 4px 12px rgba(224,77,1,0.3)',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #ff7033 0%, #e04d01 100%)',
-                  boxShadow: '0 6px 16px rgba(224,77,1,0.4)',
-                },
-                '&:disabled': {
-                  background: 'rgba(255, 255, 255, 0.08)',
-                },
+                py: 1.5,
+                fontSize: '0.9rem',
+                fontWeight: 800,
+                fontFamily: '"Orbitron", sans-serif',
+                letterSpacing: 1,
+                boxShadow: isDark ? `0 4px 15px ${theme.palette.warning.main}40` : 'none',
               }}
             >
               {voting ? (
-                <CircularProgress size={24} sx={{ color: 'white' }} />
+                <CircularProgress size={24} color="inherit" />
               ) : (
                 <>
-                  <Work sx={{ mr: 1 }} />
-                  Vote for Freelancer
+                  <Work sx={{ mr: 1, fontSize: 20 }} />
+                  VOTE FREELANCER
                 </>
               )}
             </Button>

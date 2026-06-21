@@ -8,6 +8,7 @@ import {
   Divider,
   Paper,
   Chip,
+  useTheme,
 } from '@mui/material';
 import {
   Description,
@@ -59,6 +60,10 @@ export default function JobActionPanel({
   onBidOpen,
   onChatOpen,
 }: JobActionPanelProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+
   const statusText = getStatusText(job.status);
   const isClient = !!publicKey && job.client.toBase58() === publicKey.toBase58();
   const isAssignedFreelancer =
@@ -68,11 +73,11 @@ export default function JobActionPanel({
     job.selectedFreelancer.toBase58() === publicKey.toBase58();
 
   return (
-    <Card sx={{ mb: 3, border: '1px solid rgba(0,255,195,0.08)' }}>
+    <Card sx={{ mb: 3, border: 1, borderColor: 'divider' }}>
       <CardContent sx={{ p: { xs: 2, md: 3 } }}>
         <Box sx={{ mb: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-            <Description sx={{ fontSize: 18, color: '#00ffc3' }} />
+            <Description sx={{ fontSize: 18, color: primaryMain }} />
             <Typography variant="h6" fontWeight={700}>Description</Typography>
           </Box>
           <Typography
@@ -86,7 +91,7 @@ export default function JobActionPanel({
 
         {metadata && (
           <>
-            <Divider sx={{ my: 3, borderColor: 'rgba(0,255,195,0.08)' }} />
+            <Divider sx={{ my: 3, borderColor: 'divider' }} />
             <Box sx={{ mb: 4 }}>
               <Typography variant="h6" fontWeight={700} gutterBottom>
                 Additional Details
@@ -137,13 +142,14 @@ export default function JobActionPanel({
           workSubmission &&
           statusText === 'In Progress' && (
             <Box sx={{ mt: 4 }}>
-              <Divider sx={{ mb: 3, borderColor: 'rgba(0,255,195,0.08)' }} />
+              <Divider sx={{ mb: 3, borderColor: 'divider' }} />
               <Paper
                 sx={{
                   p: 3,
-                  border: '1px solid rgba(76,175,80,0.25)',
+                  border: 1,
+                  borderColor: isDark ? 'rgba(76,175,80,0.25)' : 'success.light',
                   borderRadius: 2,
-                  bgcolor: 'rgba(76,175,80,0.05)',
+                  bgcolor: isDark ? 'rgba(76,175,80,0.05)' : 'success.lighter',
                 }}
               >
                 <Typography variant="h6" fontWeight={600} gutterBottom>
@@ -164,7 +170,7 @@ export default function JobActionPanel({
                     fontFamily="monospace"
                     sx={{
                       wordBreak: 'break-all',
-                      bgcolor: 'background.paper',
+                      bgcolor: 'background.default',
                       p: 1,
                       borderRadius: 1,
                       mt: 0.5,

@@ -11,6 +11,8 @@ import {
   CircularProgress,
   Alert,
   Divider,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import LoadingSpinner from '../LoadingSpinner';
 import {
@@ -43,6 +45,10 @@ export default function JurorStakingPanel() {
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
 
   const loadData = useCallback(async () => {
     if (!publicKey) {
@@ -130,7 +136,7 @@ export default function JurorStakingPanel() {
 
   if (!publicKey) {
     return (
-      <Card>
+      <Card sx={{ border: 1, borderColor: 'divider' }}>
         <CardContent>
           <Alert severity="info">
             Please connect your wallet to manage juror staking.
@@ -158,15 +164,16 @@ export default function JurorStakingPanel() {
   return (
     <Card
       sx={{
-        border: '1px solid',
+        border: 1,
         borderColor: 'divider',
         borderRadius: 2,
+        backgroundImage: 'none',
       }}
     >
-      <CardContent>
+      <CardContent sx={{ p: 3 }}>
         {/* Header */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-          <Gavel color="primary" />
+          <Gavel sx={{ color: primaryMain }} />
           <Typography variant="h6" fontWeight={700}>
             Juror Staking
           </Typography>
@@ -176,6 +183,7 @@ export default function JurorStakingPanel() {
               color="success"
               size="small"
               icon={<CheckCircle />}
+              sx={{ fontWeight: 700, height: 24 }}
             />
           ) : (
             <Chip
@@ -183,6 +191,7 @@ export default function JurorStakingPanel() {
               color="default"
               size="small"
               icon={<Cancel />}
+              sx={{ fontWeight: 700, height: 24 }}
             />
           )}
         </Box>
@@ -214,17 +223,18 @@ export default function JurorStakingPanel() {
                 sx={{
                   p: 2,
                   borderRadius: 2,
-                  bgcolor: 'rgba(0,255,195,0.08)',
-                  border: '1px solid rgba(0,255,195,0.2)',
+                  bgcolor: isDark ? 'rgba(0,255,195,0.08)' : 'rgba(5,150,105,0.05)',
+                  border: 1,
+                  borderColor: isDark ? 'rgba(0,255,195,0.2)' : 'rgba(5,150,105,0.2)',
                 }}
               >
-                <Typography variant="caption" color="text.secondary">
-                  Current Stake
+                <Typography variant="caption" color="text.secondary" fontWeight={700} sx={{ letterSpacing: 0.5 }}>
+                  CURRENT STAKE
                 </Typography>
-                <Typography variant="h5" fontWeight={700} color="primary.main">
+                <Typography variant="h5" fontWeight={800} color="primary.main" sx={{ mt: 0.5 }}>
                   {(stakeData.amount.toNumber() / 1_000_000_000).toFixed(4)}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>
                   tokens
                 </Typography>
               </Box>
@@ -233,18 +243,19 @@ export default function JurorStakingPanel() {
                 sx={{
                   p: 2,
                   borderRadius: 2,
-                  bgcolor: 'rgba(0,255,195,0.08)',
-                  border: '1px solid rgba(0,255,195,0.2)',
+                  bgcolor: isDark ? 'rgba(0,255,195,0.08)' : 'rgba(5,150,105,0.05)',
+                  border: 1,
+                  borderColor: isDark ? 'rgba(0,255,195,0.2)' : 'rgba(5,150,105,0.2)',
                 }}
               >
-                <Typography variant="caption" color="text.secondary">
-                  Active Disputes
+                <Typography variant="caption" color="text.secondary" fontWeight={700} sx={{ letterSpacing: 0.5 }}>
+                  ACTIVE DISPUTES
                 </Typography>
-                <Typography variant="h5" fontWeight={700} color="success.main">
+                <Typography variant="h5" fontWeight={800} color={theme.palette.success.main} sx={{ mt: 0.5 }}>
                   {stakeData.activeDisputeCount}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  currently assigned
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                  assigned
                 </Typography>
               </Box>
             </Box>
@@ -252,17 +263,17 @@ export default function JurorStakingPanel() {
             {/* Dispute Stats */}
             <Box
               sx={{
-                p: 2,
+                p: 2.5,
                 borderRadius: 2,
-                bgcolor: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid',
+                bgcolor: isDark ? 'rgba(255, 255, 255, 0.03)' : 'grey.50',
+                border: 1,
                 borderColor: 'divider',
                 mb: 3,
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <TrendingUp fontSize="small" color="primary" />
-                <Typography variant="subtitle2" fontWeight={600}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
+                <TrendingUp fontSize="small" sx={{ color: primaryMain }} />
+                <Typography variant="subtitle2" fontWeight={700} sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
                   Dispute Statistics
                 </Typography>
               </Box>
@@ -272,42 +283,42 @@ export default function JurorStakingPanel() {
                   display: 'grid',
                   gridTemplateColumns: 'repeat(3, 1fr)',
                   gap: 2,
-                  mb: 2,
+                  mb: 3,
                 }}
               >
                 <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h6" fontWeight={700}>
+                  <Typography variant="h6" fontWeight={800}>
                     {stakeData.disputesParticipated}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" color="text.secondary" fontWeight={600}>
                     Participated
                   </Typography>
                 </Box>
                 <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h6" fontWeight={700} color="success.main">
+                  <Typography variant="h6" fontWeight={800} color={theme.palette.success.main}>
                     {stakeData.disputesCorrect}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" color="text.secondary" fontWeight={600}>
                     Correct Votes
                   </Typography>
                 </Box>
                 <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h6" fontWeight={700} color="primary.main">
+                  <Typography variant="h6" fontWeight={800} color="primary.main">
                     {accuracyRate.toFixed(1)}%
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Accuracy Rate
+                  <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                    Accuracy
                   </Typography>
                 </Box>
               </Box>
 
               {/* Accuracy Progress Bar */}
               <Box sx={{ mt: 1 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Accuracy
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                    ACCURACY RATE
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" color="text.primary" fontWeight={800}>
                     {accuracyRate.toFixed(1)}%
                   </Typography>
                 </Box>
@@ -317,15 +328,15 @@ export default function JurorStakingPanel() {
                   sx={{
                     height: 8,
                     borderRadius: 4,
-                    bgcolor: 'rgba(255, 255, 255, 0.08)',
+                    bgcolor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
                     '& .MuiLinearProgress-bar': {
                       borderRadius: 4,
                       background:
                         accuracyRate >= 70
-                          ? 'linear-gradient(90deg, #00ffc3, #00ffc3)'
+                          ? theme.palette.success.main
                           : accuracyRate >= 40
-                            ? 'linear-gradient(90deg, #e04d01, #ff7033)'
-                            : 'linear-gradient(90deg, #ff00ff, #ff55ff)',
+                            ? theme.palette.warning.main
+                            : theme.palette.error.main,
                     },
                   }}
                 />
@@ -339,12 +350,11 @@ export default function JurorStakingPanel() {
         {/* Stake / Unstake Actions */}
         {!stakeData || !stakeData.active ? (
           <Box>
-            <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-              Stake to become a juror
+            <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+              Become a Juror
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Minimum stake: {minStakeDisplay} tokens. Staked jurors can be
-              selected to resolve disputes and earn rewards.
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, lineHeight: 1.6 }}>
+              Minimum stake: <strong>{minStakeDisplay} tokens</strong>. Staked jurors help maintain network integrity by resolving disputes and earning rewards.
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
@@ -360,29 +370,27 @@ export default function JurorStakingPanel() {
               />
               <Button
                 variant="contained"
-                color="primary"
                 onClick={handleStake}
                 disabled={actionLoading || !stakeAmount || parseFloat(stakeAmount) <= 0}
                 sx={{
                   minWidth: 120,
-                  py: 1,
-                  fontWeight: 600,
-                  textTransform: 'none',
+                  height: 40,
+                  fontWeight: 700,
                 }}
               >
-                {actionLoading ? <CircularProgress size={22} /> : 'Stake'}
+                {actionLoading ? <CircularProgress size={22} color="inherit" /> : 'Stake'}
               </Button>
             </Box>
           </Box>
         ) : (
           <Box>
-            <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-              Unstake from jury duty
+            <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+              Unstake Tokens
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, lineHeight: 1.6 }}>
               {stakeData.activeDisputeCount > 0
-                ? 'You cannot unstake while you have active disputes. Please wait for all assigned disputes to resolve.'
-                : 'You have no active disputes. You can safely unstake your tokens.'}
+                ? 'You cannot unstake while you have active disputes assigned. Please wait for resolution.'
+                : 'You have no active disputes. You can safely unstake your tokens at any time.'}
             </Typography>
             <Button
               variant="outlined"
@@ -390,11 +398,11 @@ export default function JurorStakingPanel() {
               onClick={handleUnstake}
               disabled={actionLoading || stakeData.activeDisputeCount > 0}
               sx={{
-                fontWeight: 600,
-                textTransform: 'none',
+                minWidth: 120,
+                fontWeight: 700,
               }}
             >
-              {actionLoading ? <CircularProgress size={22} /> : 'Unstake'}
+              {actionLoading ? <CircularProgress size={22} color="inherit" /> : 'Withdraw Stake'}
             </Button>
           </Box>
         )}

@@ -4,7 +4,7 @@ import {
   Alert, CircularProgress, ToggleButtonGroup, ToggleButton,
   Select, MenuItem, FormControl, InputLabel, Divider,
   Checkbox, FormControlLabel, LinearProgress, Tooltip,
-  Chip,
+  Chip, useTheme,
 } from '@mui/material'
 import {
   Send, Description, Edit, Upload,
@@ -33,6 +33,8 @@ interface BidFormProps {
 // ─── bid score ring ────────────────────────────────────────────────────────
 
 function ScoreRing({ score }: { score: number }) {
+  const theme = useTheme()
+  const isDark = theme.palette.mode === 'dark'
   const level = getScoreLevel(score)
   const color = SCORE_COLORS[level]
   const label = level === 'strong' ? 'STRONG' : level === 'average' ? 'AVERAGE' : 'WEAK'
@@ -45,7 +47,7 @@ function ScoreRing({ score }: { score: number }) {
           value={100}
           size={72}
           thickness={4}
-          sx={{ color: 'rgba(255,255,255,0.06)', position: 'absolute' }}
+          sx={{ color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)', position: 'absolute' }}
         />
         <CircularProgress
           variant="determinate"
@@ -68,7 +70,7 @@ function ScoreRing({ score }: { score: number }) {
         size="small"
         sx={{
           height: 16, fontSize: '0.55rem', fontFamily: '"Orbitron",sans-serif',
-          letterSpacing: '0.1em', bgcolor: `${color}18`, color, border: `1px solid ${color}44`,
+          letterSpacing: '0.1em', bgcolor: `${color}${isDark ? '18' : '12'}`, color, border: `1px solid ${color}44`,
         }}
       />
     </Box>
@@ -78,6 +80,8 @@ function ScoreRing({ score }: { score: number }) {
 // ─── price gauge ──────────────────────────────────────────────────────────
 
 function PriceGauge({ bidSol, budgetSol }: { bidSol: number; budgetSol: number }) {
+  const theme = useTheme()
+  const isDark = theme.palette.mode === 'dark'
   if (!budgetSol || !bidSol) return null
   const pct = Math.min(200, Math.round((bidSol / budgetSol) * 100))
   const color =
@@ -96,7 +100,7 @@ function PriceGauge({ bidSol, budgetSol }: { bidSol: number; budgetSol: number }
         value={Math.min(100, pct / 2)}   // map 0-200% → 0-100% bar
         sx={{
           height: 4, borderRadius: 2,
-          bgcolor: 'rgba(255,255,255,0.06)',
+          bgcolor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
           '& .MuiLinearProgress-bar': { bgcolor: color, borderRadius: 2 },
         }}
       />
@@ -105,7 +109,7 @@ function PriceGauge({ bidSol, budgetSol }: { bidSol: number; budgetSol: number }
         <Tooltip title="Job budget" placement="top">
           <Box sx={{
             position: 'absolute', left: '50%', top: 0,
-            width: 2, height: 6, bgcolor: 'rgba(255,255,255,0.25)', borderRadius: 1,
+            width: 2, height: 6, bgcolor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)', borderRadius: 1,
           }} />
         </Tooltip>
       </Box>
@@ -122,6 +126,10 @@ export default function BidForm({
   onSubmit,
   loading = false,
 }: BidFormProps) {
+  const theme = useTheme()
+  const isDark = theme.palette.mode === 'dark'
+  const primaryMain = theme.palette.primary.main
+  
   const budgetSol = parseFloat(jobBudget || '0') || 0
 
   // — fields
@@ -190,13 +198,13 @@ export default function BidForm({
   }
 
   return (
-    <Card sx={{ border: '1px solid rgba(0,255,195,0.12)', background: 'rgba(7,5,17,0.6)' }}>
+    <Card sx={{ border: 1, borderColor: 'divider', background: 'background.paper' }}>
       <CardContent sx={{ p: 3 }}>
 
         {/* Header */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2.5 }}>
           <Box>
-            <Typography sx={{ fontFamily: '"Orbitron",sans-serif', fontSize: '0.7rem', letterSpacing: '0.15em', color: 'primary.main', mb: 0.5 }}>
+            <Typography sx={{ fontFamily: '"Orbitron",sans-serif', fontSize: '0.7rem', letterSpacing: '0.15em', color: primaryMain, mb: 0.5, fontWeight: 700 }}>
               SUBMIT TENDER
             </Typography>
             <Typography variant="h6" fontWeight={700}>Place Your Bid</Typography>
@@ -220,7 +228,7 @@ export default function BidForm({
             {/* Price */}
             <Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.75 }}>
-                <AttachMoney sx={{ fontSize: 14, color: 'primary.main' }} />
+                <AttachMoney sx={{ fontSize: 14, color: primaryMain }} />
                 <Typography variant="caption" fontWeight={600} sx={{ letterSpacing: '0.06em' }}>
                   YOUR PRICE (SOL)
                 </Typography>
@@ -248,7 +256,7 @@ export default function BidForm({
             {/* Timeline */}
             <Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.75 }}>
-                <CalendarMonth sx={{ fontSize: 14, color: 'primary.main' }} />
+                <CalendarMonth sx={{ fontSize: 14, color: primaryMain }} />
                 <Typography variant="caption" fontWeight={600} sx={{ letterSpacing: '0.06em' }}>
                   DEADLINE (DAYS)
                 </Typography>
@@ -286,7 +294,7 @@ export default function BidForm({
             </>
           )}
 
-          <Divider sx={{ borderColor: 'rgba(0,255,195,0.08)' }} />
+          <Divider sx={{ borderColor: 'divider' }} />
 
           {/* ── Proposal / CV ── */}
           <Box>
@@ -351,14 +359,15 @@ export default function BidForm({
             )}
           </Box>
 
-          <Divider sx={{ borderColor: 'rgba(0,255,195,0.08)' }} />
+          <Divider sx={{ borderColor: 'divider' }} />
 
           {/* ── Commitment ── */}
           <Box
             sx={{
               p: 1.5, borderRadius: 1,
-              border: `1px solid ${acknowledged ? 'rgba(0,255,195,0.25)' : 'rgba(255,255,255,0.08)'}`,
-              bgcolor: acknowledged ? 'rgba(0,255,195,0.04)' : 'transparent',
+              border: 1,
+              borderColor: acknowledged ? (isDark ? 'rgba(0,255,195,0.25)' : 'primary.light') : 'divider',
+              bgcolor: acknowledged ? (isDark ? 'rgba(0,255,195,0.04)' : 'rgba(5,150,105,0.04)') : 'transparent',
               transition: 'all 0.2s',
             }}
           >
@@ -368,17 +377,17 @@ export default function BidForm({
                   checked={acknowledged}
                   onChange={e => setAck(e.target.checked)}
                   disabled={loading}
-                  sx={{ color: 'primary.main', '&.Mui-checked': { color: 'primary.main' } }}
+                  sx={{ color: primaryMain, '&.Mui-checked': { color: primaryMain } }}
                 />
               }
               label={
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>
                   I commit to delivering the work at{' '}
-                  <Box component="span" sx={{ color: 'primary.main', fontWeight: 700 }}>
+                  <Box component="span" sx={{ color: primaryMain, fontWeight: 700 }}>
                     {bidSol > 0 ? `${bidSol} SOL` : '—'}
                   </Box>{' '}
                   within{' '}
-                  <Box component="span" sx={{ color: 'primary.main', fontWeight: 700 }}>
+                  <Box component="span" sx={{ color: primaryMain, fontWeight: 700 }}>
                     {timelineDays > 0 ? `${timelineDays} day${timelineDays > 1 ? 's' : ''}` : '—'}
                   </Box>{' '}
                   of the contract start. I understand that failure to deliver may result in dispute and reputation penalty.
@@ -389,7 +398,7 @@ export default function BidForm({
 
           {/* security note */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 0.5 }}>
-            <Shield sx={{ fontSize: 14, color: 'rgba(0,255,195,0.4)' }} />
+            <Shield sx={{ fontSize: 14, color: isDark ? 'rgba(0,255,195,0.4)' : 'rgba(0,0,0,0.3)' }} />
             <Typography variant="caption" color="text.disabled">
               Payment is held in escrow and released only upon client approval.
             </Typography>

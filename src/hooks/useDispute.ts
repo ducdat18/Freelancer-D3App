@@ -65,8 +65,7 @@ export function useDispute() {
         // @ts-ignore - Program account types from IDL
         const dispute = await program.account.dispute.fetch(disputePda);
         return dispute as DisputeData;
-      } catch (error) {
-        console.error('Error fetching dispute:', error);
+      } catch {
         return null;
       }
     },

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Tabs, Tab, Grid, Typography } from '@mui/material';
+import { Box, Tabs, Tab, Grid, Typography, useTheme } from '@mui/material';
 import JobCard from '../JobCard';
 import LoadingSpinner from '../LoadingSpinner';
 import EmptyState from '../EmptyState';
@@ -24,16 +24,23 @@ interface DashboardJobTabsProps {
   loading?: boolean;
 }
 
-const TAB_COLORS = ['#00ffc3', '#2196f3', '#4caf50', '#9945ff'];
-
 export default function DashboardJobTabs({ tabs, loading }: DashboardJobTabsProps) {
   const [tabValue, setTabValue] = useState(0);
+  const theme = useTheme();
+  
+  // Use theme colors for tabs
+  const TAB_COLORS = [
+    theme.palette.primary.main, 
+    theme.palette.info.main, 
+    theme.palette.success.main, 
+    theme.palette.secondary.main
+  ];
   const activeColor = TAB_COLORS[tabValue] ?? TAB_COLORS[0];
 
   return (
-    <Box sx={{ border: '1px solid rgba(0,255,195,0.08)', borderRadius: 2, overflow: 'hidden' }}>
+    <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
       {/* Tab bar */}
-      <Box sx={{ borderBottom: '1px solid rgba(0,255,195,0.08)', bgcolor: 'rgba(0,0,0,0.2)' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)' }}>
         <Tabs
           value={tabValue}
           onChange={(_, newValue) => setTabValue(newValue)}

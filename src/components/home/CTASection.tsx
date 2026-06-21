@@ -1,4 +1,4 @@
-import { Container, Typography, Box, Button, Grid, Card, CardContent } from '@mui/material';
+import { Container, Typography, Box, Button, Grid, Card, CardContent, useTheme } from '@mui/material';
 import { Work, Person, AccountBalanceWallet, ArrowForward } from '@mui/icons-material';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
@@ -12,6 +12,10 @@ export default function CTASection() {
   const { connected } = useWallet();
   const { setVisible } = useWalletModal();
   const router = useRouter();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+  const secondaryMain = theme.palette.secondary.main;
 
   if (connected) {
     return (
@@ -29,12 +33,15 @@ export default function CTASection() {
             <Card
               sx={{
                 height: '100%',
-                border: '1px solid rgba(0,255,195,0.15)',
-                background: 'linear-gradient(135deg, rgba(0,255,195,0.05) 0%, rgba(0,255,195,0.01) 100%)',
+                border: 1,
+                borderColor: 'divider',
+                background: isDark 
+                  ? 'linear-gradient(135deg, rgba(0,255,195,0.05) 0%, rgba(0,255,195,0.01) 100%)'
+                  : `linear-gradient(135deg, ${primaryMain}10 0%, ${primaryMain}02 100%)`,
                 transition: 'all 0.25s ease',
                 '&:hover': {
-                  borderColor: 'rgba(0,255,195,0.3)',
-                  boxShadow: '0 0 40px rgba(0,255,195,0.08)',
+                  borderColor: isDark ? 'rgba(0,255,195,0.3)' : `${primaryMain}80`,
+                  boxShadow: isDark ? '0 0 40px rgba(0,255,195,0.08)' : `0 8px 30px ${primaryMain}15`,
                   transform: 'translateY(-4px)',
                 },
               }}
@@ -44,14 +51,14 @@ export default function CTASection() {
                   sx={{
                     width: 64, height: 64,
                     borderRadius: '50%',
-                    border: '2px solid rgba(0,255,195,0.3)',
-                    bgcolor: 'rgba(0,255,195,0.08)',
+                    border: `2px solid ${isDark ? 'rgba(0,255,195,0.3)' : primaryMain + '40'}`,
+                    bgcolor: isDark ? 'rgba(0,255,195,0.08)' : `${primaryMain}15`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     mx: 'auto', mb: 3,
-                    boxShadow: '0 0 20px rgba(0,255,195,0.12)',
+                    boxShadow: isDark ? '0 0 20px rgba(0,255,195,0.12)' : `0 4px 15px ${primaryMain}20`,
                   }}
                 >
-                  <Work sx={{ fontSize: 30, color: '#00ffc3' }} />
+                  <Work sx={{ fontSize: 30, color: primaryMain }} />
                 </Box>
                 <Typography variant="h5" fontWeight={700} gutterBottom>
                   Looking to Hire?
@@ -75,12 +82,15 @@ export default function CTASection() {
             <Card
               sx={{
                 height: '100%',
-                border: '1px solid rgba(128,132,238,0.15)',
-                background: 'linear-gradient(135deg, rgba(128,132,238,0.05) 0%, rgba(128,132,238,0.01) 100%)',
+                border: 1,
+                borderColor: 'divider',
+                background: isDark
+                  ? 'linear-gradient(135deg, rgba(128,132,238,0.05) 0%, rgba(128,132,238,0.01) 100%)'
+                  : `linear-gradient(135deg, ${secondaryMain}10 0%, ${secondaryMain}02 100%)`,
                 transition: 'all 0.25s ease',
                 '&:hover': {
-                  borderColor: 'rgba(128,132,238,0.3)',
-                  boxShadow: '0 0 40px rgba(128,132,238,0.08)',
+                  borderColor: isDark ? 'rgba(128,132,238,0.3)' : `${secondaryMain}80`,
+                  boxShadow: isDark ? '0 0 40px rgba(128,132,238,0.08)' : `0 8px 30px ${secondaryMain}15`,
                   transform: 'translateY(-4px)',
                 },
               }}
@@ -90,14 +100,14 @@ export default function CTASection() {
                   sx={{
                     width: 64, height: 64,
                     borderRadius: '50%',
-                    border: '2px solid rgba(128,132,238,0.3)',
-                    bgcolor: 'rgba(128,132,238,0.08)',
+                    border: `2px solid ${isDark ? 'rgba(128,132,238,0.3)' : secondaryMain + '40'}`,
+                    bgcolor: isDark ? 'rgba(128,132,238,0.08)' : `${secondaryMain}15`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     mx: 'auto', mb: 3,
-                    boxShadow: '0 0 20px rgba(128,132,238,0.12)',
+                    boxShadow: isDark ? '0 0 20px rgba(128,132,238,0.12)' : `0 4px 15px ${secondaryMain}20`,
                   }}
                 >
-                  <Person sx={{ fontSize: 30, color: '#8084ee' }} />
+                  <Person sx={{ fontSize: 30, color: secondaryMain }} />
                 </Box>
                 <Typography variant="h5" fontWeight={700} gutterBottom>
                   Looking for Work?
@@ -134,9 +144,12 @@ export default function CTASection() {
           sx={{
             textAlign: 'center',
             p: { xs: 4, md: 7 },
-            border: '1px solid rgba(0,255,195,0.15)',
+            border: 1,
+            borderColor: 'divider',
             borderRadius: 3,
-            background: 'linear-gradient(135deg, rgba(0,255,195,0.04) 0%, rgba(153,69,255,0.04) 100%)',
+            background: isDark 
+              ? 'linear-gradient(135deg, rgba(0,255,195,0.04) 0%, rgba(153,69,255,0.04) 100%)'
+              : `linear-gradient(135deg, ${primaryMain}08 0%, ${theme.palette.error.main}05 100%)`,
             position: 'relative',
             overflow: 'hidden',
           }}
@@ -151,7 +164,7 @@ export default function CTASection() {
               width: 300,
               height: 300,
               borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(0,255,195,0.06) 0%, transparent 70%)',
+              background: isDark ? 'radial-gradient(circle, rgba(0,255,195,0.06) 0%, transparent 70%)' : `radial-gradient(circle, ${primaryMain}10 0%, transparent 70%)`,
               pointerEvents: 'none',
             }}
           />
@@ -161,14 +174,14 @@ export default function CTASection() {
               sx={{
                 width: 72, height: 72,
                 borderRadius: '50%',
-                border: '2px solid rgba(0,255,195,0.3)',
-                bgcolor: 'rgba(0,255,195,0.08)',
+                border: `2px solid ${isDark ? 'rgba(0,255,195,0.3)' : primaryMain + '40'}`,
+                bgcolor: isDark ? 'rgba(0,255,195,0.08)' : `${primaryMain}15`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 mx: 'auto', mb: 3,
-                boxShadow: '0 0 30px rgba(0,255,195,0.15)',
+                boxShadow: isDark ? '0 0 30px rgba(0,255,195,0.15)' : `0 4px 20px ${primaryMain}20`,
               }}
             >
-              <AccountBalanceWallet sx={{ fontSize: 36, color: '#00ffc3' }} />
+              <AccountBalanceWallet sx={{ fontSize: 36, color: primaryMain }} />
             </Box>
 
             <Typography variant="h3" fontWeight={700} gutterBottom>

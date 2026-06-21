@@ -21,6 +21,9 @@ export interface JobMetadata {
   description: string
   category: string
   skills: string[]
+  deadline?: number
+  tokenMint?: string
+  budgetSol?: string
   attachments?: string[]
   notes?: string
   isPrivate?: boolean

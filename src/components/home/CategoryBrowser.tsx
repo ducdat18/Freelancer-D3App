@@ -1,4 +1,4 @@
-import { Container, Typography, Box, Grid, Card, CardContent } from '@mui/material';
+import { Container, Typography, Box, Grid, Card, CardContent, useTheme } from '@mui/material';
 import {
   Code,
   PhoneIphone,
@@ -33,6 +33,9 @@ const CATEGORY_ICONS: Record<JobCategory, React.ElementType> = {
 };
 
 export default function CategoryBrowser() {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   return (
     <Container maxWidth="lg">
       <Box sx={{ textAlign: 'center', mb: 4 }}>
@@ -65,7 +68,7 @@ export default function CategoryBrowser() {
                     transition: 'all 0.3s ease',
                     '&:hover': {
                       borderColor: 'primary.main',
-                      boxShadow: '0 0 20px rgba(0, 255, 195, 0.15)',
+                      boxShadow: isDark ? '0 0 20px rgba(0, 255, 195, 0.15)' : '0 4px 20px rgba(0,0,0,0.08)',
                     },
                   }}
                   whileHover={{ scale: 1.05, y: -4 }}
@@ -77,7 +80,7 @@ export default function CategoryBrowser() {
                         fontSize: 40,
                         color: 'primary.main',
                         mb: 1,
-                        filter: 'drop-shadow(0 0 6px rgba(0, 255, 195, 0.3))',
+                        filter: isDark ? 'drop-shadow(0 0 6px rgba(0, 255, 195, 0.3))' : 'none',
                       }}
                     />
                     <Typography variant="subtitle2" fontWeight={600} noWrap>

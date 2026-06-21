@@ -7,7 +7,8 @@ import {
   Chip,
   LinearProgress,
   Tooltip,
-  alpha
+  alpha,
+  useTheme
 } from '@mui/material';
 import { Lock, CheckCircle, EmojiEvents } from '@mui/icons-material';
 import { Achievement } from '../../config/achievements';
@@ -31,6 +32,8 @@ export default function AchievementBadge({
   compact = false
 }: AchievementBadgeProps) {
   const isLocked = !earned;
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   return (
     <Card
@@ -43,13 +46,18 @@ export default function AchievementBadge({
         filter: isLocked ? 'grayscale(100%)' : 'none',
         '&:hover': onClick ? {
           transform: 'translateY(-4px)',
-          boxShadow: 6,
+          boxShadow: isDark ? `0 0 24px ${alpha(achievement.color, 0.2)}` : '0 8px 32px rgba(0,0,0,0.1)',
           filter: isLocked ? 'grayscale(80%)' : 'none',
+          borderColor: achievement.color,
         } : {},
         background: earned
-          ? `linear-gradient(135deg, ${alpha(achievement.color, 0.1)} 0%, ${alpha(achievement.color, 0.05)} 100%)`
+          ? (isDark 
+              ? `linear-gradient(135deg, ${alpha(achievement.color, 0.12)} 0%, ${alpha(achievement.color, 0.04)} 100%)`
+              : `linear-gradient(135deg, ${alpha(achievement.color, 0.08)} 0%, ${alpha(achievement.color, 0.02)} 100%)`)
           : 'background.paper',
-        border: earned ? `2px solid ${achievement.color}` : '2px solid transparent',
+        border: 1,
+        borderColor: earned ? alpha(achievement.color, 0.5) : 'divider',
+        backgroundImage: 'none',
       }}
       onClick={onClick}
     >
@@ -65,14 +73,14 @@ export default function AchievementBadge({
         >
           <Box
             sx={{
-              width: 40,
-              height: 40,
+              width: 36,
+              height: 36,
               borderRadius: '50%',
               bgcolor: achievement.color,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: 3,
+              boxShadow: isDark ? `0 0 15px ${alpha(achievement.color, 0.5)}` : '0 4px 10px rgba(0,0,0,0.2)',
               animation: earned ? 'pulse 2s infinite' : 'none',
               '@keyframes pulse': {
                 '0%, 100%': {
@@ -84,7 +92,7 @@ export default function AchievementBadge({
               },
             }}
           >
-            <CheckCircle sx={{ color: 'white', fontSize: 24 }} />
+            <CheckCircle sx={{ color: '#fff', fontSize: 20 }} />
           </Box>
         </Box>
       )}
@@ -99,7 +107,7 @@ export default function AchievementBadge({
             zIndex: 1
           }}
         >
-          <Lock sx={{ color: 'text.disabled', fontSize: 20 }} />
+          <Lock sx={{ color: 'text.disabled', fontSize: 18 }} />
         </Box>
       )}
 
@@ -107,10 +115,10 @@ export default function AchievementBadge({
         {/* Icon */}
         <Box
           sx={{
-            fontSize: compact ? 48 : 64,
+            fontSize: compact ? 40 : 56,
             textAlign: 'center',
             mb: 2,
-            filter: isLocked ? 'grayscale(100%)' : 'none',
+            filter: isLocked ? 'grayscale(100%) opacity(0.5)' : (isDark ? `drop-shadow(0 0 10px ${alpha(achievement.color, 0.4)})` : 'none'),
           }}
         >
           {achievement.icon}
@@ -118,12 +126,14 @@ export default function AchievementBadge({
 
         {/* Name */}
         <Typography
-          variant={compact ? 'h6' : 'h5'}
+          variant={compact ? 'subtitle1' : 'h6'}
           gutterBottom
           textAlign="center"
           sx={{
-            fontWeight: 'bold',
-            color: earned ? achievement.color : 'text.primary'
+            fontWeight: 800,
+            color: earned ? (isDark ? achievement.color : 'text.primary') : 'text.disabled',
+            fontFamily: '"Orbitron", sans-serif',
+            letterSpacing: 0.5
           }}
         >
           {achievement.name}
@@ -135,34 +145,38 @@ export default function AchievementBadge({
             variant="body2"
             color="text.secondary"
             textAlign="center"
-            sx={{ mb: 2, minHeight: 40 }}
+            sx={{ mb: 2.5, minHeight: 40, lineHeight: 1.5, fontWeight: 500 }}
           >
             {achievement.description}
           </Typography>
         )}
 
         {/* Requirement */}
-        <Box sx={{ textAlign: 'center', mb: 2 }}>
+        <Box sx={{ textAlign: 'center', mb: 1 }}>
           <Chip
             label={achievement.requirement}
             size="small"
-            icon={<EmojiEvents />}
+            icon={<EmojiEvents sx={{ fontSize: '0.9rem !important' }} />}
             sx={{
-              bgcolor: earned ? alpha(achievement.color, 0.1) : 'action.hover',
-              color: earned ? achievement.color : 'text.secondary',
-              fontWeight: 500
+              bgcolor: isDark ? alpha(achievement.color, 0.1) : alpha(achievement.color, 0.05),
+              color: isDark ? achievement.color : alpha(achievement.color, 0.9),
+              fontWeight: 700,
+              fontSize: '0.65rem',
+              height: 22,
+              border: 1,
+              borderColor: alpha(achievement.color, 0.2)
             }}
           />
         </Box>
 
         {/* Progress Bar (for locked achievements) */}
         {isLocked && progress > 0 && (
-          <Box sx={{ mt: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-              <Typography variant="caption" color="text.secondary">
+          <Box sx={{ mt: 2.5 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.75 }}>
+              <Typography variant="caption" color="text.secondary" fontWeight={600}>
                 Progress
               </Typography>
-              <Typography variant="caption" fontWeight="bold">
+              <Typography variant="caption" fontWeight={800} color="primary.main">
                 {Math.round(progress)}%
               </Typography>
             </Box>
@@ -172,9 +186,10 @@ export default function AchievementBadge({
               sx={{
                 height: 6,
                 borderRadius: 3,
-                bgcolor: 'action.hover',
+                bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
                 '& .MuiLinearProgress-bar': {
-                  bgcolor: achievement.color
+                  bgcolor: achievement.color,
+                  borderRadius: 3
                 }
               }}
             />
@@ -189,9 +204,9 @@ export default function AchievementBadge({
               color="text.secondary"
               textAlign="center"
               display="block"
-              sx={{ mt: 1 }}
+              sx={{ mt: 1.5, fontWeight: 600, opacity: 0.8 }}
             >
-              Earned {formatDistanceToNow(new Date(earnedAt * 1000), { addSuffix: true })}
+              Unlocked {formatDistanceToNow(new Date(earnedAt * 1000), { addSuffix: true })}
             </Typography>
           </Tooltip>
         )}
@@ -203,7 +218,7 @@ export default function AchievementBadge({
               label="Ready to Mint!"
               color="success"
               size="small"
-              sx={{ fontWeight: 'bold' }}
+              sx={{ fontWeight: 800, fontSize: '0.65rem', animation: 'pulse 2s infinite' }}
             />
           </Box>
         )}
@@ -219,18 +234,21 @@ export function CompactAchievementBadge({
   earnedAt,
   onClick
 }: Pick<AchievementBadgeProps, 'achievement' | 'earned' | 'earnedAt' | 'onClick'>) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   return (
     <Tooltip
       title={
-        <Box>
-          <Typography variant="subtitle2" fontWeight="bold">
+        <Box sx={{ p: 0.5 }}>
+          <Typography variant="subtitle2" fontWeight={800} sx={{ fontFamily: '"Orbitron", sans-serif' }}>
             {achievement.name}
           </Typography>
-          <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
+          <Typography variant="caption" display="block" sx={{ mt: 0.5, fontWeight: 500 }}>
             {achievement.description}
           </Typography>
           {earned && earnedAt && (
-            <Typography variant="caption" display="block" sx={{ mt: 0.5, opacity: 0.8 }}>
+            <Typography variant="caption" display="block" sx={{ mt: 0.5, opacity: 0.8, fontWeight: 700 }}>
               Earned {formatDistanceToNow(new Date(earnedAt * 1000), { addSuffix: true })}
             </Typography>
           )}
@@ -241,22 +259,25 @@ export function CompactAchievementBadge({
       <Box
         onClick={onClick}
         sx={{
-          width: 60,
-          height: 60,
+          width: 52,
+          height: 52,
           borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: 32,
+          fontSize: 28,
           cursor: onClick ? 'pointer' : 'default',
-          border: earned ? `3px solid ${achievement.color}` : '3px solid transparent',
-          bgcolor: earned ? alpha(achievement.color, 0.1) : 'action.hover',
-          filter: earned ? 'none' : 'grayscale(100%)',
-          opacity: earned ? 1 : 0.5,
-          transition: 'all 0.3s ease',
+          border: 2,
+          borderColor: earned ? achievement.color : 'divider',
+          bgcolor: earned ? alpha(achievement.color, 0.1) : (isDark ? 'rgba(255,255,255,0.03)' : 'grey.50'),
+          filter: earned ? (isDark ? `drop-shadow(0 0 8px ${alpha(achievement.color, 0.4)})` : 'none') : 'grayscale(100%)',
+          opacity: earned ? 1 : 0.4,
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           '&:hover': onClick ? {
-            transform: 'scale(1.1)',
-            boxShadow: 3,
+            transform: 'scale(1.15) rotate(5deg)',
+            boxShadow: isDark ? `0 0 20px ${alpha(achievement.color, 0.3)}` : '0 4px 15px rgba(0,0,0,0.1)',
+            borderColor: achievement.color,
+            opacity: 1,
           } : {}
         }}
       >

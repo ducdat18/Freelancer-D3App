@@ -10,6 +10,8 @@ import {
   CircularProgress,
   Alert,
   Paper,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import LoadingSpinner from '../LoadingSpinner';
 import {
@@ -37,6 +39,9 @@ function truncateAddress(address: string): string {
 export default function JurorSelectionDisplay({ disputePda }: JurorSelectionDisplayProps) {
   const { publicKey } = useWallet();
   const { fetchJurorSelection } = useStakingDispute();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
 
   const [selectionData, setSelectionData] = useState<JurorSelectionData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -126,12 +131,12 @@ export default function JurorSelectionDisplay({ disputePda }: JurorSelectionDisp
   }
 
   if (error) {
-    return <Alert severity="error">{error}</Alert>;
+    return <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>;
   }
 
   if (!selectionData) {
     return (
-      <Alert severity="info">
+      <Alert severity="info" sx={{ mb: 2 }}>
         No juror selection found for this dispute. Jurors may not have been
         selected yet.
       </Alert>
@@ -154,10 +159,11 @@ export default function JurorSelectionDisplay({ disputePda }: JurorSelectionDisp
   return (
     <Paper
       sx={{
-        border: '1px solid',
+        border: 1,
         borderColor: 'divider',
         borderRadius: 2,
         overflow: 'hidden',
+        backgroundImage: 'none',
       }}
     >
       {/* Header */}
@@ -167,13 +173,13 @@ export default function JurorSelectionDisplay({ disputePda }: JurorSelectionDisp
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          bgcolor: 'rgba(0,255,195,0.05)',
-          borderBottom: '1px solid',
+          bgcolor: isDark ? 'rgba(0,255,195,0.05)' : 'rgba(5,150,105,0.05)',
+          borderBottom: 1,
           borderColor: 'divider',
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <HowToVote color="primary" />
+          <HowToVote sx={{ color: primaryMain }} />
           <Typography variant="subtitle1" fontWeight={700}>
             Selected Jurors
           </Typography>
@@ -182,6 +188,7 @@ export default function JurorSelectionDisplay({ disputePda }: JurorSelectionDisp
             size="small"
             color="primary"
             variant="outlined"
+            sx={{ fontWeight: 700, fontSize: '0.65rem', height: 20 }}
           />
         </Box>
 
@@ -192,6 +199,7 @@ export default function JurorSelectionDisplay({ disputePda }: JurorSelectionDisp
             color="success"
             size="small"
             icon={<CheckCircle />}
+            sx={{ fontWeight: 700 }}
           />
         ) : (
           <Chip
@@ -199,11 +207,12 @@ export default function JurorSelectionDisplay({ disputePda }: JurorSelectionDisp
             color="warning"
             size="small"
             icon={<HowToVote />}
+            sx={{ fontWeight: 700 }}
           />
         )}
       </Box>
 
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: 2.5 }}>
         {/* Voting Deadline Countdown */}
         {!selectionData.resolved && (
           <Box
@@ -212,15 +221,15 @@ export default function JurorSelectionDisplay({ disputePda }: JurorSelectionDisp
               alignItems: 'center',
               gap: 1.5,
               p: 1.5,
-              mb: 2,
+              mb: 3,
               borderRadius: 1.5,
               bgcolor: deadlinePassed
-                ? 'rgba(255,0,255,0.08)'
-                : 'rgba(224,77,1,0.08)',
-              border: '1px solid',
+                ? (isDark ? 'rgba(255,0,255,0.08)' : 'rgba(255,0,255,0.05)')
+                : (isDark ? 'rgba(224,77,1,0.08)' : 'rgba(224,77,1,0.05)'),
+              border: 1,
               borderColor: deadlinePassed
-                ? 'rgba(255,0,255,0.3)'
-                : 'rgba(224,77,1,0.3)',
+                ? (isDark ? 'rgba(255,0,255,0.3)' : 'rgba(255,0,255,0.2)')
+                : (isDark ? 'rgba(224,77,1,0.3)' : 'rgba(224,77,1,0.2)'),
             }}
           >
             <Timer
@@ -228,12 +237,12 @@ export default function JurorSelectionDisplay({ disputePda }: JurorSelectionDisp
               sx={{ color: deadlinePassed ? 'error.main' : 'warning.main' }}
             />
             <Box>
-              <Typography variant="caption" color="text.secondary">
-                Voting Deadline
+              <Typography variant="caption" color="text.secondary" fontWeight={700} sx={{ letterSpacing: 0.5 }}>
+                VOTING DEADLINE
               </Typography>
               <Typography
                 variant="body2"
-                fontWeight={700}
+                fontWeight={800}
                 sx={{
                   color: deadlinePassed ? 'error.main' : 'warning.main',
                   fontFamily: 'monospace',
@@ -246,12 +255,12 @@ export default function JurorSelectionDisplay({ disputePda }: JurorSelectionDisp
         )}
 
         {/* Quorum Progress */}
-        <Box sx={{ mb: 2 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography variant="caption" color="text.secondary">
-              Votes Cast
+        <Box sx={{ mb: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={700}>
+              VOTES CAST
             </Typography>
-            <Typography variant="caption" fontWeight={600}>
+            <Typography variant="caption" fontWeight={800} color="primary.main">
               {selectionData.votesCast} / {totalJurors}
             </Typography>
           </Box>
@@ -261,19 +270,21 @@ export default function JurorSelectionDisplay({ disputePda }: JurorSelectionDisp
             sx={{
               height: 10,
               borderRadius: 5,
-              bgcolor: 'rgba(255, 255, 255, 0.08)',
+              bgcolor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
+              border: 1,
+              borderColor: 'divider',
               '& .MuiLinearProgress-bar': {
                 borderRadius: 5,
                 background: selectionData.quorumMet
-                  ? 'linear-gradient(90deg, #00ffc3, #00ffc3)'
-                  : 'linear-gradient(90deg, #8084ee, #a5a8f3)',
+                  ? theme.palette.success.main
+                  : `linear-gradient(90deg, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
               },
             }}
           />
           {selectionData.quorumMet && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1 }}>
               <CheckCircle sx={{ fontSize: 14, color: 'success.main' }} />
-              <Typography variant="caption" color="success.main" fontWeight={600}>
+              <Typography variant="caption" color="success.main" fontWeight={700} sx={{ textTransform: 'uppercase' }}>
                 Quorum reached
               </Typography>
             </Box>
@@ -282,13 +293,16 @@ export default function JurorSelectionDisplay({ disputePda }: JurorSelectionDisp
 
         {/* Current user indicator */}
         {isCurrentUserSelected && (
-          <Alert severity="info" sx={{ mb: 2 }}>
+          <Alert severity="info" sx={{ mb: 3, fontWeight: 500 }}>
             You have been selected as a juror for this dispute.
           </Alert>
         )}
 
         {/* Juror List */}
         <List disablePadding>
+          <Typography variant="caption" color="text.secondary" fontWeight={700} sx={{ display: 'block', mb: 1, letterSpacing: 0.5 }}>
+            JUROR PANEL
+          </Typography>
           {selectionData.selectedJurors.map((juror, index) => {
             const jurorAddress = juror.toString();
             const isCurrentUser =
@@ -300,22 +314,22 @@ export default function JurorSelectionDisplay({ disputePda }: JurorSelectionDisp
                 sx={{
                   px: 1.5,
                   py: 1,
-                  mb: 0.5,
+                  mb: 1,
                   borderRadius: 1.5,
                   bgcolor: isCurrentUser
-                    ? 'rgba(0,255,195,0.1)'
-                    : 'rgba(255, 255, 255, 0.02)',
-                  border: '1px solid',
+                    ? (isDark ? 'rgba(0,255,195,0.1)' : 'rgba(5,150,105,0.08)')
+                    : (isDark ? 'rgba(255, 255, 255, 0.02)' : 'grey.50'),
+                  border: 1,
                   borderColor: isCurrentUser
-                    ? 'rgba(0,255,195,0.3)'
-                    : 'transparent',
+                    ? (isDark ? 'rgba(0,255,195,0.3)' : 'rgba(5,150,105,0.3)')
+                    : 'divider',
                 }}
               >
                 <Person
                   sx={{
                     fontSize: 20,
                     mr: 1.5,
-                    color: isCurrentUser ? 'primary.main' : 'text.secondary',
+                    color: isCurrentUser ? 'primary.main' : 'text.disabled',
                   }}
                 />
                 <ListItemText
@@ -324,19 +338,24 @@ export default function JurorSelectionDisplay({ disputePda }: JurorSelectionDisp
                       <Typography
                         variant="body2"
                         fontFamily="monospace"
-                        fontWeight={isCurrentUser ? 700 : 400}
+                        fontWeight={isCurrentUser ? 800 : 600}
                         sx={{
                           color: isCurrentUser ? 'primary.main' : 'text.primary',
+                          fontSize: '0.8rem',
                         }}
                       >
                         {truncateAddress(jurorAddress)}
                       </Typography>
                       {isCurrentUser && (
-                        <Chip label="You" size="small" color="primary" />
+                        <Chip label="You" size="small" color="primary" sx={{ height: 18, fontSize: '0.6rem', fontWeight: 800 }} />
                       )}
                     </Box>
                   }
-                  secondary={`Juror #${index + 1}`}
+                  secondary={
+                    <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                      Juror #{index + 1}
+                    </Typography>
+                  }
                 />
               </ListItem>
             );

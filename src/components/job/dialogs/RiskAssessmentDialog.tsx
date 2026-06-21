@@ -12,6 +12,8 @@ import {
   DialogActions,
   IconButton,
   Alert,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import {
   CheckCircle,
@@ -62,6 +64,11 @@ export default function RiskAssessmentDialog({
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
+  
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+  const secondaryMain = theme.palette.secondary.main;
 
   const handleSendChat = async (overrideMsg?: string) => {
     const text = (overrideMsg ?? chatInput).trim();
@@ -109,114 +116,122 @@ export default function RiskAssessmentDialog({
       onClose={handleClose}
       maxWidth="sm"
       fullWidth
-      PaperProps={{ sx: { backgroundImage: 'none', bgcolor: '#0d0f14', border: '1px solid rgba(128,132,238,0.2)' } }}
+      PaperProps={{ 
+        sx: { 
+          backgroundImage: 'none', 
+          bgcolor: 'background.paper', 
+          border: 1, 
+          borderColor: isDark ? alpha(secondaryMain, 0.2) : 'divider' 
+        } 
+      }}
     >
-      {/* Glowing top bar */}
-      <Box sx={{ height: 3, background: 'linear-gradient(90deg, transparent, #8084ee, #00ffc3, transparent)' }} />
+      {/* Dynamic top bar */}
+      <Box sx={{ height: 3, background: `linear-gradient(90deg, transparent, ${secondaryMain}, ${primaryMain}, transparent)` }} />
 
-      <DialogTitle sx={{ pb: 1 }}>
+      <DialogTitle sx={{ pb: 1.5, pt: 2.5 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Psychology sx={{ color: '#8084ee', fontSize: 22 }} />
+            <Psychology sx={{ color: secondaryMain, fontSize: 24 }} />
             <Box>
-              <Typography sx={{ fontFamily: '"Orbitron",sans-serif', fontWeight: 700, fontSize: '1rem', letterSpacing: '0.05em', color: '#fff' }}>
+              <Typography sx={{ fontFamily: '"Orbitron",sans-serif', fontWeight: 800, fontSize: '1rem', letterSpacing: '0.05em', color: 'text.primary' }}>
                 AI RISK ASSESSMENT
               </Typography>
               {riskDialogBid && (
-                <Typography sx={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)', fontFamily: 'monospace', mt: 0.25 }}>
-                  &gt; evaluating {formatAddress(riskDialogBid.account.freelancer)}
+                <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', fontFamily: 'monospace', mt: 0.25, fontWeight: 600 }}>
+                  &gt; EVALUATING: {formatAddress(riskDialogBid.account.freelancer)}
                 </Typography>
               )}
             </Box>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {riskCached && riskResult && !riskLoading && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                <Box sx={{ px: 1, py: 0.35, borderRadius: 1, bgcolor: 'rgba(0,255,195,0.08)', border: '1px solid rgba(0,255,195,0.2)' }}>
-                  <Typography sx={{ fontSize: '0.62rem', color: '#00ffc3', fontFamily: 'monospace', letterSpacing: '0.06em' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ px: 1, py: 0.35, borderRadius: 1, bgcolor: isDark ? alpha(primaryMain, 0.08) : alpha(primaryMain, 0.05), border: 1, borderColor: alpha(primaryMain, 0.3) }}>
+                  <Typography sx={{ fontSize: '0.6rem', color: 'primary.main', fontFamily: 'monospace', letterSpacing: '0.06em', fontWeight: 800 }}>
                     CACHED
                   </Typography>
                 </Box>
                 <Button
                   size="small"
                   onClick={onRerun}
-                  sx={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', minWidth: 0, px: 1, py: 0.5, '&:hover': { color: '#fff', bgcolor: 'rgba(255,255,255,0.06)' } }}
+                  sx={{ fontSize: '0.7rem', color: 'text.secondary', minWidth: 0, px: 1, py: 0.5, fontWeight: 700, '&:hover': { color: 'primary.main' } }}
                 >
-                  Re-run
+                  RE-RUN
                 </Button>
               </Box>
             )}
-            <IconButton onClick={handleClose} disabled={riskLoading} size="small" sx={{ color: 'rgba(255,255,255,0.4)', '&:hover': { color: '#fff' } }}>
+            <IconButton onClick={handleClose} disabled={riskLoading} size="small" sx={{ color: 'text.disabled', '&:hover': { color: 'text.primary' } }}>
               <Close fontSize="small" />
             </IconButton>
           </Box>
         </Box>
       </DialogTitle>
 
-      <DialogContent sx={{ pt: 0.5, pb: 2 }}>
+      <DialogContent sx={{ pt: 1, pb: 3 }}>
         {riskLoading && (
-          <Box sx={{ textAlign: 'center', py: 5 }}>
-            <CircularProgress sx={{ color: '#8084ee', mb: 2 }} size={40} />
-            <Typography sx={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', fontFamily: 'monospace', mb: 1 }}>
-              &gt; Analyzing CV, budget &amp; timeline…
+          <Box sx={{ textAlign: 'center', py: 6 }}>
+            <CircularProgress sx={{ color: secondaryMain, mb: 3 }} size={44} />
+            <Typography sx={{ fontSize: '0.85rem', color: 'text.secondary', fontFamily: 'monospace', mb: 2, fontWeight: 600 }}>
+              &gt; Analyzing contractor profile &amp; history...
             </Typography>
-            <LinearProgress sx={{ maxWidth: 280, mx: 'auto', borderRadius: 1, bgcolor: 'rgba(128,132,238,0.1)', '& .MuiLinearProgress-bar': { bgcolor: '#8084ee' } }} />
+            <LinearProgress sx={{ maxWidth: 300, mx: 'auto', borderRadius: 1, height: 6 }} />
           </Box>
         )}
 
         {riskError && !riskLoading && (
-          <Alert severity="error" sx={{ mt: 1 }}>{riskError}</Alert>
+          <Alert severity="error" sx={{ mt: 1, fontWeight: 500 }}>{riskError}</Alert>
         )}
 
         {riskResult && !riskLoading && (() => {
           const rl = riskResult.riskLevel as 'LOW' | 'MEDIUM' | 'HIGH';
           const riskCfg = {
-            LOW:    { color: '#4caf50', bg: 'rgba(76,175,80,0.1)',   border: 'rgba(76,175,80,0.35)',  label: 'LOW RISK',  glow: '#4caf5040' },
-            MEDIUM: { color: '#ff9800', bg: 'rgba(255,152,0,0.1)',   border: 'rgba(255,152,0,0.35)',  label: 'MED RISK',  glow: '#ff980040' },
-            HIGH:   { color: '#f44336', bg: 'rgba(244,67,54,0.1)',   border: 'rgba(244,67,54,0.35)',  label: 'HIGH RISK', glow: '#f4433640' },
-          }[rl] ?? { color: '#ff9800', bg: 'rgba(255,152,0,0.1)', border: 'rgba(255,152,0,0.35)', label: 'UNKNOWN', glow: '#ff980040' };
+            LOW:    { color: theme.palette.success.main, bg: isDark ? alpha(theme.palette.success.main, 0.1) : alpha(theme.palette.success.main, 0.05), border: alpha(theme.palette.success.main, 0.35), label: 'LOW RISK' },
+            MEDIUM: { color: theme.palette.warning.main, bg: isDark ? alpha(theme.palette.warning.main, 0.1) : alpha(theme.palette.warning.main, 0.05), border: alpha(theme.palette.warning.main, 0.35), label: 'MED RISK' },
+            HIGH:   { color: theme.palette.error.main,   bg: isDark ? alpha(theme.palette.error.main, 0.1) : alpha(theme.palette.error.main, 0.05), border: alpha(theme.palette.error.main, 0.35), label: 'HIGH RISK' },
+          }[rl] ?? { color: theme.palette.warning.main, bg: alpha(theme.palette.warning.main, 0.1), border: alpha(theme.palette.warning.main, 0.35), label: 'UNKNOWN' };
 
           const GAUGES = [
-            { value: riskResult.matchScore,        label: 'JOB MATCH' },
-            { value: riskResult.authenticityScore, label: 'CV QUALITY' },
+            { value: riskResult.matchScore,        label: 'MATCH' },
+            { value: riskResult.authenticityScore, label: 'QUALITY' },
             { value: riskResult.budgetScore,       label: 'BUDGET' },
             { value: riskResult.timelineScore,     label: 'TIMELINE' },
           ];
 
           const GROUPS: Array<{ key: string; label: string; icon: React.ReactNode }> = [
-            { key: 'skills',      label: 'Skills & Experience', icon: <Code sx={{ fontSize: 15 }} /> },
-            { key: 'budget',      label: 'Budget Analysis',     icon: <AccountBalance sx={{ fontSize: 15 }} /> },
-            { key: 'timeline',    label: 'Timeline',            icon: <Schedule sx={{ fontSize: 15 }} /> },
-            { key: 'proposal',    label: 'Proposal Quality',    icon: <Article sx={{ fontSize: 15 }} /> },
-            { key: 'credibility', label: 'Credibility',         icon: <FactCheck sx={{ fontSize: 15 }} /> },
+            { key: 'skills',      label: 'Skills & Profile', icon: <Code sx={{ fontSize: 16 }} /> },
+            { key: 'budget',      label: 'Budget Suitability', icon: <AccountBalance sx={{ fontSize: 16 }} /> },
+            { key: 'timeline',    label: 'Timeline Realism', icon: <Schedule sx={{ fontSize: 16 }} /> },
+            { key: 'proposal',    label: 'Proposal Analysis', icon: <Article sx={{ fontSize: 16 }} /> },
+            { key: 'credibility', label: 'Reputation', icon: <FactCheck sx={{ fontSize: 16 }} /> },
           ];
+          
           type Finding = { type: string; category?: string; text: string };
           const findings: Finding[] = riskResult.findings || [];
           const grouped = GROUPS.map(g => ({ ...g, items: findings.filter(f => f.category === g.key) })).filter(g => g.items.length > 0);
           const uncategorised = findings.filter(f => !f.category || !GROUPS.find(g => g.key === f.category));
 
           const FINDING_STYLE = {
-            positive: { leftBar: '#4caf50', bg: 'rgba(76,175,80,0.06)',  icon: <CheckCircle sx={{ fontSize: 15, color: '#4caf50', flexShrink: 0, mt: '3px' }} /> },
-            warning:  { leftBar: '#ff9800', bg: 'rgba(255,152,0,0.06)',  icon: <Warning    sx={{ fontSize: 15, color: '#ff9800', flexShrink: 0, mt: '3px' }} /> },
-            danger:   { leftBar: '#f44336', bg: 'rgba(244,67,54,0.06)', icon: <Cancel     sx={{ fontSize: 15, color: '#f44336', flexShrink: 0, mt: '3px' }} /> },
+            positive: { color: theme.palette.success.main, bg: isDark ? alpha(theme.palette.success.main, 0.08) : alpha(theme.palette.success.main, 0.05), icon: <CheckCircle sx={{ fontSize: 16, color: 'success.main', mt: '2px' }} /> },
+            warning:  { color: theme.palette.warning.main, bg: isDark ? alpha(theme.palette.warning.main, 0.08) : alpha(theme.palette.warning.main, 0.05), icon: <Warning    sx={{ fontSize: 16, color: 'warning.main', mt: '2px' }} /> },
+            danger:   { color: theme.palette.error.main,   bg: isDark ? alpha(theme.palette.error.main, 0.08) : alpha(theme.palette.error.main, 0.05), icon: <Cancel     sx={{ fontSize: 16, color: 'error.main', mt: '2px' }} /> },
           } as const;
 
           const SectionLabel = ({ children, icon }: { children: string; icon?: React.ReactNode }) => (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              {icon && <Box sx={{ display: 'flex', alignItems: 'center', color: '#8084ee', fontSize: 15 }}>{icon}</Box>}
-              <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, color: '#8084ee', letterSpacing: '0.12em', fontFamily: '"Orbitron",sans-serif', whiteSpace: 'nowrap' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, mt: 1 }}>
+              {icon && <Box sx={{ display: 'flex', alignItems: 'center', color: secondaryMain }}>{icon}</Box>}
+              <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, color: secondaryMain, letterSpacing: '0.1em', fontFamily: '"Orbitron",sans-serif' }}>
                 {children}
               </Typography>
-              <Box sx={{ flex: 1, height: '1px', bgcolor: 'rgba(128,132,238,0.2)' }} />
+              <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider', ml: 1 }} />
             </Box>
           );
 
           const FindingItem = ({ f }: { f: Finding }) => {
             const s = FINDING_STYLE[f.type as keyof typeof FINDING_STYLE] ?? FINDING_STYLE.warning;
             return (
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.25, p: '10px 14px', borderRadius: 1, bgcolor: s.bg, borderLeft: `3px solid ${s.leftBar}`, mb: 0.75 }}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, p: 1.5, borderRadius: 1.5, bgcolor: s.bg, borderLeft: 4, borderColor: s.color, mb: 1, border: 1, borderLeftWidth: 4, borderLeftColor: s.color, borderRightColor: 'divider', borderTopColor: 'divider', borderBottomColor: 'divider' }}>
                 {s.icon}
-                <Typography sx={{ fontSize: '0.875rem', lineHeight: 1.65, color: 'rgba(255,255,255,0.82)' }}>
+                <Typography sx={{ fontSize: '0.85rem', lineHeight: 1.6, color: 'text.primary', fontWeight: 500 }}>
                   {f.text}
                 </Typography>
               </Box>
@@ -224,115 +239,111 @@ export default function RiskAssessmentDialog({
           };
 
           return (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
 
-              {/* ── Score gauges ───────────────────────────────────── */}
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, p: 2, borderRadius: 1.5, bgcolor: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              {/* ── Score gauges row ───────────────────────────────── */}
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, p: 2.5, borderRadius: 2, bgcolor: isDark ? alpha(primaryMain, 0.03) : 'grey.50', border: 1, borderColor: 'divider' }}>
                 <Box sx={{ display: 'flex', gap: 2.5, flexWrap: 'wrap' }}>
                   {GAUGES.map(({ value, label }) => {
                     const v = value ?? 50;
-                    const c = v >= 70 ? '#4caf50' : v >= 40 ? '#ff9800' : '#f44336';
+                    const c = v >= 70 ? theme.palette.success.main : v >= 40 ? theme.palette.warning.main : theme.palette.error.main;
                     return (
                       <Box key={label} sx={{ textAlign: 'center' }}>
                         <Box sx={{ position: 'relative', display: 'inline-flex', mb: 0.5 }}>
-                          <CircularProgress variant="determinate" value={100} size={62} thickness={4}
-                            sx={{ color: 'rgba(255,255,255,0.05)', position: 'absolute' }} />
-                          <CircularProgress variant="determinate" value={v} size={62} thickness={4}
-                            sx={{ color: c, filter: `drop-shadow(0 0 4px ${c}88)` }} />
+                          <CircularProgress variant="determinate" value={100} size={56} thickness={4}
+                            sx={{ color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', position: 'absolute' }} />
+                          <CircularProgress variant="determinate" value={v} size={56} thickness={4}
+                            sx={{ color: c }} />
                           <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Typography sx={{ fontFamily: '"Orbitron",sans-serif', fontWeight: 800, fontSize: '0.9rem', color: c, lineHeight: 1 }}>
+                            <Typography sx={{ fontFamily: '"Orbitron",sans-serif', fontWeight: 800, fontSize: '0.85rem', color: c, lineHeight: 1 }}>
                               {v}
                             </Typography>
                           </Box>
                         </Box>
-                        <Typography sx={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', fontWeight: 600 }}>
+                        <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', letterSpacing: 0.5, fontWeight: 700 }}>
                           {label}
                         </Typography>
                       </Box>
                     );
                   })}
                 </Box>
+                
                 {/* Risk badge */}
                 <Box sx={{ textAlign: 'center' }}>
-                  <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, px: 1.5, py: 0.75, border: `1px solid ${riskCfg.border}`, borderRadius: 1, bgcolor: riskCfg.bg, mb: 0.5, boxShadow: `0 0 12px ${riskCfg.glow}` }}>
-                    <Shield sx={{ fontSize: 15, color: riskCfg.color }} />
-                    <Typography sx={{ fontFamily: '"Orbitron",sans-serif', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', color: riskCfg.color }}>
+                  <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, px: 2, py: 1, border: 1, borderColor: riskCfg.border, borderRadius: 1.5, bgcolor: riskCfg.bg, mb: 0.5 }}>
+                    <Shield sx={{ fontSize: 16, color: riskCfg.color }} />
+                    <Typography sx={{ fontFamily: '"Orbitron",sans-serif', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.05em', color: riskCfg.color }}>
                       {riskCfg.label}
                     </Typography>
                   </Box>
-                  <Typography sx={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', display: 'block', fontFamily: 'monospace' }}>
-                    score {riskResult.riskScore}/100
+                  <Typography sx={{ fontSize: '0.65rem', color: 'text.disabled', fontFamily: 'monospace', fontWeight: 700 }}>
+                    SCORE: {riskResult.riskScore}/100
                   </Typography>
                 </Box>
               </Box>
 
               {/* ── Summary ────────────────────────────────────────── */}
               <Box>
-                <SectionLabel icon={<Summarize sx={{ fontSize: 15 }} />}>SUMMARY</SectionLabel>
-                <Box sx={{ p: '12px 16px', borderRadius: 1, bgcolor: 'rgba(128,132,238,0.07)', borderLeft: '3px solid rgba(128,132,238,0.5)' }}>
-                  <Typography sx={{ fontSize: '0.9rem', lineHeight: 1.75, color: 'rgba(255,255,255,0.8)' }}>
+                <SectionLabel icon={<Summarize sx={{ fontSize: 16 }} />}>ANALYSIS SUMMARY</SectionLabel>
+                <Box sx={{ p: 2, borderRadius: 1.5, bgcolor: isDark ? alpha(secondaryMain, 0.06) : 'grey.50', border: 1, borderColor: 'divider' }}>
+                  <Typography sx={{ fontSize: '0.9rem', lineHeight: 1.7, color: 'text.primary', fontWeight: 500 }}>
                     {riskResult.summary}
                   </Typography>
                 </Box>
               </Box>
 
-              {/* ── Grouped findings ───────────────────────────────── */}
-              {(grouped.length > 0 ? grouped : [{ key: '_', label: 'Analysis', icon: <Psychology sx={{ fontSize: 15 }} />, items: uncategorised }]).map(group => (
+              {/* ── Findings ───────────────────────────────────────── */}
+              {(grouped.length > 0 ? grouped : [{ key: '_', label: 'Detailed Findings', icon: <Psychology sx={{ fontSize: 16 }} />, items: uncategorised }]).map(group => (
                 <Box key={group.key}>
                   <SectionLabel icon={group.icon}>{group.label.toUpperCase()}</SectionLabel>
                   {group.items.map((f, i) => <FindingItem key={i} f={f} />)}
                 </Box>
               ))}
-              {uncategorised.length > 0 && grouped.length > 0 && (
-                <Box>
-                  {uncategorised.map((f, i) => <FindingItem key={i} f={f} />)}
-                </Box>
-              )}
 
               {/* ── Recommendation ─────────────────────────────────── */}
               <Box>
-                <SectionLabel icon={<Lightbulb sx={{ fontSize: 15 }} />}>RECOMMENDATION</SectionLabel>
-                <Box sx={{ p: '12px 16px', borderRadius: 1, bgcolor: `${riskCfg.color}0f`, borderLeft: `3px solid ${riskCfg.color}` }}>
-                  <Typography sx={{ fontSize: '0.9rem', lineHeight: 1.75, color: 'rgba(255,255,255,0.85)' }}>
+                <SectionLabel icon={<Lightbulb sx={{ fontSize: 16 }} />}>RECRUITMENT ADVICE</SectionLabel>
+                <Box sx={{ p: 2, borderRadius: 1.5, bgcolor: alpha(riskCfg.color, 0.05), border: 1, borderColor: alpha(riskCfg.color, 0.3), borderLeftWidth: 4, borderLeftColor: riskCfg.color }}>
+                  <Typography sx={{ fontSize: '0.9rem', lineHeight: 1.7, color: 'text.primary', fontWeight: 700 }}>
                     {riskResult.recommendation}
                   </Typography>
                 </Box>
               </Box>
 
-              {/* ── Ask AI chat ─────────────────────────────────────── */}
-              <Box sx={{ borderRadius: 1.5, border: '1px solid rgba(128,132,238,0.25)', overflow: 'hidden' }}>
+              {/* ── AI Follow-up Chat ───────────────────────────────── */}
+              <Box sx={{ borderRadius: 2, border: 1, borderColor: alpha(secondaryMain, 0.25), overflow: 'hidden', backgroundImage: 'none', bgcolor: isDark ? 'rgba(0,0,0,0.2)' : 'grey.50' }}>
                 <Box
                   onClick={() => setChatOpen(o => !o)}
-                  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 1.25, bgcolor: 'rgba(128,132,238,0.08)', cursor: 'pointer', userSelect: 'none', '&:hover': { bgcolor: 'rgba(128,132,238,0.13)' }, transition: 'background 0.15s' }}
+                  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, py: 1.5, bgcolor: alpha(secondaryMain, 0.08), cursor: 'pointer', '&:hover': { bgcolor: alpha(secondaryMain, 0.12) }, transition: 'all 0.2s' }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Chat sx={{ fontSize: 16, color: '#8084ee' }} />
-                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#8084ee', fontFamily: '"Orbitron",sans-serif', letterSpacing: '0.06em' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Chat sx={{ fontSize: 18, color: secondaryMain }} />
+                    <Typography sx={{ fontSize: '0.85rem', fontWeight: 800, color: secondaryMain, fontFamily: '"Orbitron",sans-serif', letterSpacing: 0.5 }}>
                       ASK AI FOLLOW-UP
                     </Typography>
                   </Box>
-                  <Typography sx={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)' }}>{chatOpen ? '▲' : '▼'}</Typography>
+                  <Typography sx={{ fontSize: '0.8rem', color: secondaryMain }}>{chatOpen ? '▲' : '▼'}</Typography>
                 </Box>
 
                 {chatOpen && (
-                  <Box sx={{ p: 2, bgcolor: 'rgba(0,0,0,0.25)', display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                    {/* Quick chips */}
-                    <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+                  <Box sx={{ p: 2.5, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    {/* Quick Questions */}
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                       {[
-                        'What should I verify before hiring?',
-                        'Suggest 3 interview questions',
-                        'Is the timeline realistic?',
-                        'Should I negotiate the budget?',
+                        'Is this budget realistic?',
+                        'Verify technical skills',
+                        'Check delivery timeline',
                       ].map(q => (
                         <Box
                           key={q}
                           onClick={() => handleSendChat(q)}
                           sx={{
-                            px: 1.25, py: 0.5, borderRadius: 10, fontSize: '0.75rem', cursor: 'pointer',
-                            border: '1px solid rgba(128,132,238,0.35)', color: '#8084ee',
-                            bgcolor: 'rgba(128,132,238,0.07)',
-                            '&:hover': { bgcolor: 'rgba(128,132,238,0.16)', borderColor: '#8084ee' },
-                            transition: 'all 0.15s',
+                            px: 1.5, py: 0.6, borderRadius: 10, fontSize: '0.75rem', cursor: 'pointer',
+                            border: 1, borderColor: alpha(secondaryMain, 0.3), color: secondaryMain,
+                            bgcolor: isDark ? alpha(secondaryMain, 0.05) : '#fff',
+                            fontWeight: 700,
+                            '&:hover': { bgcolor: alpha(secondaryMain, 0.1), borderColor: secondaryMain },
+                            transition: 'all 0.2s',
                           }}
                         >
                           {q}
@@ -340,56 +351,55 @@ export default function RiskAssessmentDialog({
                       ))}
                     </Box>
 
-                    {/* Messages */}
+                    {/* Messages Area */}
                     {chatMessages.length > 0 && (
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, maxHeight: 260, overflowY: 'auto', pr: 0.5 }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, maxHeight: 300, overflowY: 'auto', px: 0.5, py: 1 }}>
                         {chatMessages.map((m, i) => (
                           <Box key={i} sx={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
                             <Box sx={{
-                              maxWidth: '88%', px: 1.5, py: 1, borderRadius: m.role === 'user' ? '14px 14px 3px 14px' : '14px 14px 14px 3px',
-                              bgcolor: m.role === 'user' ? 'rgba(0,255,195,0.1)' : 'rgba(128,132,238,0.1)',
-                              border: m.role === 'user' ? '1px solid rgba(0,255,195,0.25)' : '1px solid rgba(128,132,238,0.25)',
+                              maxWidth: '90%', px: 2, py: 1.25, borderRadius: 2,
+                              bgcolor: m.role === 'user' ? alpha(primaryMain, 0.1) : (isDark ? 'background.paper' : '#fff'),
+                              border: 1, borderColor: m.role === 'user' ? alpha(primaryMain, 0.3) : 'divider',
+                              boxShadow: isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.05)',
                             }}>
-                              <Typography sx={{ fontSize: '0.85rem', lineHeight: 1.65, color: m.role === 'user' ? '#00ffc3' : 'rgba(255,255,255,0.8)', whiteSpace: 'pre-wrap' }}>
+                              <Typography sx={{ fontSize: '0.875rem', lineHeight: 1.6, color: m.role === 'user' ? 'primary.main' : 'text.primary', fontWeight: 500 }}>
                                 {m.content}
                               </Typography>
                             </Box>
                           </Box>
                         ))}
                         {chatLoading && (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 0.5 }}>
-                            <CircularProgress size={14} sx={{ color: '#8084ee' }} />
-                            <Typography sx={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', fontFamily: 'monospace' }}>thinking…</Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 1 }}>
+                            <CircularProgress size={16} sx={{ color: secondaryMain }} />
+                            <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', fontWeight: 600 }}>Gemini is thinking...</Typography>
                           </Box>
                         )}
                       </Box>
                     )}
 
-                    {/* Input row */}
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                    {/* Chat Input */}
+                    <Box sx={{ display: 'flex', gap: 1.5, mt: 1 }}>
                       <Box
                         component="input"
                         value={chatInput}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setChatInput(e.target.value)}
                         onKeyDown={(e: React.KeyboardEvent) => e.key === 'Enter' && !e.shiftKey && handleSendChat()}
-                        placeholder="Ask anything about this bid…"
+                        placeholder="Ask a question about this bid..."
                         disabled={chatLoading}
                         sx={{
-                          flex: 1, px: 1.5, py: 1, borderRadius: 1, fontSize: '0.875rem',
-                          bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-                          color: '#fff', outline: 'none', fontFamily: 'inherit',
-                          '&:focus': { borderColor: 'rgba(128,132,238,0.5)', boxShadow: '0 0 0 2px rgba(128,132,238,0.1)' },
-                          '&::placeholder': { color: 'rgba(255,255,255,0.25)' },
-                          transition: 'border-color 0.15s, box-shadow 0.15s',
+                          flex: 1, px: 2, py: 1.25, borderRadius: 1.5, fontSize: '0.9rem',
+                          bgcolor: isDark ? 'rgba(255,255,255,0.03)' : '#fff', border: 1, borderColor: 'divider',
+                          color: 'text.primary', outline: 'none', fontFamily: 'inherit',
+                          '&:focus': { borderColor: secondaryMain, boxShadow: `0 0 0 2px ${alpha(secondaryMain, 0.1)}` },
                         }}
                       />
                       <Button
-                        size="small"
+                        variant="contained"
                         onClick={() => handleSendChat()}
                         disabled={!chatInput.trim() || chatLoading}
-                        sx={{ minWidth: 0, px: 2, py: 1, bgcolor: 'rgba(128,132,238,0.15)', color: '#8084ee', border: '1px solid rgba(128,132,238,0.35)', borderRadius: 1, fontSize: '1rem', fontWeight: 700, '&:hover': { bgcolor: 'rgba(128,132,238,0.28)', borderColor: '#8084ee' }, '&:disabled': { opacity: 0.35 }, transition: 'all 0.15s' }}
+                        sx={{ minWidth: 50, borderRadius: 1.5, bgcolor: secondaryMain }}
                       >
-                        →
+                        SEND
                       </Button>
                     </Box>
                   </Box>
@@ -400,8 +410,10 @@ export default function RiskAssessmentDialog({
           );
         })()}
       </DialogContent>
-      <DialogActions sx={{ p: 2 }}>
-        <Button onClick={handleClose} disabled={riskLoading}>Close</Button>
+      <DialogActions sx={{ p: 2.5, borderTop: 1, borderColor: 'divider' }}>
+        <Button onClick={handleClose} disabled={riskLoading} variant="outlined" sx={{ fontWeight: 700, px: 4 }}>
+          CLOSE
+        </Button>
       </DialogActions>
     </Dialog>
   );

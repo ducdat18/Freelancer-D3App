@@ -1,12 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container, Typography, Box, Grid, TextField, InputAdornment,
   Alert, Card, CardContent, Button, Chip, FormControl, InputLabel,
-  Select, MenuItem, Stack, Pagination,
+  Select, MenuItem, Stack, Pagination, useTheme, alpha,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
+import AppsIcon from '@mui/icons-material/Apps';
+import CodeIcon from '@mui/icons-material/Code';
+import BrushIcon from '@mui/icons-material/Brush';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import ArticleIcon from '@mui/icons-material/Article';
+import SecurityIcon from '@mui/icons-material/Security';
 import { useRouter } from 'next/router';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { motion } from 'framer-motion';
@@ -17,14 +23,21 @@ import { lamportsToSol, bnToNumber, formatSol } from '../../src/types/solana';
 import { SolanaIconSimple } from '../../src/components/SolanaIcon';
 import { JOB_STATUS } from '../../src/config/constants';
 import { staggerContainer, staggerChild } from '../../src/utils/animations';
+import { DEMO_JOBS } from '../../src/data/demoJobs';
+import { fetchFromIPFS } from '../../src/services/ipfs';
 
 const MotionBox = motion.create(Box);
 const MotionCard = motion.create(Card);
 
 export default function Jobs() {
   const router = useRouter();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+
   const [searchTerm, setSearchTerm] = useState('');
   const [budgetFilter, setBudgetFilter] = useState<string>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('newest');
   const [page, setPage] = useState(1);
   const { connected } = useWallet();
@@ -32,7 +45,51 @@ export default function Jobs() {
   const itemsPerPage = 9;
   const { jobs, loading, error } = useJobs({ autoFetch: true });
 
-  const filteredJobs = jobs
+  // Cache of jobPda -> category fetched from IPFS metadata
+  const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (jobs.length === 0) return;
+
+    // Fetch IPFS metadata for chain jobs to extract category.
+    // Run in parallel, ignore failures per-job.
+    const uncached = jobs.filter(j => {
+      const key = j.publicKey.toBase58();
+      return !(key in categoryMap) && j.account.metadataUri;
+    });
+
+    if (uncached.length === 0) return;
+
+    Promise.allSettled(
+      uncached.map(async j => {
+        const meta = await fetchFromIPFS(j.account.metadataUri);
+        return { key: j.publicKey.toBase58(), category: (meta as any)?.category ?? '' };
+      })
+    ).then(results => {
+      const updates: Record<string, string> = {};
+      for (const r of results) {
+        if (r.status === 'fulfilled') updates[r.value.key] = r.value.category;
+      }
+      if (Object.keys(updates).length > 0) {
+        setCategoryMap(prev => ({ ...prev, ...updates }));
+      }
+    });
+  }, [jobs]);
+
+  // Merge real chain jobs with demo jobs (real jobs take priority)
+  const chainKeys = new Set(jobs.map(j => j.publicKey.toBase58()));
+  const allJobs = [
+    ...jobs.map(j => ({
+      ...j,
+      isDemo: false as const,
+      tags: [] as string[],
+      // Use IPFS-fetched category if available
+      category: categoryMap[j.publicKey.toBase58()] ?? '',
+    })),
+    ...DEMO_JOBS.filter(d => !chainKeys.has(d.publicKey.toBase58())),
+  ];
+
+  const filteredJobs = allJobs
     .filter((job) => {
       const status = typeof job.account.status === 'object'
         ? Object.keys(job.account.status)[0]
@@ -56,6 +113,9 @@ export default function Jobs() {
         if (budgetFilter === 'medium' && (budgetSol < 1 || budgetSol >= 5)) return false;
         if (budgetFilter === 'high' && budgetSol < 5) return false;
       }
+      if (categoryFilter !== 'all' && job.category) {
+        if (job.category !== categoryFilter) return false;
+      }
       return true;
     })
     .sort((a, b) => {
@@ -77,14 +137,27 @@ export default function Jobs() {
   const handleSearchChange = (value: string) => { setSearchTerm(value); setPage(1); };
   const handleBudgetChange = (value: string) => { setBudgetFilter(value); setPage(1); };
   const handleSortChange = (value: string) => { setSortBy(value); setPage(1); };
+  const handleCategoryChange = (value: string) => { setCategoryFilter(value); setPage(1); };
+
+  const CATEGORIES = [
+    { value: 'all',         label: 'All Categories', Icon: AppsIcon },
+    { value: 'development', label: 'Development',    Icon: CodeIcon },
+    { value: 'design',      label: 'Design',         Icon: BrushIcon },
+    { value: 'marketing',   label: 'Marketing',      Icon: CampaignIcon },
+    { value: 'writing',     label: 'Writing',        Icon: ArticleIcon },
+    { value: 'security',    label: 'Security',       Icon: SecurityIcon },
+  ];
 
   return (
     <Layout>
       {/* Page Header */}
       <Box
         sx={{
-          borderBottom: '1px solid rgba(0,255,195,0.08)',
-          background: 'linear-gradient(180deg, rgba(0,255,195,0.03) 0%, transparent 100%)',
+          borderBottom: 1,
+          borderColor: 'divider',
+          background: isDark 
+            ? 'linear-gradient(180deg, rgba(0,255,195,0.03) 0%, transparent 100%)'
+            : `linear-gradient(180deg, ${primaryMain}08 0%, transparent 100%)`,
           px: { xs: 2, md: 4 },
           py: { xs: 4, md: 5 },
         }}
@@ -100,9 +173,9 @@ export default function Jobs() {
                   fontFamily: '"Orbitron", monospace',
                   fontSize: '0.6rem',
                   letterSpacing: 2,
-                  color: '#00ffc3',
-                  borderColor: 'rgba(0,255,195,0.25)',
-                  bgcolor: 'rgba(0,255,195,0.04)',
+                  color: primaryMain,
+                  borderColor: isDark ? 'rgba(0,255,195,0.25)' : `${primaryMain}40`,
+                  bgcolor: isDark ? 'rgba(0,255,195,0.04)' : `${primaryMain}08`,
                   mb: 1.5,
                 }}
               />
@@ -110,7 +183,9 @@ export default function Jobs() {
                 variant="h3"
                 fontWeight={700}
                 sx={{
-                  background: 'linear-gradient(135deg, #fff 20%, #00ffc3 100%)',
+                  background: isDark 
+                    ? `linear-gradient(135deg, #fff 20%, ${primaryMain} 100%)`
+                    : `linear-gradient(135deg, ${theme.palette.text.primary} 20%, ${primaryMain} 100%)`,
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   mb: 0.5,
@@ -127,16 +202,17 @@ export default function Jobs() {
                 <Box
                   sx={{
                     px: 2.5, py: 1,
-                    border: '1px solid rgba(0,255,195,0.2)',
+                    border: 1,
+                    borderColor: isDark ? 'rgba(0,255,195,0.2)' : `${primaryMain}30`,
                     borderRadius: 1.5,
-                    bgcolor: 'rgba(0,255,195,0.05)',
+                    bgcolor: isDark ? 'rgba(0,255,195,0.05)' : `${primaryMain}08`,
                     textAlign: 'center',
                   }}
                 >
                   <Typography
                     variant="h5"
                     fontWeight={700}
-                    sx={{ fontFamily: '"Orbitron", sans-serif', color: '#00ffc3', lineHeight: 1 }}
+                    sx={{ fontFamily: '"Orbitron", sans-serif', color: primaryMain, lineHeight: 1 }}
                   >
                     {filteredJobs.length}
                   </Typography>
@@ -160,20 +236,49 @@ export default function Jobs() {
       </Box>
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
+        {/* Category pill filter */}
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 3 }}>
+          {CATEGORIES.map(({ value, label, Icon }) => {
+            const active = categoryFilter === value;
+            return (
+              <Chip
+                key={value}
+                icon={<Icon sx={{ fontSize: '14px !important' }} />}
+                label={label}
+                onClick={() => handleCategoryChange(value)}
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  bgcolor: active ? (isDark ? alpha(primaryMain, 0.15) : alpha(primaryMain, 0.1)) : 'background.paper',
+                  color: active ? primaryMain : 'text.secondary',
+                  border: 1,
+                  borderColor: active ? primaryMain : 'divider',
+                  '& .MuiChip-icon': { color: active ? primaryMain : 'text.disabled' },
+                  '&:hover': { borderColor: primaryMain, color: primaryMain },
+                  transition: 'all 0.15s',
+                }}
+              />
+            );
+          })}
+        </Box>
+
         {/* Filter Bar */}
         <Box
           sx={{
             p: 2,
             mb: 4,
-            border: '1px solid rgba(255,255,255,0.06)',
+            border: 1,
+            borderColor: 'divider',
             borderRadius: 2,
-            bgcolor: 'rgba(0,0,0,0.25)',
+            bgcolor: theme.palette.background.paper,
+            boxShadow: isDark ? 'none' : '0 2px 12px rgba(0,0,0,0.03)',
           }}
         >
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ md: 'center' }}>
             <TextField
               fullWidth
-              placeholder="Search by title or description..."
+              placeholder="Search by title, description, or tag..."
               value={searchTerm}
               onChange={(e) => handleSearchChange(e.target.value)}
               size="small"
@@ -211,9 +316,10 @@ export default function Jobs() {
           <Box
             sx={{
               mb: 3, p: 2,
-              border: '1px solid rgba(0,255,195,0.15)',
+              border: 1,
+              borderColor: isDark ? 'rgba(0,255,195,0.15)' : `${primaryMain}30`,
               borderRadius: 1.5,
-              bgcolor: 'rgba(0,255,195,0.04)',
+              bgcolor: isDark ? 'rgba(0,255,195,0.04)' : `${primaryMain}08`,
               display: 'flex', alignItems: 'center', gap: 1,
             }}
           >
@@ -236,7 +342,7 @@ export default function Jobs() {
           <Alert severity="error">{error}</Alert>
         ) : filteredJobs.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 10 }}>
-            <WorkOutlineIcon sx={{ fontSize: 56, color: 'rgba(0,255,195,0.2)', mb: 2 }} />
+            <WorkOutlineIcon sx={{ fontSize: 56, color: 'divider', mb: 2 }} />
             <Typography variant="h6" color="text.secondary" gutterBottom>
               No jobs found
             </Typography>
@@ -258,17 +364,19 @@ export default function Jobs() {
                   const postedDate = new Date(bnToNumber(job.account.createdAt) * 1000).toLocaleDateString('en-US', {
                     month: 'short', day: 'numeric',
                   });
+                  const tags: string[] = (job as any).tags ?? [];
                   return (
                     <MotionCard
                       key={job.publicKey.toString()}
                       variants={staggerChild}
                       sx={{
-                        border: '1px solid rgba(0,255,195,0.08)',
+                        border: 1,
+                        borderColor: 'divider',
                         transition: 'all 0.22s ease',
                         cursor: 'pointer',
                         '&:hover': {
-                          borderColor: 'rgba(0,255,195,0.22)',
-                          boxShadow: '0 0 28px rgba(0,255,195,0.06)',
+                          borderColor: primaryMain,
+                          boxShadow: isDark ? '0 0 28px rgba(0,255,195,0.06)' : `0 8px 30px ${primaryMain}10`,
                           transform: 'translateY(-2px)',
                         },
                       }}
@@ -281,37 +389,63 @@ export default function Jobs() {
                             sx={{
                               width: 3,
                               borderRadius: 4,
-                              bgcolor: '#00ffc3',
+                              bgcolor: primaryMain,
                               alignSelf: 'stretch',
                               flexShrink: 0,
                               minHeight: 60,
-                              boxShadow: '0 0 8px rgba(0,255,195,0.4)',
+                              boxShadow: isDark ? `0 0 8px ${primaryMain}60` : 'none',
                             }}
                           />
 
                           {/* Main content */}
                           <Box sx={{ flex: 1, minWidth: 0 }}>
-                            <Typography
-                              variant="h6"
-                              fontWeight={700}
-                              sx={{ mb: 0.75, lineHeight: 1.3, fontSize: { xs: '1rem', md: '1.1rem' } }}
-                            >
-                              {job.account.title}
-                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
+                              <Typography
+                                variant="h6"
+                                fontWeight={700}
+                                sx={{ lineHeight: 1.3, fontSize: { xs: '1rem', md: '1.05rem' }, flex: 1 }}
+                              >
+                                {job.account.title}
+                              </Typography>
+                            </Box>
                             <Typography
                               variant="body2"
                               color="text.secondary"
                               sx={{
-                                mb: 1.5,
+                                mb: 1.25,
                                 display: '-webkit-box',
                                 WebkitLineClamp: 2,
                                 WebkitBoxOrient: 'vertical',
                                 overflow: 'hidden',
                                 lineHeight: 1.6,
+                                fontSize: '0.82rem',
                               }}
                             >
                               {job.account.description}
                             </Typography>
+
+                            {/* Tags */}
+                            {tags.length > 0 && (
+                              <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mb: 1.25 }}>
+                                {tags.map(tag => (
+                                  <Chip
+                                    key={tag}
+                                    label={tag}
+                                    size="small"
+                                    sx={{
+                                      fontSize: '0.65rem',
+                                      height: 20,
+                                      fontWeight: 600,
+                                      bgcolor: isDark ? alpha(primaryMain, 0.08) : alpha(primaryMain, 0.06),
+                                      color: isDark ? alpha(primaryMain, 0.85) : 'primary.main',
+                                      border: 1,
+                                      borderColor: isDark ? alpha(primaryMain, 0.2) : alpha(primaryMain, 0.2),
+                                    }}
+                                  />
+                                ))}
+                              </Box>
+                            )}
+
                             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
                               <Chip
                                 label="Open"
@@ -348,13 +482,13 @@ export default function Jobs() {
                             }}
                           >
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                              <SolanaIconSimple sx={{ fontSize: 18, color: '#00ffc3' }} />
+                              <SolanaIconSimple sx={{ fontSize: 18, color: primaryMain }} />
                               <Typography
                                 variant="h6"
                                 fontWeight={700}
                                 sx={{
                                   fontFamily: '"Orbitron", sans-serif',
-                                  color: '#00ffc3',
+                                  color: primaryMain,
                                   fontSize: { xs: '1rem', md: '1.1rem' },
                                 }}
                               >

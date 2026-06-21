@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { getConversations } from './messages'
+import { getConversations } from '../../../src/utils/chatStore'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const walletAddress = req.headers.authorization?.replace('Bearer ', '')
     if (!walletAddress) return res.status(401).json({ error: 'Unauthorized' })
 
-    const conversations = await getConversations(walletAddress)
+    const conversations = getConversations(walletAddress)
     return res.status(200).json({ conversations })
   } catch (error) {
     console.error('Conversations API error:', error)

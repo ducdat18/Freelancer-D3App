@@ -1,4 +1,4 @@
-import { Box, Typography, Tooltip } from '@mui/material';
+import { Box, Typography, Tooltip, useTheme } from '@mui/material';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 
 interface VerifiedBadgeProps {
@@ -8,6 +8,10 @@ interface VerifiedBadgeProps {
 }
 
 export default function VerifiedBadge({ size = 'md', tooltip = true }: VerifiedBadgeProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const successColor = theme.palette.success.main;
+
   const badge = (
     <Box
       sx={{
@@ -17,17 +21,18 @@ export default function VerifiedBadge({ size = 'md', tooltip = true }: VerifiedB
         px: size === 'md' ? 1 : 0.5,
         py: size === 'md' ? 0.3 : 0.25,
         borderRadius: 1,
-        bgcolor: 'rgba(76,175,80,0.08)',
-        border: '1px solid rgba(76,175,80,0.3)',
-        boxShadow: '0 0 8px rgba(76,175,80,0.1)',
+        bgcolor: isDark ? 'rgba(76,175,80,0.08)' : 'rgba(76,175,80,0.05)',
+        border: 1,
+        borderColor: isDark ? 'rgba(76,175,80,0.3)' : 'rgba(76,175,80,0.4)',
+        boxShadow: isDark ? '0 0 8px rgba(76,175,80,0.1)' : 'none',
         cursor: 'default',
       }}
     >
       <VerifiedUserIcon
         sx={{
           fontSize: size === 'md' ? 14 : 12,
-          color: '#4caf50',
-          filter: 'drop-shadow(0 0 3px rgba(76,175,80,0.5))',
+          color: successColor,
+          filter: isDark ? 'drop-shadow(0 0 3px rgba(76,175,80,0.5))' : 'none',
         }}
       />
       {size === 'md' && (
@@ -35,9 +40,9 @@ export default function VerifiedBadge({ size = 'md', tooltip = true }: VerifiedB
           sx={{
             fontFamily: '"Orbitron", monospace',
             fontSize: '0.55rem',
-            fontWeight: 700,
+            fontWeight: 800,
             letterSpacing: '0.1em',
-            color: '#4caf50',
+            color: successColor,
             lineHeight: 1,
           }}
         >

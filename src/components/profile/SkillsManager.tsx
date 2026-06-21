@@ -6,7 +6,8 @@ import {
   TextField,
   Typography,
   Stack,
-  Alert
+  Alert,
+  useTheme
 } from '@mui/material';
 import { ALL_SKILLS, POPULAR_SKILLS } from '../../config/categories';
 
@@ -26,6 +27,8 @@ export default function SkillsManager({
   readonly = false
 }: SkillsManagerProps) {
   const [inputValue, setInputValue] = useState('');
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   const handleAddSkill = (event: any, newValue: string | null) => {
     if (!newValue || !newValue.trim()) return;
@@ -96,7 +99,7 @@ export default function SkillsManager({
         {/* Current Skills */}
         {skills.length > 0 && (
           <Box>
-            <Typography variant="subtitle2" gutterBottom>
+            <Typography variant="subtitle2" gutterBottom fontWeight={700}>
               Your Skills ({skills.length}/{maxSkills})
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
@@ -106,7 +109,19 @@ export default function SkillsManager({
                   label={skill}
                   onDelete={readonly ? undefined : () => handleDeleteSkill(skill)}
                   color="primary"
-                  variant="outlined"
+                  variant={isDark ? "outlined" : "filled"}
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '0.75rem',
+                    bgcolor: isDark ? 'transparent' : 'rgba(5,150,105,0.08)',
+                    color: isDark ? 'primary.main' : 'primary.dark',
+                    borderColor: isDark ? 'primary.main' : 'transparent',
+                    '& .MuiChip-deleteIcon': {
+                      color: isDark ? 'primary.main' : 'primary.dark',
+                      opacity: 0.7,
+                      '&:hover': { opacity: 1 }
+                    }
+                  }}
                 />
               ))}
             </Box>
@@ -116,7 +131,7 @@ export default function SkillsManager({
         {/* Suggested Skills */}
         {!readonly && availableSuggestedSkills.length > 0 && (
           <Box>
-            <Typography variant="subtitle2" gutterBottom color="text.secondary">
+            <Typography variant="subtitle2" gutterBottom color="text.secondary" fontWeight={600}>
               Popular Skills (Click to add)
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
@@ -128,8 +143,13 @@ export default function SkillsManager({
                   variant="outlined"
                   sx={{
                     cursor: 'pointer',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                    borderColor: 'divider',
                     '&:hover': {
-                      backgroundColor: 'action.hover'
+                      backgroundColor: 'action.hover',
+                      borderColor: 'primary.main',
+                      color: 'primary.main',
                     }
                   }}
                   disabled={skills.length >= maxSkills}
@@ -141,14 +161,14 @@ export default function SkillsManager({
 
         {/* Warning when limit reached */}
         {!readonly && skills.length >= maxSkills && (
-          <Alert severity="info">
-            You've reached the maximum of {maxSkills} skills. Remove some skills to add new ones.
+          <Alert severity="info" sx={{ fontWeight: 500 }}>
+            You've reached the maximum of {maxSkills} skills.
           </Alert>
         )}
 
         {/* Empty state */}
         {skills.length === 0 && readonly && (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
             No skills added yet
           </Typography>
         )}

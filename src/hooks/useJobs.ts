@@ -2,10 +2,11 @@ import { useCallback, useState, useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { web3, BN } from "@coral-xyz/anchor";
 import { useSolanaProgram } from "./useSolanaProgram";
-import { deriveJobPDA, deriveBidPDA } from "../utils/pda";
+import { deriveJobPDA, deriveBidPDA, deriveEscrowPDA } from "../utils/pda";
 import { retryWithBackoff } from "../utils/rpcRetry";
-import { isGarbageMetadataUri } from "../services/ipfs";
+import { isGarbageMetadataUri, uploadToIPFS, fetchFromIPFS } from "../services/ipfs";
 import type { PublicKey } from "../types/solana";
+import type { JobMetadata } from "../types";
 
 const { SystemProgram, LAMPORTS_PER_SOL } = web3;
 
@@ -51,7 +52,9 @@ export function useJobs(params?: UseJobsParams) {
   const [error, setError] = useState<string | null>(null);
 
   /**
-   * Create a new job
+   * Create a new job on-chain.
+   * Returns { signature, jobPda, jobId } so callers can use the correct jobPda
+   * for milestone initialisation instead of re-deriving it with a different seed.
    */
   const createJob = useCallback(
     async (
@@ -59,7 +62,8 @@ export function useJobs(params?: UseJobsParams) {
       description: string,
       budgetSol: string,
       deadline: number,
-      metadataUri: string
+      metadataUri: string,
+      tokenMint?: string | null
     ) => {
       if (!program || !publicKey) throw new Error("Wallet not connected");
 
@@ -67,17 +71,17 @@ export function useJobs(params?: UseJobsParams) {
       setError(null);
 
       try {
-        // Use timestamp as unique job ID to avoid seed length issues
         const jobId = Date.now();
         const [jobPda] = deriveJobPDA(publicKey, jobId);
 
-        // Convert SOL to lamports (1 SOL = 1,000,000,000 lamports)
         const budgetLamports = parseFloat(budgetSol) * LAMPORTS_PER_SOL;
         const budget = new BN(budgetLamports);
 
+        const mintPubkey = tokenMint ? new web3.PublicKey(tokenMint) : null;
+
         // @ts-ignore - Program methods type inference issue
         const tx = await program.methods
-          .createJob(new BN(jobId), title, description, budget, metadataUri, null)
+          .createJob(new BN(jobId), title, description, budget, metadataUri, mintPubkey)
           .accounts({
             job: jobPda,
             client: publicKey,
@@ -86,7 +90,7 @@ export function useJobs(params?: UseJobsParams) {
           .rpc();
 
         setLoading(false);
-        return { signature: tx, jobPda };
+        return { signature: tx, jobPda, jobId };
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to create job";
         setError(message);
@@ -95,6 +99,107 @@ export function useJobs(params?: UseJobsParams) {
       }
     },
     [program, publicKey]
+  );
+
+  /**
+   * Deposit SOL into the escrow account for a job.
+   * Call this after createJob to lock funds on-chain.
+   */
+  const depositJobEscrow = useCallback(
+    async (jobPda: PublicKey, amountSol: string) => {
+      if (!program || !publicKey) throw new Error("Wallet not connected");
+
+      const [escrowPda] = deriveEscrowPDA(jobPda);
+      const amountLamports = parseFloat(amountSol) * LAMPORTS_PER_SOL;
+      const amount = new BN(amountLamports);
+
+      // @ts-ignore - Program methods type inference issue
+      const tx = await program.methods
+        .depositEscrow(amount)
+        .accounts({
+          escrow: escrowPda,
+          job: jobPda,
+          client: publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .rpc();
+
+      return { signature: tx, escrowPda };
+    },
+    [program, publicKey]
+  );
+
+  /**
+   * Update a job's IPFS metadata.
+   * Uploads new metadata to IPFS and stores the latest CID override in
+   * localStorage (keyed by jobPda) since there is no on-chain update_job
+   * instruction yet.  The job detail page checks this override first.
+   */
+  const updateJobMetadata = useCallback(
+    async (jobPda: PublicKey, newMetadata: JobMetadata): Promise<string> => {
+      const newCid = await uploadToIPFS(newMetadata);
+      if (!newCid) throw new Error("Failed to upload updated metadata to IPFS");
+
+      const overrideKey = `job_metadata_override_${jobPda.toBase58()}`;
+      if (typeof window !== "undefined") {
+        localStorage.setItem(overrideKey, newCid);
+      }
+
+      return newCid;
+    },
+    []
+  );
+
+  /**
+   * Repost a cancelled or expired job by creating a new job on-chain
+   * using the original job's metadata with an updated deadline.
+   */
+  const repostJob = useCallback(
+    async (
+      originalJobPda: PublicKey,
+      newDeadline: Date,
+      newBudgetSol?: string
+    ) => {
+      if (!program || !publicKey) throw new Error("Wallet not connected");
+
+      const originalJob = await fetchJob(originalJobPda);
+      if (!originalJob) throw new Error("Original job not found");
+
+      const overrideKey = `job_metadata_override_${originalJobPda.toBase58()}`;
+      const overrideCid = typeof window !== "undefined"
+        ? localStorage.getItem(overrideKey)
+        : null;
+
+      const metadataCid = overrideCid || originalJob.metadataUri;
+      const existingMeta: JobMetadata | null = await fetchFromIPFS(metadataCid);
+
+      const budgetSol = newBudgetSol
+        ?? (originalJob.budget.toNumber() / LAMPORTS_PER_SOL).toString();
+
+      const newMeta: JobMetadata = {
+        ...(existingMeta ?? {
+          title: originalJob.title,
+          description: originalJob.description,
+          category: "",
+          skills: [],
+        }),
+        deadline: Math.floor(newDeadline.getTime() / 1000),
+        budgetSol,
+      };
+
+      const newCid = await uploadToIPFS(newMeta);
+      if (!newCid) throw new Error("Failed to upload repost metadata to IPFS");
+
+      return createJob(
+        originalJob.title,
+        originalJob.description,
+        budgetSol,
+        Math.floor(newDeadline.getTime() / 1000),
+        newCid,
+        undefined
+      );
+    },
+    [program, publicKey, fetchJob, createJob]
   );
 
   /**
@@ -339,6 +444,9 @@ export function useJobs(params?: UseJobsParams) {
 
     // Functions
     createJob,
+    depositJobEscrow,
+    updateJobMetadata,
+    repostJob,
     submitBid,
     selectBid,
     completeJob,

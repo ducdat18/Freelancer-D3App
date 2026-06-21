@@ -11,8 +11,7 @@ pub fn submit_kyc(ctx: Context<SubmitKyc>, id_type: IdType) -> Result<()> {
     record.id_type = id_type;
     record.submitted_at = clock.unix_timestamp;
     record.verified_at = 0;
-    record.face_distance_bp = 0;
-    record.bump = ctx.bumps.kyc_record;
+    record.verification_hash = [0u8; 32];
 
     emit!(KycSubmitted {
         user: ctx.accounts.user.key(),
@@ -22,17 +21,19 @@ pub fn submit_kyc(ctx: Context<SubmitKyc>, id_type: IdType) -> Result<()> {
     Ok(())
 }
 
+/// verification_hash = SHA-256(quantized_face_descriptor[128] || doc_type_byte || wallet_pubkey[32])
+/// Computed entirely in the browser — no raw biometric data ever reaches the chain.
 pub fn finalize_kyc(
     ctx: Context<FinalizeKyc>,
     id_type: IdType,
-    face_distance_bp: u32,
+    verification_hash: [u8; 32],
     matched: bool,
 ) -> Result<()> {
     let record = &mut ctx.accounts.kyc_record;
     let clock = Clock::get()?;
 
     record.id_type = id_type;
-    record.face_distance_bp = face_distance_bp;
+    record.verification_hash = verification_hash;
 
     if matched {
         record.status = KycStatus::Verified;
@@ -45,7 +46,7 @@ pub fn finalize_kyc(
     emit!(KycFinalized {
         user: ctx.accounts.user.key(),
         verified: matched,
-        face_distance_bp,
+        verification_hash,
         timestamp: clock.unix_timestamp,
     });
 
@@ -59,12 +60,42 @@ pub fn reset_kyc(ctx: Context<ResetKyc>) -> Result<()> {
     record.status = KycStatus::Pending;
     record.submitted_at = clock.unix_timestamp;
     record.verified_at = 0;
-    record.face_distance_bp = 0;
+    record.verification_hash = [0u8; 32];
 
     emit!(KycReset {
         user: ctx.accounts.user.key(),
         timestamp: clock.unix_timestamp,
     });
+
+    Ok(())
+}
+
+/// Close an existing KYC record using raw account access to handle legacy struct layouts.
+/// Use this to migrate old accounts (created before verification_hash was added).
+/// After closing, the user can call submit_kyc again to create a fresh record.
+pub fn close_kyc_unchecked(ctx: Context<CloseKycUnchecked>) -> Result<()> {
+    let record = &ctx.accounts.kyc_record;
+
+    // Verify authority from raw bytes: authority is at bytes 8..40 (after 8-byte discriminator)
+    {
+        let data = record.data.borrow();
+        require!(data.len() >= 40, KycError::Unauthorized);
+        let mut authority_bytes = [0u8; 32];
+        authority_bytes.copy_from_slice(&data[8..40]);
+        let authority = Pubkey::from(authority_bytes);
+        require_keys_eq!(authority, ctx.accounts.user.key(), KycError::Unauthorized);
+    }
+
+    // Transfer all lamports to user (closes the account)
+    let balance = record.lamports();
+    **record.try_borrow_mut_lamports()? -= balance;
+    **ctx.accounts.user.try_borrow_mut_lamports()? += balance;
+
+    // Zero out account data to mark as closed
+    let mut data = record.try_borrow_mut_data()?;
+    for b in data.iter_mut() {
+        *b = 0;
+    }
 
     Ok(())
 }
@@ -90,24 +121,46 @@ pub struct SubmitKyc<'info> {
 pub struct FinalizeKyc<'info> {
     #[account(
         mut,
+        realloc = 8 + KycRecord::INIT_SPACE,
+        realloc::payer = user,
+        realloc::zero = true,
         seeds = [b"kyc", user.key().as_ref()],
-        bump = kyc_record.bump,
+        bump,
         constraint = kyc_record.authority == user.key() @ KycError::Unauthorized,
     )]
     pub kyc_record: Account<'info, KycRecord>,
     #[account(mut)]
     pub user: Signer<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
 pub struct ResetKyc<'info> {
     #[account(
         mut,
+        realloc = 8 + KycRecord::INIT_SPACE,
+        realloc::payer = user,
+        realloc::zero = false,
         seeds = [b"kyc", user.key().as_ref()],
-        bump = kyc_record.bump,
+        bump,
         constraint = kyc_record.authority == user.key() @ KycError::Unauthorized,
     )]
     pub kyc_record: Account<'info, KycRecord>,
+    #[account(mut)]
+    pub user: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+/// Raw account access — bypasses Anchor deserialization for legacy struct migration.
+#[derive(Accounts)]
+pub struct CloseKycUnchecked<'info> {
+    /// CHECK: raw account — authority verified manually from bytes 8..40
+    #[account(
+        mut,
+        seeds = [b"kyc", user.key().as_ref()],
+        bump,
+    )]
+    pub kyc_record: UncheckedAccount<'info>,
     #[account(mut)]
     pub user: Signer<'info>,
 }
@@ -122,8 +175,9 @@ pub struct KycRecord {
     pub id_type: IdType,
     pub submitted_at: i64,
     pub verified_at: i64,
-    pub face_distance_bp: u32,
-    pub bump: u8,
+    /// SHA-256(quantized_face_descriptor[128] || doc_type_byte || wallet_pubkey[32])
+    /// Privacy: raw face distance is never stored on-chain.
+    pub verification_hash: [u8; 32],
 }
 
 // ==================== TYPES ====================
@@ -154,7 +208,7 @@ pub struct KycSubmitted {
 pub struct KycFinalized {
     pub user: Pubkey,
     pub verified: bool,
-    pub face_distance_bp: u32,
+    pub verification_hash: [u8; 32],
     pub timestamp: i64,
 }
 

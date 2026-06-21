@@ -1,5 +1,5 @@
 import {
-  Container, Box, Typography, Grid, Card, CardContent, Chip, Divider,
+  Container, Box, Typography, Grid, Card, CardContent, Chip, Divider, useTheme, alpha,
 } from '@mui/material'
 import {
   Shield, Speed, PublicOutlined, LockOutlined,
@@ -17,43 +17,44 @@ const features = [
     icon: Shield,
     title: 'Trustless Escrow',
     desc: 'Funds lock in a Solana smart contract on bid acceptance. Payment releases only on work approval — zero human custody.',
+    accent: '#00ffc3',
+    detail: 'SPL-TOKEN ESCROW',
   },
   {
     icon: Speed,
     title: 'Sub-Second Settlement',
     desc: 'Solana finalizes transactions in ~400ms with fees under $0.001. No waiting for bank wires or platform processing.',
+    accent: '#9945ff',
+    detail: '400ms FINALITY',
   },
   {
     icon: PublicOutlined,
     title: 'Permissionless & Global',
     desc: 'Anyone with a wallet can participate. No country restrictions, no KYC, no approval process — ever.',
+    accent: '#00ffc3',
+    detail: 'NO KYC REQUIRED',
   },
   {
     icon: StarOutlined,
     title: 'On-Chain Reputation',
     desc: 'Ratings and completed job counts live on-chain permanently. Your reputation is yours — it follows your wallet forever.',
+    accent: '#febc2e',
+    detail: 'NFT/PDA REPUTATION',
   },
   {
     icon: AccountBalanceWallet,
     title: 'SOL Payments',
     desc: 'Pay and receive in native SOL. Fast, cheap, and self-custodied from the moment payment releases.',
+    accent: '#9945ff',
+    detail: 'DIRECT SETTLEMENT',
   },
   {
     icon: GavelOutlined,
     title: 'Dispute Resolution',
     desc: 'Disputes are raised on-chain and resolved through protocol arbitration — no opaque platform decisions.',
+    accent: '#ff5f57',
+    detail: 'ON-CHAIN ARBITRATION',
   },
-]
-
-const stack = [
-  { label: 'Solana', color: '#9945ff' },
-  { label: 'Anchor', color: '#00ffc3' },
-  { label: 'Next.js', color: '#fff' },
-  { label: 'TypeScript', color: '#3178c6' },
-  { label: 'React Query', color: '#ff4154' },
-  { label: 'MUI', color: '#0081cb' },
-  { label: 'IPFS', color: '#65c2cb' },
-  { label: 'Framer Motion', color: '#bb4bff' },
 ]
 
 const protocolStats = [
@@ -64,19 +65,56 @@ const protocolStats = [
 ]
 
 export default function AboutPage() {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+  const secondaryMain = theme.palette.secondary.main;
+  const errorMain = theme.palette.error.main;
+
+  const stack = [
+    { label: 'Solana', color: '#9945ff' },
+    { label: 'Anchor', color: primaryMain },
+    { label: 'Next.js', color: isDark ? '#fff' : '#000' },
+    { label: 'TypeScript', color: '#3178c6' },
+    { label: 'React Query', color: '#ff4154' },
+    { label: 'MUI', color: '#0081cb' },
+    { label: 'IPFS', color: '#65c2cb' },
+    { label: 'Framer Motion', color: '#bb4bff' },
+  ]
+
   return (
     <Layout>
-      <Box>
+      <Box sx={{ overflow: 'hidden' }}>
         {/* Hero */}
         <Box
           sx={{
-            background: 'linear-gradient(180deg, rgba(0,255,195,0.04) 0%, transparent 100%)',
-            borderBottom: '1px solid rgba(0,255,195,0.08)',
-            py: { xs: 6, md: 9 },
+            position: 'relative',
+            background: `linear-gradient(180deg, ${alpha(primaryMain, isDark ? 0.04 : 0.02)} 0%, transparent 100%)`,
+            borderBottom: 1,
+            borderColor: alpha(primaryMain, 0.08),
+            py: { xs: 8, md: 12 },
             textAlign: 'center',
           }}
         >
-          <Container maxWidth="md">
+          {/* Ambient grid */}
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: isDark ? `
+                linear-gradient(rgba(0,255,195,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,195,0.03) 1px, transparent 1px)
+              ` : `
+                linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)
+              `,
+              backgroundSize: '60px 60px',
+              pointerEvents: 'none',
+              maskImage: 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,1) 50%, transparent 100%)',
+            }}
+          />
+
+          <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
             <Chip
               label="// ABOUT THE PROTOCOL"
               size="small"
@@ -85,33 +123,46 @@ export default function AboutPage() {
                 fontFamily: '"Orbitron", monospace',
                 fontSize: '0.62rem',
                 letterSpacing: 3,
-                color: '#00ffc3',
-                borderColor: 'rgba(0,255,195,0.3)',
-                bgcolor: 'rgba(0,255,195,0.05)',
+                color: primaryMain,
+                borderColor: alpha(primaryMain, 0.3),
+                bgcolor: alpha(primaryMain, 0.05),
                 mb: 3,
+                px: 1,
               }}
             />
             <Typography
               variant="h2"
               fontWeight={700}
               sx={{
-                background: 'linear-gradient(135deg, #fff 0%, #00ffc3 60%)',
+                background: isDark 
+                  ? `linear-gradient(135deg, #fff 0%, ${primaryMain} 60%)`
+                  : `linear-gradient(135deg, ${theme.palette.text.primary} 0%, ${primaryMain} 80%)`,
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 mb: 2,
                 fontFamily: '"Orbitron", sans-serif',
-                fontSize: { xs: '2rem', md: '3rem' },
+                fontSize: { xs: '2.2rem', md: '3.5rem' },
+                lineHeight: 1.2,
               }}
             >
-              About Lancer Lab
+              The Infrastructure of<br />Modern Freelancing
             </Typography>
             <Typography
               variant="h6"
               color="text.secondary"
-              sx={{ maxWidth: 600, mx: 'auto', fontWeight: 400, lineHeight: 1.7, mb: 5 }}
+              sx={{ 
+                maxWidth: 620, 
+                mx: 'auto', 
+                fontWeight: 500, 
+                lineHeight: 1.7, 
+                mb: 6,
+                fontFamily: '"Rajdhani", sans-serif',
+                fontSize: '1.2rem'
+              }}
             >
-              A decentralized freelance marketplace built on Solana — where contracts are code,
-              payments are instant, and trust is mathematically guaranteed.
+              Lancer Lab is a decentralized marketplace protocol built on Solana. 
+              We replace platform middlemen with immutable code, ensuring trust is
+              guaranteed by cryptography rather than company promises.
             </Typography>
 
             {/* Protocol Stats */}
@@ -120,10 +171,12 @@ export default function AboutPage() {
                 <Grid size={{ xs: 6, sm: 3 }} key={stat.label}>
                   <Box
                     sx={{
-                      p: 2,
-                      border: '1px solid rgba(0,255,195,0.12)',
+                      p: 2.5,
+                      border: 1,
+                      borderColor: alpha(primaryMain, 0.12),
                       borderRadius: 2,
-                      bgcolor: 'rgba(0,255,195,0.03)',
+                      bgcolor: isDark ? alpha(primaryMain, 0.02) : '#fff',
+                      boxShadow: isDark ? 'none' : '0 4px 12px rgba(0,0,0,0.03)',
                     }}
                   >
                     <Typography
@@ -131,14 +184,19 @@ export default function AboutPage() {
                       fontWeight={700}
                       sx={{
                         fontFamily: '"Orbitron", sans-serif',
-                        color: '#00ffc3',
-                        filter: 'drop-shadow(0 0 8px rgba(0,255,195,0.4))',
+                        color: primaryMain,
+                        mb: 0.5,
+                        filter: isDark ? `drop-shadow(0 0 8px ${alpha(primaryMain, 0.4)})` : 'none',
                       }}
                     >
                       {stat.value}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {stat.label}
+                    <Typography 
+                      variant="caption" 
+                      color="text.secondary"
+                      sx={{ letterSpacing: 1, fontWeight: 500 }}
+                    >
+                      {stat.label.toUpperCase()}
                     </Typography>
                   </Box>
                 </Grid>
@@ -147,76 +205,150 @@ export default function AboutPage() {
           </Container>
         </Box>
 
-        <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Container maxWidth="lg" sx={{ py: 10 }}>
 
           {/* Mission */}
-          <Grid container spacing={4} sx={{ mb: 10 }} alignItems="stretch">
+          <Grid container spacing={4} sx={{ mb: 12 }} alignItems="stretch">
             <Grid size={{ xs: 12, md: 6 }}>
               <Box
                 sx={{
-                  p: 3,
-                  border: '1px solid rgba(255,80,80,0.15)',
-                  borderRadius: 2,
-                  bgcolor: 'rgba(255,80,80,0.03)',
+                  p: 4,
+                  border: 1,
+                  borderColor: alpha(errorMain, 0.15),
+                  borderRadius: 3,
+                  bgcolor: alpha(errorMain, 0.02),
                   height: '100%',
-                  fontFamily: 'monospace',
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
               >
-                <Typography
-                  variant="overline"
-                  sx={{ color: '#ff5050', letterSpacing: 3, fontSize: '0.62rem', display: 'block', mb: 2 }}
+                <Box sx={{ position: 'relative', zIndex: 1 }}>
+                  <Typography
+                    variant="overline"
+                    sx={{ color: errorMain, letterSpacing: 3, fontSize: '0.62rem', display: 'block', mb: 2, fontWeight: 700 }}
+                  >
+                    THE PROBLEM
+                  </Typography>
+                  <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
+                    Traditional Extraction
+                  </Typography>
+                  <Typography 
+                    variant="body1" 
+                    color="text.secondary" 
+                    paragraph 
+                    sx={{ 
+                      lineHeight: 1.8, 
+                      fontSize: '1.05rem',
+                      fontFamily: '"Rajdhani", sans-serif',
+                      fontWeight: 500,
+                    }}
+                  >
+                    Centralized platforms sit in the middle of every transaction — taking 10–20% fees,
+                    holding your hard-earned funds for weeks, and arbitrarily suspending accounts.
+                  </Typography>
+                  <Typography 
+                    variant="body1" 
+                    color="text.secondary" 
+                    sx={{ 
+                      lineHeight: 1.8, 
+                      fontSize: '1.05rem',
+                      fontFamily: '"Rajdhani", sans-serif',
+                      fontWeight: 500,
+                    }}
+                  >
+                    They monetize your reputation data while you do all the work. Your ratings belong to
+                    the platform, not to you. If you leave, you lose your entire history.
+                  </Typography>
+                </Box>
+                <Box 
+                  sx={{ 
+                    position: 'absolute', bottom: -20, right: -20, 
+                    opacity: 0.05, fontSize: '120px', color: errorMain,
+                    transform: 'rotate(-15deg)'
+                  }}
                 >
-                  THE PROBLEM
-                </Typography>
-                <Typography variant="body1" color="text.secondary" paragraph sx={{ lineHeight: 1.8 }}>
-                  Traditional freelance platforms sit in the middle of every transaction — taking 10–20% fees,
-                  holding your funds for weeks, and arbitrarily suspending accounts.
-                </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
-                  They monetize your reputation data while you do all the work. Your ratings belong to
-                  the platform, not to you. Delete your account and you lose everything.
-                </Typography>
+                  <LockOutlined fontSize="inherit" />
+                </Box>
               </Box>
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
               <Box
                 sx={{
-                  p: 3,
-                  border: '1px solid rgba(0,255,195,0.15)',
-                  borderRadius: 2,
-                  bgcolor: 'rgba(0,255,195,0.03)',
+                  p: 4,
+                  border: 1,
+                  borderColor: alpha(primaryMain, 0.15),
+                  borderRadius: 3,
+                  bgcolor: alpha(primaryMain, 0.02),
                   height: '100%',
-                  fontFamily: 'monospace',
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
               >
-                <Typography
-                  variant="overline"
-                  sx={{ color: '#00ffc3', letterSpacing: 3, fontSize: '0.62rem', display: 'block', mb: 2 }}
+                <Box sx={{ position: 'relative', zIndex: 1 }}>
+                  <Typography
+                    variant="overline"
+                    sx={{ color: primaryMain, letterSpacing: 3, fontSize: '0.62rem', display: 'block', mb: 2, fontWeight: 700 }}
+                  >
+                    THE SOLUTION
+                  </Typography>
+                  <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
+                    Immutable Protocol
+                  </Typography>
+                  <Typography 
+                    variant="body1" 
+                    color="text.secondary" 
+                    paragraph 
+                    sx={{ 
+                      lineHeight: 1.8, 
+                      fontSize: '1.05rem',
+                      fontFamily: '"Rajdhani", sans-serif',
+                      fontWeight: 500,
+                    }}
+                  >
+                    Lancer Lab removes the middleman entirely. Smart contracts handle escrow, dispute
+                    resolution, and payments — all verifiable on-chain in real-time.
+                  </Typography>
+                  <Typography 
+                    variant="body1" 
+                    color="text.secondary" 
+                    sx={{ 
+                      lineHeight: 1.8, 
+                      fontSize: '1.05rem',
+                      fontFamily: '"Rajdhani", sans-serif',
+                      fontWeight: 500,
+                    }}
+                  >
+                    Your reputation is an on-chain asset that belongs to your wallet. We take 0% of your earnings.
+                    In this ecosystem, the code is the only authority.
+                  </Typography>
+                </Box>
+                <Box 
+                  sx={{ 
+                    position: 'absolute', bottom: -20, right: -20, 
+                    opacity: 0.05, fontSize: '120px', color: primaryMain,
+                    transform: 'rotate(-15deg)'
+                  }}
                 >
-                  THE SOLUTION
-                </Typography>
-                <Typography variant="body1" color="text.secondary" paragraph sx={{ lineHeight: 1.8 }}>
-                  Lancer Lab removes the middleman entirely. Smart contracts handle escrow, dispute
-                  resolution, and payments — all verifiable on-chain.
-                </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
-                  Your reputation lives on-chain and belongs to your wallet address. The platform earns
-                  nothing from your work. The code is the contract.
-                </Typography>
+                  <Code fontSize="inherit" />
+                </Box>
               </Box>
             </Grid>
           </Grid>
 
-          <Divider sx={{ mb: 8, borderColor: 'rgba(0,255,195,0.06)' }} />
-
           {/* Features */}
-          <Box sx={{ mb: 10 }}>
-            <Box sx={{ mb: 5 }}>
-              <Typography variant="h5" fontWeight={700} gutterBottom>
-                Core Protocol Features
+          <Box sx={{ mb: 12 }}>
+            <Box sx={{ mb: 6, textAlign: 'center' }}>
+              <Typography
+                variant="overline"
+                sx={{ color: primaryMain, letterSpacing: 4, fontSize: '0.62rem', fontWeight: 700, mb: 1, display: 'block' }}
+              >
+                CORE PROTOCOL
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Everything built on smart contracts — verifiable, auditable, unstoppable.
+              <Typography variant="h4" fontWeight={700} gutterBottom>
+                Protocol Features
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 500, mx: 'auto' }}>
+                Everything built on Solana smart contracts — verifiable, auditable, and unstoppable.
               </Typography>
             </Box>
             <MotionBox
@@ -225,37 +357,81 @@ export default function AboutPage() {
               whileInView="animate"
               viewport={{ once: true, amount: 0.1 }}
             >
-              <Grid container spacing={2}>
+              <Grid container spacing={3}>
                 {features.map((f) => (
                   <Grid key={f.title} size={{ xs: 12, sm: 6, md: 4 }}>
                     <MotionCard
                       variants={staggerChild}
                       sx={{
                         height: '100%',
-                        border: '1px solid rgba(0,255,195,0.08)',
-                        transition: 'all 0.25s ease',
+                        border: 1,
+                        borderColor: alpha(primaryMain, 0.08),
+                        bgcolor: isDark ? alpha('#fff', 0.01) : '#fff',
+                        borderRadius: 3,
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        position: 'relative',
+                        overflow: 'hidden',
                         '&:hover': {
-                          borderColor: 'rgba(0,255,195,0.22)',
-                          boxShadow: '0 0 24px rgba(0,255,195,0.06)',
-                          transform: 'translateY(-3px)',
+                          borderColor: alpha(f.accent, 0.4),
+                          boxShadow: isDark 
+                            ? `0 0 30px ${alpha(f.accent, 0.08)}`
+                            : `0 12px 30px ${alpha(f.accent, 0.1)}`,
+                          transform: 'translateY(-6px)',
+                          '& .feature-icon': {
+                            transform: 'scale(1.1) rotate(5deg)',
+                            color: f.accent,
+                          }
                         },
                       }}
                     >
-                      <CardContent sx={{ p: 3 }}>
-                        <f.icon
+                      <CardContent sx={{ p: 4 }}>
+                        <Box
+                          className="feature-icon"
                           sx={{
-                            fontSize: 32,
-                            color: '#00ffc3',
-                            mb: 1.5,
-                            filter: 'drop-shadow(0 0 6px rgba(0,255,195,0.35))',
+                            width: 56,
+                            height: 56,
+                            borderRadius: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: alpha(f.accent, 0.08),
+                            mb: 3,
+                            transition: 'all 0.3s ease',
+                            border: 1,
+                            borderColor: alpha(f.accent, 0.15),
                           }}
-                        />
-                        <Typography variant="subtitle1" fontWeight={700} gutterBottom>
+                        >
+                          <f.icon
+                            sx={{
+                              fontSize: 28,
+                              color: f.accent,
+                              filter: isDark ? `drop-shadow(0 0 8px ${alpha(f.accent, 0.4)})` : 'none',
+                            }}
+                          />
+                        </Box>
+                        <Typography variant="h6" fontWeight={700} gutterBottom>
                           {f.title}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7, mb: 3 }}>
                           {f.desc}
                         </Typography>
+                        <Box
+                          sx={{
+                            display: 'inline-block',
+                            px: 1.5, py: 0.5,
+                            borderRadius: 1,
+                            bgcolor: alpha(f.accent, 0.05),
+                            border: 1,
+                            borderColor: alpha(f.accent, 0.1),
+                            color: f.accent,
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            fontFamily: 'monospace',
+                            letterSpacing: 1,
+                          }}
+                        >
+                          {f.detail}
+                        </Box>
                       </CardContent>
                     </MotionCard>
                   </Grid>
@@ -264,36 +440,39 @@ export default function AboutPage() {
             </MotionBox>
           </Box>
 
-          <Divider sx={{ mb: 8, borderColor: 'rgba(0,255,195,0.06)' }} />
+          <Divider sx={{ mb: 10, borderColor: alpha(primaryMain, 0.08) }} />
 
           {/* Tech Stack */}
-          <Box sx={{ mb: 8 }}>
-            <Box sx={{ mb: 4 }}>
+          <Box sx={{ mb: 12 }}>
+            <Box sx={{ mb: 5 }}>
               <Typography variant="h5" fontWeight={700} gutterBottom>
-                Tech Stack
+                Battle-Tested Architecture
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Built with battle-tested open-source infrastructure.
+                Lancer Lab is built with modern, open-source infrastructure for maximum reliability.
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
               {stack.map((s) => (
                 <Box
                   key={s.label}
                   sx={{
-                    px: 2,
-                    py: 0.75,
-                    border: `1px solid ${s.color}30`,
-                    borderRadius: 1.5,
-                    bgcolor: `${s.color}08`,
+                    px: 3,
+                    py: 1,
+                    border: 1,
+                    borderColor: alpha(s.color, 0.2),
+                    borderRadius: 2,
+                    bgcolor: alpha(s.color, 0.05),
                     color: s.color,
                     fontFamily: 'monospace',
-                    fontSize: '0.85rem',
-                    fontWeight: 500,
+                    fontSize: '0.9rem',
+                    fontWeight: 600,
                     transition: 'all 0.2s ease',
+                    cursor: 'default',
                     '&:hover': {
-                      bgcolor: `${s.color}15`,
-                      boxShadow: `0 0 10px ${s.color}20`,
+                      bgcolor: alpha(s.color, 0.1),
+                      borderColor: alpha(s.color, 0.4),
+                      transform: 'scale(1.05)',
                     },
                   }}
                 >
@@ -306,40 +485,55 @@ export default function AboutPage() {
           {/* Status */}
           <Box
             sx={{
-              p: 3,
-              border: '1px solid rgba(0,255,195,0.12)',
-              borderRadius: 2,
-              bgcolor: 'rgba(0,0,0,0.3)',
-              fontFamily: 'monospace',
+              p: 5,
+              border: 1,
+              borderColor: alpha(primaryMain, 0.12),
+              borderRadius: 4,
+              bgcolor: isDark ? 'rgba(0,0,0,0.4)' : '#f8fafc',
+              position: 'relative',
+              overflow: 'hidden',
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <Box
-                sx={{
-                  width: 8, height: 8, borderRadius: '50%',
-                  bgcolor: '#00ffc3',
-                  boxShadow: '0 0 8px #00ffc3',
-                  animation: 'pulse 2s infinite',
-                  '@keyframes pulse': {
-                    '0%, 100%': { opacity: 1 },
-                    '50%': { opacity: 0.3 },
-                  },
-                }}
-              />
-              <Typography
-                variant="overline"
-                sx={{ color: '#00ffc3', letterSpacing: 3, fontSize: '0.62rem' }}
-              >
-                DEPLOYMENT STATUS
+            <Box sx={{ position: 'relative', zIndex: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                <Box
+                  sx={{
+                    width: 10, height: 10, borderRadius: '50%',
+                    bgcolor: primaryMain,
+                    boxShadow: `0 0 12px ${primaryMain}`,
+                    animation: 'pulse 2s infinite',
+                    '@keyframes pulse': {
+                      '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+                      '50%': { opacity: 0.4, transform: 'scale(0.8)' },
+                    },
+                  }}
+                />
+                <Typography
+                  variant="overline"
+                  sx={{ color: primaryMain, letterSpacing: 4, fontSize: '0.7rem', fontWeight: 700 }}
+                >
+                  MAINNET DEPLOYMENT STATUS: ACTIVE
+                </Typography>
+              </Box>
+              <Typography variant="h5" fontWeight={700} gutterBottom>
+                Live on Solana Mainnet
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8, maxWidth: 700 }}>
+                Lancer Lab is fully deployed and operational. All smart contracts are open-source 
+                and verified on the Solana blockchain. Connect your wallet to experience the future
+                of work today.
               </Typography>
             </Box>
-            <Typography variant="subtitle2" fontWeight={700} gutterBottom>
-              Live on Solana
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-              Lancer Lab is fully deployed on <strong style={{ color: '#00ffc3' }}>Solana</strong>.
-              All smart contracts are live and audited. Connect your wallet to start working or hiring today.
-            </Typography>
+            {/* Background decoration */}
+            <Box
+              sx={{
+                position: 'absolute',
+                top: -50, right: -50,
+                width: 200, height: 200,
+                borderRadius: '50%',
+                background: `radial-gradient(circle, ${alpha(primaryMain, 0.1)} 0%, transparent 70%)`,
+              }}
+            />
           </Box>
 
         </Container>

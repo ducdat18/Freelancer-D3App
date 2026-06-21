@@ -4,6 +4,16 @@ export type FaceDescriptor = Float32Array;
 
 export type FaceApiStatus = 'idle' | 'loading' | 'ready' | 'error';
 
+export interface FaceExpressions {
+  neutral: number;
+  happy: number;
+  sad: number;
+  angry: number;
+  fearful: number;
+  disgusted: number;
+  surprised: number;
+}
+
 const MODEL_URL = '/models';
 
 /** Singleton — load models once per page session */
@@ -20,6 +30,7 @@ async function ensureModelsLoaded(): Promise<typeof import('@vladmandic/face-api
         faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
         faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
         faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+        faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
       ]);
       _faceapi = faceapi;
     })();
@@ -42,6 +53,25 @@ export async function detectFaceDescriptor(
     .withFaceLandmarks(true)
     .withFaceDescriptor();
   return result?.descriptor ?? null;
+}
+
+/**
+ * Detect face descriptor + expression scores in a single pass.
+ * Used for the liveness challenge in the webcam selfie step.
+ */
+export async function detectWithExpressions(
+  el: HTMLImageElement | HTMLVideoElement | HTMLCanvasElement,
+): Promise<{ descriptor: FaceDescriptor | null; expressions: FaceExpressions | null }> {
+  const faceapi = await ensureModelsLoaded();
+  const result = await faceapi
+    .detectSingleFace(el as any, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.35 }))
+    .withFaceLandmarks(true)
+    .withFaceDescriptor()
+    .withFaceExpressions();
+  return {
+    descriptor: result?.descriptor ?? null,
+    expressions: (result?.expressions as unknown as FaceExpressions) ?? null,
+  };
 }
 
 /**

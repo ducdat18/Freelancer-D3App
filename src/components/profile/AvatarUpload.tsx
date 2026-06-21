@@ -6,7 +6,8 @@ import {
   IconButton,
   CircularProgress,
   Typography,
-  Alert
+  Alert,
+  useTheme
 } from '@mui/material';
 import { PhotoCamera, Delete } from '@mui/icons-material';
 import { useIPFS } from '../../hooks/useIPFS';
@@ -30,6 +31,8 @@ export default function AvatarUpload({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -129,9 +132,12 @@ export default function AvatarUpload({
             height: size,
             fontSize: size / 3,
             bgcolor: 'primary.main',
+            color: 'primary.contrastText',
+            fontWeight: 800,
+            fontFamily: '"Orbitron", sans-serif',
             border: '4px solid',
             borderColor: 'background.paper',
-            boxShadow: 3
+            boxShadow: isDark ? `0 0 20px ${theme.palette.primary.main}40` : '0 4px 16px rgba(0,0,0,0.1)'
           }}
         >
           {!avatarUrl && getInitials()}
@@ -148,17 +154,21 @@ export default function AvatarUpload({
                 bottom: 0,
                 right: 0,
                 bgcolor: 'primary.main',
-                color: 'white',
+                color: 'primary.contrastText',
+                border: '2px solid',
+                borderColor: 'background.paper',
                 '&:hover': {
                   bgcolor: 'primary.dark'
                 },
-                boxShadow: 2
+                boxShadow: 2,
+                width: 36,
+                height: 40,
               }}
             >
               {uploading ? (
-                <CircularProgress size={20} color="inherit" />
+                <CircularProgress size={18} color="inherit" />
               ) : (
-                <PhotoCamera fontSize="small" />
+                <PhotoCamera sx={{ fontSize: 18 }} />
               )}
               <input
                 type="file"
@@ -176,19 +186,21 @@ export default function AvatarUpload({
                 sx={{
                   position: 'absolute',
                   top: 0,
-                  right: 0,
-                  bgcolor: 'error.main',
-                  color: 'white',
+                  right: -8,
+                  bgcolor: theme.palette.error.main,
+                  color: theme.palette.error.contrastText,
+                  border: '2px solid',
+                  borderColor: 'background.paper',
                   '&:hover': {
-                    bgcolor: 'error.dark'
+                    bgcolor: theme.palette.error.dark
                   },
                   boxShadow: 2,
-                  width: 32,
+                  width: 28,
                   height: 32
                 }}
                 size="small"
               >
-                <Delete fontSize="small" />
+                <Delete sx={{ fontSize: 16 }} />
               </IconButton>
             )}
           </>
@@ -196,13 +208,14 @@ export default function AvatarUpload({
       </Box>
 
       {!readonly && (
-        <Box sx={{ mt: 2 }}>
+        <Box sx={{ mt: 2.5 }}>
           <Button
             component="label"
             variant="outlined"
             size="small"
             disabled={uploading}
             startIcon={uploading ? <CircularProgress size={16} /> : <PhotoCamera />}
+            sx={{ fontWeight: 700, borderRadius: 1.5 }}
           >
             {avatarUri ? 'Change Avatar' : 'Upload Avatar'}
             <input
@@ -213,14 +226,14 @@ export default function AvatarUpload({
               disabled={uploading}
             />
           </Button>
-          <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 1 }}>
-            JPG, PNG, GIF or WebP. Max 5MB.
+          <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 1.25, fontWeight: 500 }}>
+            Square JPG, PNG, GIF or WebP. Max 5MB.
           </Typography>
         </Box>
       )}
 
       {error && (
-        <Alert severity="error" sx={{ mt: 2 }}>
+        <Alert severity="error" sx={{ mt: 2, fontWeight: 500 }}>
           {error}
         </Alert>
       )}

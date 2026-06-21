@@ -1,4 +1,4 @@
-import { Box, Typography, Grid } from '@mui/material';
+import { Box, Typography, Grid, useTheme } from '@mui/material';
 import { motion } from 'framer-motion';
 import { staggerContainer, staggerChild } from '../../utils/animations';
 
@@ -16,22 +16,25 @@ interface StatsHUDProps {
 }
 
 function HUDStatCard({ stat, index }: { stat: StatItem; index: number }) {
-  const color = stat.color || '#00ffc3';
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const color = stat.color || theme.palette.primary.main;
 
   return (
     <MotionBox
       variants={staggerChild}
       sx={{
         position: 'relative',
-        background: 'rgba(7, 5, 17, 0.9)',
-        border: `1px solid ${color}22`,
+        background: theme.palette.background.paper,
+        border: `1px solid ${isDark ? color + '22' : 'rgba(0,0,0,0.05)'}`,
+        boxShadow: isDark ? 'none' : '0 2px 12px rgba(0,0,0,0.03)',
         borderRadius: 2,
         p: 2.5,
         overflow: 'hidden',
         transition: 'all 0.3s ease',
         '&:hover': {
-          borderColor: `${color}55`,
-          boxShadow: `0 0 20px ${color}15`,
+          borderColor: isDark ? `${color}55` : color,
+          boxShadow: isDark ? `0 0 20px ${color}15` : '0 4px 20px rgba(0,0,0,0.08)',
         },
         // HUD corner brackets
         '&::before': {
@@ -41,8 +44,8 @@ function HUDStatCard({ stat, index }: { stat: StatItem; index: number }) {
           left: 4,
           width: 12,
           height: 12,
-          borderTop: `2px solid ${color}66`,
-          borderLeft: `2px solid ${color}66`,
+          borderTop: `2px solid ${isDark ? color + '66' : color + '40'}`,
+          borderLeft: `2px solid ${isDark ? color + '66' : color + '40'}`,
         },
         '&::after': {
           content: '""',
@@ -51,8 +54,8 @@ function HUDStatCard({ stat, index }: { stat: StatItem; index: number }) {
           right: 4,
           width: 12,
           height: 12,
-          borderBottom: `2px solid ${color}66`,
-          borderRight: `2px solid ${color}66`,
+          borderBottom: `2px solid ${isDark ? color + '66' : color + '40'}`,
+          borderRight: `2px solid ${isDark ? color + '66' : color + '40'}`,
         },
       }}
     >
@@ -63,7 +66,7 @@ function HUDStatCard({ stat, index }: { stat: StatItem; index: number }) {
           fontSize: '1.5rem',
           fontWeight: 700,
           color: color,
-          textShadow: `0 0 10px ${color}40`,
+          textShadow: isDark ? `0 0 10px ${color}40` : 'none',
           lineHeight: 1.2,
         }}
       >
@@ -74,7 +77,7 @@ function HUDStatCard({ stat, index }: { stat: StatItem; index: number }) {
             sx={{
               fontSize: '0.7rem',
               ml: 0.5,
-              color: `${color}99`,
+              color: isDark ? `${color}99` : `${color}cc`,
               fontWeight: 500,
             }}
           >
@@ -88,7 +91,7 @@ function HUDStatCard({ stat, index }: { stat: StatItem; index: number }) {
         sx={{
           fontFamily: '"Rajdhani", sans-serif',
           fontSize: '0.7rem',
-          color: 'rgba(224, 230, 237, 0.4)',
+          color: theme.palette.text.secondary,
           letterSpacing: '0.08em',
           textTransform: 'uppercase',
           mt: 1,

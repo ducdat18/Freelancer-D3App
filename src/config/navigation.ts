@@ -24,7 +24,7 @@ export const NAV_ITEMS: NavItem[] = [
   { name: 'Referral', path: '/referral', group: 'secondary', requiresAuth: true },
   { name: 'Identity', path: '/identity', group: 'secondary', requiresAuth: true },
   { name: 'Arbitrator Fees', path: '/arbitrator/fees', group: 'secondary', requiresAuth: true },
-  { name: 'Arbitrator Staking', path: '/arbitrator/staking', group: 'secondary', requiresAuth: true },
+  { name: 'Juror Staking', path: '/arbitrator/staking', group: 'secondary', requiresAuth: true },
   { name: 'Settings', path: '/settings/recovery', group: 'secondary', requiresAuth: true },
 
   // Secondary - "More" dropdown (public)

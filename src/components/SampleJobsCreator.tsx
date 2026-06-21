@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Box, Button } from '@mui/material'
+import { Box, Button, useTheme, CircularProgress, alpha } from '@mui/material'
 import { PlayArrow } from '@mui/icons-material'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useJobs } from '../hooks/useJobs'
@@ -80,14 +80,6 @@ interface LogLine {
   text: string
 }
 
-const TYPE_COLOR: Record<LogType, string> = {
-  info: '#8084ee',
-  ok:   '#00ffc3',
-  warn: '#e04d01',
-  err:  '#ff5555',
-  exec: 'rgba(224,230,237,0.85)',
-}
-
 const TYPE_LABEL: Record<LogType, string> = {
   info: 'INFO',
   ok:   'OK  ',
@@ -105,12 +97,24 @@ function nowTs() {
 export default function SampleJobsCreator() {
   const { connected, publicKey } = useWallet()
   const { createJob }            = useJobs()
+  const theme = useTheme()
+  const isDark = theme.palette.mode === 'dark'
+  const primaryMain = theme.palette.primary.main
+  const secondaryMain = theme.palette.secondary.main
 
   const [running, setRunning] = useState(false)
   const [states,  setStates]  = useState<JobState[]>(SAMPLE_JOBS.map(() => 'idle'))
   const [logs,    setLogs]    = useState<LogLine[]>([])
   const [done,    setDone]    = useState(false)
   const scrollRef             = useRef<HTMLDivElement>(null)
+
+  const typeColors: Record<LogType, string> = {
+    info: theme.palette.info.main,
+    ok:   theme.palette.success.main,
+    warn: theme.palette.warning.main,
+    err:  theme.palette.error.main,
+    exec: isDark ? 'rgba(224,230,237,0.85)' : 'rgba(15,23,42,0.85)',
+  }
 
   const push = (type: LogType, text: string) =>
     setLogs(prev => [...prev, { ts: nowTs(), type, text }])
@@ -175,7 +179,7 @@ export default function SampleJobsCreator() {
 
     push('info', `batch complete — ${ok}/${SAMPLE_JOBS.length} succeeded`)
     if (ok < SAMPLE_JOBS.length) {
-      push('warn', `${SAMPLE_JOBS.length - ok} job(s) failed — check IDL / wallet balance`)
+      push('warn', `${SAMPLE_JOBS.length - ok} job(s) failed — check balance`)
     }
 
     setRunning(false)
@@ -185,11 +189,11 @@ export default function SampleJobsCreator() {
   // ─── state icon ─────────────────────────────────────────────────────────────
 
   const stateColor = (s: JobState) => {
-    if (s === 'ok')      return '#00ffc3'
-    if (s === 'fail')    return '#ff5555'
-    if (s === 'running') return '#8084ee'
-    if (s === 'pending') return 'rgba(255,255,255,0.28)'
-    return 'rgba(255,255,255,0.12)'
+    if (s === 'ok')      return theme.palette.success.main
+    if (s === 'fail')    return theme.palette.error.main
+    if (s === 'running') return theme.palette.secondary.main
+    if (s === 'pending') return isDark ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.28)'
+    return isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'
   }
 
   const stateGlyph = (s: JobState) => {
@@ -211,8 +215,9 @@ export default function SampleJobsCreator() {
         sx={{
           mb: 1.5,
           p: '10px 14px',
-          bgcolor: 'rgba(0,0,0,0.25)',
-          border: '1px solid rgba(255,255,255,0.06)',
+          bgcolor: isDark ? 'rgba(0,0,0,0.25)' : 'rgba(0,0,0,0.03)',
+          border: 1,
+          borderColor: 'divider',
           borderRadius: 1,
         }}
       >
@@ -229,7 +234,7 @@ export default function SampleJobsCreator() {
             }}
           >
             {/* index */}
-            <Box component="span" sx={{ color: 'rgba(255,255,255,0.18)', minWidth: 20, flexShrink: 0 }}>
+            <Box component="span" sx={{ color: 'text.disabled', minWidth: 20, flexShrink: 0 }}>
               {String(i + 1).padStart(2, '0')}
             </Box>
 
@@ -243,13 +248,14 @@ export default function SampleJobsCreator() {
                 whiteSpace: 'nowrap',
                 color: stateColor(states[i]),
                 transition: 'color 0.2s',
+                fontWeight: states[i] !== 'idle' ? 700 : 400,
               }}
             >
               {job.title}
             </Box>
 
             {/* budget */}
-            <Box component="span" sx={{ color: 'rgba(255,255,255,0.22)', fontSize: '0.64rem', flexShrink: 0 }}>
+            <Box component="span" sx={{ color: 'text.secondary', fontSize: '0.64rem', flexShrink: 0, fontWeight: 600 }}>
               {job.budget}&nbsp;SOL
             </Box>
 
@@ -262,6 +268,7 @@ export default function SampleJobsCreator() {
                 flexShrink: 0,
                 color: stateColor(states[i]),
                 fontSize: states[i] === 'running' ? '0.85rem' : '0.75rem',
+                fontWeight: 800,
               }}
             >
               {stateGlyph(states[i])}
@@ -279,8 +286,9 @@ export default function SampleJobsCreator() {
             p: '10px 14px',
             maxHeight: 190,
             overflowY: 'auto',
-            bgcolor: 'rgba(0,0,0,0.35)',
-            border: '1px solid rgba(0,255,195,0.08)',
+            bgcolor: isDark ? 'rgba(0,0,0,0.35)' : '#f8fafc',
+            border: 1,
+            borderColor: isDark ? 'rgba(0,255,195,0.08)' : 'divider',
             borderRadius: 1,
             '&::-webkit-scrollbar': { display: 'none' },
           }}
@@ -290,20 +298,21 @@ export default function SampleJobsCreator() {
               key={i}
               sx={{ display: 'flex', gap: 1, mb: '1px', fontSize: '0.68rem', lineHeight: 1.75 }}
             >
-              <Box component="span" sx={{ color: 'rgba(255,255,255,0.18)', minWidth: 70, flexShrink: 0 }}>
+              <Box component="span" sx={{ color: 'text.disabled', minWidth: 70, flexShrink: 0 }}>
                 [{entry.ts}]
               </Box>
               <Box
                 component="span"
-                sx={{ color: TYPE_COLOR[entry.type], minWidth: 36, flexShrink: 0, fontWeight: 700 }}
+                sx={{ color: typeColors[entry.type], minWidth: 36, flexShrink: 0, fontWeight: 700 }}
               >
                 {TYPE_LABEL[entry.type]}
               </Box>
               <Box
                 component="span"
                 sx={{
-                  color: entry.type === 'exec' ? 'rgba(224,230,237,0.85)' : '#e0e6ed',
+                  color: entry.type === 'exec' ? (isDark ? 'rgba(224,230,237,0.85)' : 'primary.dark') : 'text.primary',
                   wordBreak: 'break-all',
+                  fontWeight: entry.type === 'ok' ? 600 : 400,
                 }}
               >
                 {entry.text}
@@ -317,51 +326,43 @@ export default function SampleJobsCreator() {
       <Button
         fullWidth
         variant="outlined"
-        startIcon={<PlayArrow sx={{ fontSize: '14px !important' }} />}
+        startIcon={running ? <CircularProgress size={14} color="inherit" /> : <PlayArrow sx={{ fontSize: '14px !important' }} />}
         onClick={run}
         disabled={running || !connected}
         sx={{
-          fontFamily: '"JetBrains Mono","Fira Code","Courier New",monospace',
+          fontFamily: '"JetBrains Mono", monospace',
           fontSize: '0.77rem',
           letterSpacing: '0.04em',
-          py: 0.85,
-          borderColor: running
-            ? 'rgba(128,132,238,0.4)'
-            : 'rgba(0,255,195,0.3)',
-          color: running
-            ? '#8084ee'
-            : connected
-            ? '#00ffc3'
-            : 'rgba(255,255,255,0.22)',
+          py: 1,
+          fontWeight: 700,
+          borderColor: running ? alpha(secondaryMain, 0.4) : (connected ? alpha(primaryMain, 0.4) : 'divider'),
+          color: running ? secondaryMain : (connected ? primaryMain : 'text.disabled'),
           '&:hover': {
-            borderColor: '#00ffc3',
-            bgcolor: 'rgba(0,255,195,0.04)',
-          },
-          '&.Mui-disabled': {
-            color: running ? '#8084ee' : 'rgba(255,255,255,0.18)',
-            borderColor: running ? 'rgba(128,132,238,0.3)' : 'rgba(255,255,255,0.08)',
+            borderColor: primaryMain,
+            bgcolor: alpha(primaryMain, 0.05),
           },
         }}
       >
         {running
-          ? `> executing batch... [${completedCount}/${SAMPLE_JOBS.length}]`
+          ? `EXECUTING BATCH... [${completedCount}/${SAMPLE_JOBS.length}]`
           : done
-          ? '> run again'
-          : '> run create_sample_jobs'}
+          ? 'RUN BATCH AGAIN'
+          : 'GENERATE SAMPLE JOBS'}
       </Button>
 
       {/* Not connected hint */}
       {!connected && (
         <Box
           sx={{
-            mt: 0.75,
+            mt: 1,
             fontSize: '0.67rem',
-            color: '#e04d01',
+            color: theme.palette.warning.main,
             textAlign: 'center',
             letterSpacing: '0.02em',
+            fontWeight: 600,
           }}
         >
-          [WARN] wallet not connected — connect wallet to proceed
+          [WARN] wallet not connected — connect to proceed
         </Box>
       )}
     </Box>

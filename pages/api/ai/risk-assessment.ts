@@ -336,6 +336,8 @@ export default async function handler(
   res: NextApiResponse<RiskAssessmentResult | ErrorResponse>,
 ) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  const { aiRateLimit } = await import('../../../src/utils/rateLimit');
+  if (!aiRateLimit(req, res)) return;
 
   const { jobDescription, cvText = '', cvUri, jobTitle, bidBudgetSol, jobBudgetSol, bidTimelineDays }: RiskAssessmentRequest = req.body;
 

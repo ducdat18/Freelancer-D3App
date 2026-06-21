@@ -73,22 +73,23 @@ export default function DirectHire() {
     }
 
     try {
-      // Add note to metadata that this is a private job
+      const deadlineTimestamp = Math.floor(data.deadline.getTime() / 1000);
+
+      // Add deadline/budget to metadata and mark as private
       const privateMetadata = {
         ...data.metadata,
         isPrivate: true,
         invitedFreelancer: freelancer,
+        deadline: deadlineTimestamp,
+        budgetSol: data.budget,
         notes: `Private job for ${formatAddress(freelancer)}. ${data.metadata.notes || ''}`,
       };
 
-      // Upload metadata to IPFS
       const ipfsHash = await upload(privateMetadata);
       if (!ipfsHash) {
         throw new Error('Failed to upload metadata to IPFS');
       }
 
-      // Create job on blockchain
-      const deadlineTimestamp = Math.floor(data.deadline.getTime() / 1000);
       const result = await createJob(
         data.title,
         data.description,

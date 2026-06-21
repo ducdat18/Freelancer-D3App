@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Box,
   TextField,
@@ -14,7 +14,13 @@ import {
   Chip,
   Switch,
   FormControlLabel,
+  Tooltip,
+  Snackbar,
+  Collapse,
+  useTheme,
 } from '@mui/material';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import SaveIcon from '@mui/icons-material/Save';
 import MilestoneBuilder from './job/MilestoneBuilder';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -26,6 +32,7 @@ import {
   validateDeadline,
 } from '../utils/validation';
 import type { JobMetadata } from '../types';
+import { useJobDraft } from '../hooks/useJobDraft';
 
 // Common SPL token mints (Devnet)
 const TOKEN_OPTIONS = [
@@ -40,6 +47,14 @@ export interface MilestoneInput {
   amount: number;
 }
 
+interface AIPricingSuggestion {
+  minPrice: number;
+  maxPrice: number;
+  recommendedPrice: number;
+  marketAverage: number;
+  confidence: number;
+}
+
 interface JobFormProps {
   onSubmit: (data: {
     title: string;
@@ -48,14 +63,17 @@ interface JobFormProps {
     deadline: Date;
     metadata: JobMetadata;
     tokenMint?: string | null;
+    depositNow?: boolean;
     useMilestones?: boolean;
     milestones?: MilestoneInput[];
   }) => void;
   isLoading?: boolean;
   error?: string | null;
+  /** Pre-fill form from an existing draft ID */
+  draftId?: string;
 }
 
-export default function JobForm({ onSubmit, isLoading, error }: JobFormProps) {
+export default function JobForm({ onSubmit, isLoading, error, draftId }: JobFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [budget, setBudget] = useState('');
@@ -63,12 +81,111 @@ export default function JobForm({ onSubmit, isLoading, error }: JobFormProps) {
   const [category, setCategory] = useState('');
   const [skills, setSkills] = useState('');
   const [paymentToken, setPaymentToken] = useState('SOL');
+  const [depositNow, setDepositNow] = useState(false);
   const [useMilestones, setUseMilestones] = useState(false);
   const [milestones, setMilestones] = useState<MilestoneInput[]>([
     { title: '', description: '', amount: 0 },
   ]);
 
+  // AI pricing state
+  const [aiPricing, setAiPricing] = useState<AIPricingSuggestion | null>(null);
+  const [aiPricingLoading, setAiPricingLoading] = useState(false);
+  const [aiPricingError, setAiPricingError] = useState<string | null>(null);
+
+  // Draft state
+  const [draftSnackbar, setDraftSnackbar] = useState(false);
+  const [activeDraftId, setActiveDraftId] = useState<string | undefined>(draftId);
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const { saveDraft, loadDraft } = useJobDraft();
+
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+  const secondaryMain = theme.palette.secondary.main;
+
+  // Load draft on mount if draftId provided
+  useEffect(() => {
+    if (!draftId) return;
+    const draft = loadDraft(draftId);
+    if (!draft) return;
+    setTitle(draft.title ?? '');
+    setDescription(draft.description ?? '');
+    setBudget(draft.budget ?? '');
+    setDeadline(draft.deadline ? new Date(draft.deadline) : null);
+    setCategory(draft.metadata?.category ?? '');
+    setSkills((draft.metadata?.skills ?? []).join(', '));
+    setUseMilestones(draft.useMilestones ?? false);
+    setMilestones(draft.milestones?.length ? draft.milestones : [{ title: '', description: '', amount: 0 }]);
+    setActiveDraftId(draftId);
+  }, [draftId]);
+
+  // Auto-save draft 30s after last change
+  const scheduleAutoSave = useCallback(() => {
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(() => {
+      const id = saveDraft({
+        id: activeDraftId,
+        title,
+        description,
+        budget,
+        deadline: deadline ?? null,
+        metadata: { category, skills: skills.split(',').map(s => s.trim()).filter(Boolean) },
+        useMilestones,
+        milestones,
+      });
+      setActiveDraftId(id);
+      setDraftSnackbar(true);
+    }, 30_000);
+  }, [activeDraftId, title, description, budget, deadline, category, skills, useMilestones, milestones, saveDraft]);
+
+  useEffect(() => { scheduleAutoSave(); }, [title, description, budget, deadline, category, skills, useMilestones, milestones]);
+
+  const handleSaveDraft = () => {
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    const id = saveDraft({
+      id: activeDraftId,
+      title,
+      description,
+      budget,
+      deadline: deadline ?? null,
+      metadata: { category, skills: skills.split(',').map(s => s.trim()).filter(Boolean) },
+      useMilestones,
+      milestones,
+    });
+    setActiveDraftId(id);
+    setDraftSnackbar(true);
+  };
+
+  // AI pricing suggestion
+  const handleGetAIPricing = async () => {
+    if (!description) {
+      setAiPricingError('Add a description first');
+      return;
+    }
+    setAiPricingLoading(true);
+    setAiPricingError(null);
+    try {
+      const res = await fetch('/api/ai/pricing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobDescription: description,
+          skills: skills.split(',').map(s => s.trim()).filter(Boolean),
+          complexity: 'medium',
+          timelineDays: 14,
+        }),
+      });
+      if (!res.ok) throw new Error('AI pricing request failed');
+      const data: AIPricingSuggestion = await res.json();
+      setAiPricing(data);
+    } catch (e) {
+      setAiPricingError(e instanceof Error ? e.message : 'Failed to get AI pricing');
+    } finally {
+      setAiPricingLoading(false);
+    }
+  };
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -117,6 +234,7 @@ export default function JobForm({ onSubmit, isLoading, error }: JobFormProps) {
       deadline: deadline!,
       metadata,
       tokenMint: selectedToken?.mint || null,
+      depositNow,
       useMilestones,
       milestones: useMilestones ? milestones.filter(m => m.title && m.amount > 0) : undefined,
     });
@@ -125,9 +243,11 @@ export default function JobForm({ onSubmit, isLoading, error }: JobFormProps) {
   return (
     <Box
       sx={{
-        border: '1px solid rgba(0,255,195,0.08)',
+        border: 1,
+        borderColor: 'divider',
         borderRadius: 2,
         overflow: 'hidden',
+        bgcolor: 'background.paper',
       }}
     >
       {error && (
@@ -142,11 +262,11 @@ export default function JobForm({ onSubmit, isLoading, error }: JobFormProps) {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
             <Typography
               variant="overline"
-              sx={{ color: '#00ffc3', letterSpacing: 3, fontSize: '0.6rem' }}
+              sx={{ color: primaryMain, letterSpacing: 3, fontSize: '0.6rem', fontWeight: 700 }}
             >
               BASIC INFO
             </Typography>
-            <Box sx={{ flex: 1, height: '1px', bgcolor: 'rgba(0,255,195,0.08)' }} />
+            <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
           </Box>
 
           <TextField
@@ -182,11 +302,11 @@ export default function JobForm({ onSubmit, isLoading, error }: JobFormProps) {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
             <Typography
               variant="overline"
-              sx={{ color: '#00ffc3', letterSpacing: 3, fontSize: '0.6rem' }}
+              sx={{ color: primaryMain, letterSpacing: 3, fontSize: '0.6rem', fontWeight: 700 }}
             >
               PROJECT DETAILS
             </Typography>
-            <Box sx={{ flex: 1, height: '1px', bgcolor: 'rgba(0,255,195,0.08)' }} />
+            <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
           </Box>
 
           {/* Payment Token Selection */}
@@ -215,6 +335,7 @@ export default function JobForm({ onSubmit, isLoading, error }: JobFormProps) {
           </FormControl>
 
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mb: 2 }}>
+          <Box>
             <TextField
               fullWidth
               label="Budget"
@@ -233,6 +354,53 @@ export default function JobForm({ onSubmit, isLoading, error }: JobFormProps) {
               }}
               disabled={isLoading}
             />
+            {/* AI pricing suggestion */}
+            <Box sx={{ mt: 1, display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={aiPricingLoading ? <CircularProgress size={12} /> : <AutoAwesomeIcon sx={{ fontSize: 14 }} />}
+                onClick={handleGetAIPricing}
+                disabled={aiPricingLoading || isLoading || !description}
+                sx={{ fontSize: '0.72rem', textTransform: 'none', py: 0.25, px: 1 }}
+              >
+                AI Price Suggest
+              </Button>
+              {aiPricingError && (
+                <Typography variant="caption" color="error">{aiPricingError}</Typography>
+              )}
+            </Box>
+            <Collapse in={!!aiPricing}>
+              {aiPricing && (
+                <Box
+                  sx={{
+                    mt: 1, px: 1.5, py: 1,
+                    border: 1,
+                    borderColor: isDark ? 'rgba(0,255,195,0.2)' : 'primary.light',
+                    borderRadius: 1.5,
+                    bgcolor: isDark ? 'rgba(0,255,195,0.04)' : 'primary.50',
+                    display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap',
+                  }}
+                >
+                  <AutoAwesomeIcon sx={{ fontSize: 14, color: 'primary.main' }} />
+                  <Typography variant="caption" color="primary.main" fontWeight={600}>
+                    Recommended: {aiPricing.recommendedPrice} SOL
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Range: {aiPricing.minPrice}–{aiPricing.maxPrice} SOL · Confidence: {Math.round(aiPricing.confidence * 100)}%
+                  </Typography>
+                  <Button
+                    size="small"
+                    variant="text"
+                    onClick={() => setBudget(String(aiPricing.recommendedPrice))}
+                    sx={{ fontSize: '0.7rem', textTransform: 'none', py: 0, px: 0.5, minWidth: 0 }}
+                  >
+                    Use
+                  </Button>
+                </Box>
+              )}
+            </Collapse>
+          </Box>
 
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DateTimePicker
@@ -278,11 +446,11 @@ export default function JobForm({ onSubmit, isLoading, error }: JobFormProps) {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
             <Typography
               variant="overline"
-              sx={{ color: '#9945ff', letterSpacing: 3, fontSize: '0.6rem' }}
+              sx={{ color: secondaryMain, letterSpacing: 3, fontSize: '0.6rem', fontWeight: 700 }}
             >
               MILESTONES
             </Typography>
-            <Box sx={{ flex: 1, height: '1px', bgcolor: 'rgba(153,69,255,0.1)' }} />
+            <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
           </Box>
 
           <FormControlLabel
@@ -315,27 +483,84 @@ export default function JobForm({ onSubmit, isLoading, error }: JobFormProps) {
           )}
         </Box>
 
+        {/* Escrow Deposit Section */}
+        <Box sx={{ mb: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
+            <Typography
+              variant="overline"
+              sx={{ color: primaryMain, letterSpacing: 3, fontSize: '0.6rem', fontWeight: 700 }}
+            >
+              ESCROW
+            </Typography>
+            <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
+          </Box>
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={depositNow}
+                onChange={(e) => setDepositNow(e.target.checked)}
+                disabled={isLoading}
+              />
+            }
+            label={
+              <Box>
+                <Typography variant="body2" fontWeight={600}>
+                  Deposit budget now
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Lock funds on-chain immediately after posting. Freelancers can see the escrow is funded.
+                </Typography>
+              </Box>
+            }
+            sx={{ alignItems: 'flex-start', ml: 0 }}
+          />
+        </Box>
+
         {/* Submit Section */}
         <Box
           sx={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
-            pt: 3, borderTop: '1px solid rgba(0,255,195,0.08)',
+            pt: 3, borderTop: 1, borderColor: 'divider',
           }}
         >
           <Typography variant="caption" color="text.secondary" sx={{ mb: 2, textAlign: 'center' }}>
-            Job posted on-chain · funds deposited into escrow · released on approval
+            Job posted on-chain · {depositNow ? 'funds locked in escrow on submit' : 'deposit escrow later from the job page'} · released on approval
           </Typography>
-          <Button
-            type="submit"
-            variant="contained"
-            size="large"
-            sx={{ px: 6, py: 1.5, fontSize: '0.95rem', minWidth: 220 }}
-            disabled={isLoading}
-          >
-            {isLoading ? <CircularProgress size={22} /> : 'Create Job & Deposit'}
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Tooltip title="Save as draft (auto-saves every 30s)">
+              <Button
+                variant="outlined"
+                size="large"
+                startIcon={<SaveIcon />}
+                onClick={handleSaveDraft}
+                disabled={isLoading}
+                sx={{ px: 3, py: 1.5 }}
+              >
+                Save Draft
+              </Button>
+            </Tooltip>
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              sx={{ px: 6, py: 1.5, fontSize: '0.95rem', minWidth: 220 }}
+              disabled={isLoading}
+            >
+              {isLoading ? <CircularProgress size={22} /> : depositNow ? 'Create Job & Deposit' : 'Post Job'}
+            </Button>
+          </Box>
         </Box>
       </Box>
+
+      {/* Draft saved snackbar */}
+      <Snackbar
+        open={draftSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setDraftSnackbar(false)}
+        message="Draft saved"
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
     </Box>
   );
 }

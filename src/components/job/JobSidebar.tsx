@@ -6,6 +6,7 @@ import {
   Avatar,
   Divider,
   Link as MuiLink,
+  useTheme,
 } from '@mui/material';
 import Link from 'next/link';
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
@@ -49,14 +50,19 @@ export default function JobSidebar({
   getStatusText,
   getEscrowStatus,
 }: JobSidebarProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+  const secondaryMain = theme.palette.secondary.main;
+
   return (
     <>
       {/* Client Info */}
-      <Card sx={{ mb: 2, border: '1px solid rgba(0,255,195,0.08)' }}>
+      <Card sx={{ mb: 2, border: 1, borderColor: 'divider' }}>
         <CardContent sx={{ p: 2.5 }}>
           <Typography
             variant="overline"
-            sx={{ color: '#00ffc3', letterSpacing: 3, fontSize: '0.6rem', display: 'block', mb: 2 }}
+            sx={{ color: primaryMain, letterSpacing: 3, fontSize: '0.6rem', display: 'block', mb: 2, fontWeight: 700 }}
           >
             CLIENT
           </Typography>
@@ -64,8 +70,8 @@ export default function JobSidebar({
             <Avatar
               sx={{
                 width: 44, height: 44,
-                background: 'linear-gradient(135deg, #00ffc3 0%, #9945ff 100%)',
-                color: '#000', fontFamily: '"Orbitron", monospace', fontWeight: 700, fontSize: '0.85rem',
+                background: `linear-gradient(135deg, ${primaryMain} 0%, ${secondaryMain} 100%)`,
+                color: theme.palette.primary.contrastText, fontFamily: '"Orbitron", monospace', fontWeight: 700, fontSize: '0.85rem',
               }}
             >
               {job.client.toBase58().slice(0, 2).toUpperCase()}
@@ -83,11 +89,11 @@ export default function JobSidebar({
       </Card>
 
       {/* Job Details */}
-      <Card sx={{ mb: 2, border: '1px solid rgba(0,255,195,0.08)' }}>
+      <Card sx={{ mb: 2, border: 1, borderColor: 'divider' }}>
         <CardContent sx={{ p: 2.5 }}>
           <Typography
             variant="overline"
-            sx={{ color: '#00ffc3', letterSpacing: 3, fontSize: '0.6rem', display: 'block', mb: 2 }}
+            sx={{ color: primaryMain, letterSpacing: 3, fontSize: '0.6rem', display: 'block', mb: 2, fontWeight: 700 }}
           >
             JOB DETAILS
           </Typography>
@@ -97,8 +103,8 @@ export default function JobSidebar({
               label: 'Budget',
               value: (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <SolanaIconSimple sx={{ fontSize: 13, color: '#00ffc3' }} />
-                  <Typography variant="body2" fontWeight={700} sx={{ fontFamily: '"Orbitron", monospace', color: '#00ffc3', fontSize: '0.82rem' }}>
+                  <SolanaIconSimple sx={{ fontSize: 13, color: primaryMain }} />
+                  <Typography variant="body2" fontWeight={700} sx={{ fontFamily: '"Orbitron", monospace', color: primaryMain, fontSize: '0.82rem' }}>
                     {formatSol(budgetInSol)}
                   </Typography>
                 </Box>
@@ -123,7 +129,7 @@ export default function JobSidebar({
             </Box>
           ))}
 
-          <Divider sx={{ my: 2, borderColor: 'rgba(0,255,195,0.08)' }} />
+          <Divider sx={{ my: 2, borderColor: 'divider' }} />
 
           {/* Escrow Status Indicator */}
           <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
@@ -140,11 +146,11 @@ export default function JobSidebar({
       {/* Selected Freelancer */}
       {job.selectedFreelancer &&
         !job.selectedFreelancer.equals(PublicKey.default) && (
-          <Card sx={{ mb: 2, border: '1px solid rgba(128,132,238,0.15)' }}>
+          <Card sx={{ mb: 2, border: 1, borderColor: isDark ? `${secondaryMain}40` : `${secondaryMain}60` }}>
             <CardContent sx={{ p: 2.5 }}>
               <Typography
                 variant="overline"
-                sx={{ color: '#8084ee', letterSpacing: 3, fontSize: '0.6rem', display: 'block', mb: 2 }}
+                sx={{ color: secondaryMain, letterSpacing: 3, fontSize: '0.6rem', display: 'block', mb: 2, fontWeight: 700 }}
               >
                 ASSIGNED FREELANCER
               </Typography>
@@ -152,8 +158,8 @@ export default function JobSidebar({
                 <Avatar
                   sx={{
                     width: 44, height: 44,
-                    background: 'linear-gradient(135deg, #8084ee 0%, #00ffc3 100%)',
-                    color: '#000', fontFamily: '"Orbitron", monospace', fontWeight: 700, fontSize: '0.85rem',
+                    background: `linear-gradient(135deg, ${secondaryMain} 0%, ${primaryMain} 100%)`,
+                    color: '#fff', fontFamily: '"Orbitron", monospace', fontWeight: 700, fontSize: '0.85rem',
                   }}
                 >
                   {job.selectedFreelancer.toBase58().slice(0, 2).toUpperCase()}
@@ -172,11 +178,11 @@ export default function JobSidebar({
         )}
 
       {/* Job Status Timeline */}
-      <Card sx={{ mt: 2, border: '1px solid rgba(0,255,195,0.08)' }}>
+      <Card sx={{ mt: 2, border: 1, borderColor: 'divider' }}>
         <CardContent sx={{ p: 2.5 }}>
           <Typography
             variant="overline"
-            sx={{ color: '#00ffc3', letterSpacing: 3, fontSize: '0.6rem', display: 'block', mb: 2 }}
+            sx={{ color: primaryMain, letterSpacing: 3, fontSize: '0.6rem', display: 'block', mb: 2, fontWeight: 700 }}
           >
             PROGRESS
           </Typography>
@@ -194,7 +200,7 @@ export default function JobSidebar({
 
       {/* Milestone Escrow Status */}
       {hasMilestones && jobPda && (
-        <Card sx={{ mt: 2, border: '1px solid rgba(0,255,195,0.08)' }}>
+        <Card sx={{ mt: 2, border: 1, borderColor: 'divider' }}>
           <CardContent sx={{ p: 2.5 }}>
             <MilestoneEscrowStatus jobPda={jobPda} />
           </CardContent>
@@ -213,7 +219,7 @@ export default function JobSidebar({
 
       {/* IPFS Metadata */}
       {job.metadataUri && (
-        <Card sx={{ mt: 2, border: '1px solid rgba(0,255,195,0.06)' }}>
+        <Card sx={{ mt: 2, border: 1, borderColor: 'divider' }}>
           <CardContent sx={{ p: 2 }}>
             <Typography
               variant="overline"

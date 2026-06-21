@@ -1,5 +1,5 @@
 import { Star, StarBorder } from '@mui/icons-material'
-import { Box, Rating as MuiRating, Typography } from '@mui/material'
+import { Box, Rating as MuiRating, Typography, useTheme } from '@mui/material'
 
 interface RatingStarsProps {
   rating: number
@@ -18,6 +18,9 @@ export default function RatingStars({
   showNumber = true,
   onChange,
 }: RatingStarsProps) {
+  const theme = useTheme()
+  const isDark = theme.palette.mode === 'dark'
+  
   const sizeMap = {
     small: 16,
     medium: 24,
@@ -41,20 +44,23 @@ export default function RatingStars({
         sx={{
           fontSize: sizeMap[size],
           '& .MuiRating-iconFilled': {
-            color: '#ffc107',
+            color: isDark ? '#ffc107' : '#f59e0b', // Slightly darker amber for light mode
           },
           '& .MuiRating-iconHover': {
-            color: '#ffb300',
+            color: isDark ? '#ffb300' : '#d97706',
           },
+          '& .MuiRating-iconEmpty': {
+            color: 'text.disabled',
+          }
         }}
       />
       {showNumber && (
         <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-          <Typography variant="body2" fontWeight={600}>
+          <Typography variant="body2" fontWeight={700}>
             {rating.toFixed(1)}
           </Typography>
           {totalReviews !== undefined && (
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
               ({totalReviews} {totalReviews === 1 ? 'review' : 'reviews'})
             </Typography>
           )}

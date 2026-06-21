@@ -79,16 +79,19 @@ export function useIdentityVerification(address: string | null) {
     setRecord(null);
   }, [address]);
 
-  /** Sync from on-chain record — call when localStorage is empty but chain has data */
+  /**
+   * Sync from on-chain record — call when localStorage is empty but chain has data.
+   * Note: faceDistance is NOT synced from chain (it's no longer stored on-chain;
+   * only the verification_hash commitment is kept there).
+   */
   const syncFromChain = useCallback(
-    (chainStatus: VerificationStatus, chainIdType: IdentityRecord['idType'], submittedAtSec: number, verifiedAtSec: number, faceDistanceBp: number) => {
+    (chainStatus: VerificationStatus, chainIdType: IdentityRecord['idType'], submittedAtSec: number, verifiedAtSec: number) => {
       if (!address) return;
       const rec: IdentityRecord = {
         address,
         status: chainStatus,
         idType: chainIdType,
         submittedAt: submittedAtSec * 1000,
-        faceDistance: faceDistanceBp / 10000,
         ...(chainStatus === 'verified' ? { verifiedAt: verifiedAtSec * 1000 } : {}),
       };
       save(rec);

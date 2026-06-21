@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
+  useTheme,
 } from '@mui/material';
 import { Close, Lock } from '@mui/icons-material';
 import type { BidWithDetails } from '../../../hooks/useOptimizedBids';
@@ -36,6 +37,9 @@ export default function AcceptBidDialog({
   onAccept,
   onClose,
 }: AcceptBidDialogProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   const formatAddress = (address: any) => {
     const addr = address.toBase58();
     return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
@@ -50,23 +54,24 @@ export default function AcceptBidDialog({
     >
       <DialogTitle>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6" fontWeight={600}>
+          <Typography variant="h6" fontWeight={700}>
             Accept Bid
           </Typography>
           <IconButton
             onClick={onClose}
             disabled={accepting}
+            size="small"
           >
             <Close />
           </IconButton>
         </Box>
       </DialogTitle>
-      <DialogContent>
+      <DialogContent dividers={!isDark}>
         {bid && (
           <Box>
             {/* ✅ NEW: Enhanced info about composite transaction */}
             <Alert severity="info" icon={<Lock />} sx={{ mb: 2 }}>
-              <Typography variant="body2" fontWeight={600} gutterBottom>
+              <Typography variant="body2" fontWeight={700} gutterBottom>
                 🔒 Secure 2-in-1 Transaction
               </Typography>
               <Typography variant="body2">
@@ -80,8 +85,8 @@ export default function AcceptBidDialog({
             </Alert>
 
             {/* Bid Details */}
-            <Box sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1, mb: 2 }}>
-              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+            <Box sx={{ p: 2, bgcolor: isDark ? 'background.default' : 'grey.50', border: 1, borderColor: 'divider', borderRadius: 1, mb: 2 }}>
+              <Typography variant="caption" color="text.secondary" gutterBottom sx={{ display: 'block', fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
                 Bid Details
               </Typography>
               <Typography variant="body2" gutterBottom>
@@ -93,11 +98,11 @@ export default function AcceptBidDialog({
               <Typography variant="body2" gutterBottom>
                 <strong>Timeline:</strong> {bid.account.timelineDays} days
               </Typography>
-              <Divider sx={{ my: 1 }} />
+              <Divider sx={{ my: 1.5 }} />
               <Typography variant="body2" color="text.secondary">
                 <strong>Transaction Fee:</strong> ~{estimatedFee.toFixed(4)} SOL
               </Typography>
-              <Typography variant="body2" fontWeight={600} sx={{ mt: 1 }}>
+              <Typography variant="body2" fontWeight={700} sx={{ mt: 1, color: 'primary.main' }}>
                 <strong>Total Required:</strong> {(bid.budgetInSol + estimatedFee).toFixed(4)} SOL
               </Typography>
             </Box>
@@ -112,7 +117,7 @@ export default function AcceptBidDialog({
                   <strong>Your Balance:</strong> {balanceCheck.balance.toFixed(4)} SOL
                 </Typography>
                 {!balanceCheck.sufficient && (
-                  <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                  <Typography variant="body2" color="error" sx={{ mt: 1, fontWeight: 600 }}>
                     ⚠️ Insufficient funds. You need {balanceCheck.required.toFixed(4)} SOL but only have {balanceCheck.balance.toFixed(4)} SOL.
                   </Typography>
                 )}
@@ -128,7 +133,7 @@ export default function AcceptBidDialog({
 
             {/* ✅ NEW: Security info */}
             <Alert severity="success" sx={{ mt: 2 }}>
-              <Typography variant="caption">
+              <Typography variant="caption" sx={{ fontWeight: 500 }}>
                 ✅ Funds are protected: Payment will only be released when you approve the completed work.
               </Typography>
             </Alert>
@@ -148,6 +153,7 @@ export default function AcceptBidDialog({
           onClick={onAccept}
           disabled={accepting || !!(balanceCheck && !balanceCheck.sufficient)}
           startIcon={accepting ? <CircularProgress size={20} /> : <Lock />}
+          sx={{ fontWeight: 700 }}
         >
           {accepting ? 'Processing Transaction...' : 'Accept & Deposit Escrow'}
         </Button>
