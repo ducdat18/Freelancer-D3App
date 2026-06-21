@@ -151,58 +151,6 @@ export function useJobs(params?: UseJobsParams) {
   );
 
   /**
-   * Repost a cancelled or expired job by creating a new job on-chain
-   * using the original job's metadata with an updated deadline.
-   */
-  const repostJob = useCallback(
-    async (
-      originalJobPda: PublicKey,
-      newDeadline: Date,
-      newBudgetSol?: string
-    ) => {
-      if (!program || !publicKey) throw new Error("Wallet not connected");
-
-      const originalJob = await fetchJob(originalJobPda);
-      if (!originalJob) throw new Error("Original job not found");
-
-      const overrideKey = `job_metadata_override_${originalJobPda.toBase58()}`;
-      const overrideCid = typeof window !== "undefined"
-        ? localStorage.getItem(overrideKey)
-        : null;
-
-      const metadataCid = overrideCid || originalJob.metadataUri;
-      const existingMeta: JobMetadata | null = await fetchFromIPFS(metadataCid);
-
-      const budgetSol = newBudgetSol
-        ?? (originalJob.budget.toNumber() / LAMPORTS_PER_SOL).toString();
-
-      const newMeta: JobMetadata = {
-        ...(existingMeta ?? {
-          title: originalJob.title,
-          description: originalJob.description,
-          category: "",
-          skills: [],
-        }),
-        deadline: Math.floor(newDeadline.getTime() / 1000),
-        budgetSol,
-      };
-
-      const newCid = await uploadToIPFS(newMeta);
-      if (!newCid) throw new Error("Failed to upload repost metadata to IPFS");
-
-      return createJob(
-        originalJob.title,
-        originalJob.description,
-        budgetSol,
-        Math.floor(newDeadline.getTime() / 1000),
-        newCid,
-        undefined
-      );
-    },
-    [program, publicKey, fetchJob, createJob]
-  );
-
-  /**
    * Submit a bid for a job
    */
   const submitBid = useCallback(
@@ -319,6 +267,58 @@ export function useJobs(params?: UseJobsParams) {
       }
     },
     [program]
+  );
+
+  /**
+   * Repost a cancelled or expired job by creating a new job on-chain
+   * using the original job's metadata with an updated deadline.
+   */
+  const repostJob = useCallback(
+    async (
+      originalJobPda: PublicKey,
+      newDeadline: Date,
+      newBudgetSol?: string
+    ) => {
+      if (!program || !publicKey) throw new Error("Wallet not connected");
+
+      const originalJob = await fetchJob(originalJobPda);
+      if (!originalJob) throw new Error("Original job not found");
+
+      const overrideKey = `job_metadata_override_${originalJobPda.toBase58()}`;
+      const overrideCid = typeof window !== "undefined"
+        ? localStorage.getItem(overrideKey)
+        : null;
+
+      const metadataCid = overrideCid || originalJob.metadataUri;
+      const existingMeta: JobMetadata | null = await fetchFromIPFS(metadataCid);
+
+      const budgetSol = newBudgetSol
+        ?? (originalJob.budget.toNumber() / LAMPORTS_PER_SOL).toString();
+
+      const newMeta: JobMetadata = {
+        ...(existingMeta ?? {
+          title: originalJob.title,
+          description: originalJob.description,
+          category: "",
+          skills: [],
+        }),
+        deadline: Math.floor(newDeadline.getTime() / 1000),
+        budgetSol,
+      };
+
+      const newCid = await uploadToIPFS(newMeta);
+      if (!newCid) throw new Error("Failed to upload repost metadata to IPFS");
+
+      return createJob(
+        originalJob.title,
+        originalJob.description,
+        budgetSol,
+        Math.floor(newDeadline.getTime() / 1000),
+        newCid,
+        undefined
+      );
+    },
+    [program, publicKey, fetchJob, createJob]
   );
 
   /**

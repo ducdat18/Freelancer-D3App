@@ -53,9 +53,7 @@ export function useJobDraft() {
       title: partial.title ?? '',
       description: partial.description ?? '',
       budget: partial.budget ?? '',
-      deadline: partial.deadline instanceof Date
-        ? (partial.deadline as Date).getTime()
-        : (partial.deadline ?? null),
+      deadline: partial.deadline ?? null,
       metadata: partial.metadata ?? {},
       useMilestones: partial.useMilestones ?? false,
       milestones: partial.milestones ?? [],
