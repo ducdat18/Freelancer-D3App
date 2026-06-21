@@ -1,10 +1,9 @@
 import { Connection, PublicKey, Keypair } from '@solana/web3.js';
+import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
+import { walletAdapterIdentity } from '@metaplex-foundation/umi-signer-wallet-adapters';
+import { createNft, mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata';
+import { generateSigner, percentAmount } from '@metaplex-foundation/umi';
 import { Achievement } from '../config/achievements';
-
-// Note: Metaplex SDK integration
-// This is a placeholder implementation. To fully implement:
-// 1. Install: npm install @metaplex-foundation/js @metaplex-foundation/mpl-token-metadata
-// 2. Import: import { Metaplex, walletAdapterIdentity } from '@metaplex-foundation/js';
 
 interface AchievementNFTMetadata {
   name: string;
@@ -125,34 +124,25 @@ export async function createAchievementNFT(
     // Upload metadata to IPFS
     const metadataUri = await uploadMetadataToIPFS(metadata, uploadToIPFS);
 
-    // TODO: Implement actual Metaplex NFT minting
-    // This is a placeholder that returns a dummy mint
-    // Real implementation:
-    /*
-    const metaplex = Metaplex.make(connection)
+    // Mint the NFT on-chain via Metaplex (umi + Token Metadata program).
+    const umi = createUmi(connection.rpcEndpoint)
+      .use(mplTokenMetadata())
       .use(walletAdapterIdentity(wallet));
 
-    const { nft } = await metaplex.nfts().create({
-      uri: metadataUri,
+    const mint = generateSigner(umi);
+
+    await createNft(umi, {
+      mint,
       name: metadata.name,
       symbol: metadata.symbol,
-      sellerFeeBasisPoints: 0,
+      uri: metadataUri,
+      sellerFeeBasisPoints: percentAmount(0),
       isMutable: false,
-      maxSupply: 1,
-    });
+    }).sendAndConfirm(umi);
 
     return {
-      nftMint: nft.mint.address,
-      metadataUri
-    };
-    */
-
-    // Placeholder: Generate a random mint address for testing
-    const dummyMint = Keypair.generate().publicKey;
-
-    return {
-      nftMint: dummyMint,
-      metadataUri
+      nftMint: new PublicKey(mint.publicKey.toString()),
+      metadataUri,
     };
   } catch (error) {
     console.error('Error creating achievement NFT:', error);

@@ -21,7 +21,7 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { getAchievementByType } from '../../config/achievements';
 import { useAchievements } from '../../hooks/useAchievements';
 import { useIPFS } from '../../hooks/useIPFS';
-import { mockCreateAchievementNFT } from '../../services/metaplex';
+import { createAchievementNFT } from '../../services/metaplex';
 
 interface MintAchievementDialogProps {
   achievementType: number;
@@ -71,11 +71,18 @@ export default function MintAchievementDialog({
       setActiveStep(1);
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Step 2: Mint NFT (using mock for now)
+      // Step 2: Mint the achievement NFT on-chain via Metaplex
       setActiveStep(2);
-      const { nftMint, metadataUri } = await mockCreateAchievementNFT(
+      const { nftMint } = await createAchievementNFT(
+        connection,
+        wallet,
         achievement,
-        wallet.publicKey.toBase58()
+        wallet.publicKey.toBase58(),
+        async (data) => {
+          const cid = await upload(data);
+          if (!cid) throw new Error('Failed to upload achievement metadata to IPFS');
+          return cid;
+        }
       );
 
       // Step 3: Record on-chain

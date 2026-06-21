@@ -71,9 +71,9 @@ export function useAIPricing() {
         body: JSON.stringify({ jobDescription, skills, complexity, timelineDays }),
       });
       if (!response.ok) throw new Error("Failed to get pricing suggestion");
-      const data = await response.json();
-      setSuggestion(data.suggestion || null);
-      return data.suggestion;
+      const data: PricingSuggestion = await response.json();
+      setSuggestion(data || null);
+      return data;
     } catch (err: any) {
       setError(err.message);
       return null;

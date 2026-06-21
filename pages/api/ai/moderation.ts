@@ -64,24 +64,56 @@ export default async function handler(
 
     const rules = contentTypeRules[contentType];
 
-    // TODO: Replace with actual AI moderation model integration
-    // Currently uses pattern-based detection as a placeholder
-
+    // ── Structural checks (length) run regardless of AI availability ──────────
     const flags: string[] = [];
     let totalWeight = 0;
 
-    // Check content length
     if (content.length > rules.maxLength) {
       flags.push('content_too_long');
       totalWeight += 0.3;
     }
-
     if (content.trim().length < rules.requiredMinLength) {
       flags.push('content_too_short');
       totalWeight += 0.5;
     }
 
-    // Check against flag patterns
+    // ── Real AI moderation via Groq, with pattern-based heuristic fallback ────
+    const { callGroqJSON, sanitize } = await import('../../../src/utils/aiHelpers');
+
+    const aiResult = await callGroqJSON<{
+      approved: boolean;
+      flags: string[];
+      confidence: number;
+      severity?: number;
+    }>(
+      `You are a content moderation system for a professional freelance marketplace. ` +
+      `Analyze the following ${contentType.replace('_', ' ')} for policy violations: scams, fraud, ` +
+      `phishing/credential theft, misleading financial claims, harassment, spam, illegal activity, ` +
+      `or otherwise inappropriate content.\n\n` +
+      `CONTENT:\n"""${sanitize(content).slice(0, 4000)}"""\n\n` +
+      `Output ONLY this JSON:\n` +
+      `{"approved": true, "severity": 0.0, "flags": ["snake_case_reason"], "confidence": 0.0}\n\n` +
+      `Rules:\n` +
+      `- severity: 0.0 (clean) to 1.0 (severe violation).\n` +
+      `- approved: true only if severity < 0.7.\n` +
+      `- flags: short snake_case reasons for any concerns (empty array if clean).\n` +
+      `- confidence: 0.0-1.0 how confident you are in this assessment.\n` +
+      `Output ONLY the JSON object.`,
+      { maxTokens: 400, temperature: 0.1 },
+    );
+
+    if (aiResult && typeof aiResult.approved === 'boolean' && Array.isArray(aiResult.flags)) {
+      // Merge structural flags with AI flags; structural issues can override approval.
+      const mergedFlags = Array.from(new Set([...flags, ...aiResult.flags.map(String)]));
+      const severity = typeof aiResult.severity === 'number' ? aiResult.severity : (aiResult.approved ? 0.1 : 0.8);
+      const approved = aiResult.approved && totalWeight < 0.7 && severity < 0.7;
+      const confidence = parseFloat(
+        Math.min(0.99, Math.max(0.5, typeof aiResult.confidence === 'number' ? aiResult.confidence : 0.7)).toFixed(2),
+      );
+      return res.status(200).json({ approved, flags: mergedFlags, confidence });
+    }
+
+    // ── Fallback: pattern-based detection ────────────────────────────────────
     for (const { pattern, flag, weight } of flagPatterns) {
       if (pattern.test(content)) {
         flags.push(flag);
@@ -89,17 +121,10 @@ export default async function handler(
       }
     }
 
-    // Calculate confidence (higher weight = more confident the content is problematic)
     const confidence = parseFloat(Math.min(0.99, 0.5 + totalWeight * 0.3).toFixed(2));
-
-    // Content is approved if total weight is below threshold
     const approved = totalWeight < 0.7;
 
-    return res.status(200).json({
-      approved,
-      flags,
-      confidence,
-    });
+    return res.status(200).json({ approved, flags, confidence });
   } catch (error: any) {
     console.error('Content moderation error:', error);
     return res.status(500).json({ error: 'Internal server error' });
