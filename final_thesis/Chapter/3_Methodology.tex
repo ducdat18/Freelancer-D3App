@@ -1,0 +1,78 @@
+This chapter presents the technologies that underpin FreelanceChain and the rationale for each selection.
+
+\section{Solana Blockchain}
+\label{section:3.1}
+
+Solana is a public, permissionless Layer-1 blockchain designed for high-performance decentralized applications \cite{yakovenko2018solana}. Its Proof-of-History (PoH) mechanism establishes a verifiable cryptographic clock that orders events prior to consensus, permitting validators to process transactions in parallel without coordination on event ordering. In combination with Tower BFT, Solana attains a theoretical throughput exceeding 65{,}000 \gls{tps} with average block confirmation of approximately 400~ms, sustained mainnet throughput has been observed in excess of 2{,}000 \gls{tps}, against Ethereum's practical ceiling of 15--30 \gls{tps} \cite{solana2021performance}.
+
+Unlike Ethereum's account-centric model, Solana enforces a strict separation between program code and account data. Programs are stateless executables, state resides in independent data accounts that programs may read and modify, enabling transaction-level parallelism over disjoint account sets. \textbf{Program Derived Addresses (PDAs)} are deterministic addresses obtained by hashing seeds with the program identifier, they possess no corresponding private key and may be signed for only by the owning program. FreelanceChain exploits this property extensively: every job, bid, escrow, milestone, KYC record, SBT, and governance proposal occupies a distinct PDA derived from semantically meaningful seeds.
+
+Solana was preferred over Ethereum for three reasons. First, \textbf{cost}: an average fee below USD\,0.001 against Ethereum's typical USD\,5--50, which is decisive given that an engagement may comprise many transactions. Second, \textbf{throughput}: Solana scales to millions of concurrent users, whereas Ethereum's 15--30 \gls{tps} would constitute a bottleneck. Third, \textbf{latency}: Solana's sub-second finality matches conventional web-application responsiveness, whereas Ethereum's 15-second blocks introduce perceptible delay. Polygon and Avalanche offer lower fees but compromise decentralization and lack the maturity of Anchor and SPL tooling.
+
+\section{Anchor Smart-Contract Framework}
+\label{section:3.2}
+
+Anchor~\cite{anchor2021} is a Rust-based development framework that subsumes the boilerplate of Solana program development: account validation, serialization, error handling, and Interface Definition Language (IDL) generation. Its declarative constraint system, illustrated by a representative account constraint such as \emph{\#[account(mut, has\_one = authority)]}, instructs the framework to emit validation code that executes before the instruction body, materially reducing exposure to missing ownership checks, account substitution, and integer overflow. The same mechanism supports deterministic PDA validation and first-use account initialization without hand-written boilerplate. The auto-generated IDL is consumed by the TypeScript SDK \emph{@coral-xyz/anchor} on the front-end, eliminating manual binary instruction construction. Given the eighteen modules required by FreelanceChain, Anchor was clearly preferred over raw Solana program development.
+
+\section{Rust}
+\label{section:3.3}
+
+Rust's ownership model enforces memory safety at compile time without a garbage collector, precluding use-after-free, null-pointer dereference, and data-race classes of defect \cite{rust2023}. Solana programs are compiled to BPF bytecode, for which Rust is the only officially supported source language. FreelanceChain's modules are organized within a single Cargo workspace, and the final binary is size-optimized through build configuration so that deployment remains practical on Solana Devnet.
+
+\section{Next.js and React}
+\label{section:3.4}
+
+React~\cite{react2023} supplies the declarative component model, allowing the front-end to be decomposed into reusable interface components. Next.js~\cite{nextjs2023} was selected because it combines public-page rendering with server-side endpoints for operations that should not run entirely in the browser (such as keeping the Groq API key off the client). The supporting front-end libraries provide state synchronization, interface components, and lightweight transitions; they are implementation choices rather than core research contributions, and the front-end is positioned as a working prototype rather than as a production-hardened deployment.
+
+\section{Face Recognition for KYC}
+\label{section:3.5}
+
+The threat addressed in this section is the \emph{Sybil attack}: a single adversary fabricating multiple wallet identities to inflate reputation scores, place collusive bids, or evade dispute-resolution outcomes. A naïve mitigation - requiring users to upload a passport scan and a selfie to a custodial server - merely shifts the problem from blockchain to a centralized honeypot. The design objective is therefore Sybil resistance \emph{without} biometric custody.
+
+The \emph{@vladmandic/face-api} library~\cite{vladmandic2021faceapi} is a maintained fork of \emph{face-api.js} and runs three networks in concert through TensorFlow.js: \textbf{TinyFaceDetector} localizes the face bounding box, \textbf{FaceLandmark68TinyNet} predicts 68 anchor points used to align the face into a canonical pose, and \textbf{FaceRecognitionNet} (ResNet-34) maps the aligned crop to a 128-dimensional descriptor $\mathbf{d} \in \mathbb{R}^{128}$. The descriptor is the key abstraction: it compresses the geometric signature of a face into a fixed-length vector, and small Euclidean distance between two such vectors implies (with high probability) that they originate from the same identity.
+
+Given descriptors $\mathbf{d}_{\text{doc}}$ (extracted from the identity document) and $\mathbf{d}_{\text{selfie}}$ (extracted from a live webcam capture),
+
+\begin{equation}
+    \delta = \left\| \mathbf{d}_{\text{doc}} - \mathbf{d}_{\text{selfie}} \right\|_2 = \sqrt{\sum_{i=1}^{128} \left( d_{\text{doc},i} - d_{\text{selfie},i} \right)^2}.
+\end{equation}
+
+If $\delta < 0.50$, the two faces are accepted as belonging to the same individual. The reference range $[0.45, 0.60]$ trades off two failure modes: an excessively tight threshold rejects legitimate users whose document photograph predates the selfie by several years or who are photographed under sub-optimal illumination, while an excessively loose threshold admits adversarial near-matches, including the deliberate use of similar-looking confederates. The midpoint $0.50$ was chosen on the basis of an illustrative threshold check reported in Section~\ref{section:5.3} (Table~\ref{table:kyc_threshold}); the check is not a statistically valid empirical evaluation and should be read accordingly. On-chain, the distance is stored as \emph{u32} basis points (\emph{face\_distance\_bp} $= \lfloor \delta \times 10{,}000 \rfloor$) so that the smart contract performs only integer arithmetic.
+
+\textbf{Privacy by construction.} All inference runs on the client; neither the raw image nor the 128-dimensional descriptor leaves the browser. The only on-chain residue is the document type, the integer distance, a boolean \emph{matched} flag, a status enumeration, and a SHA-256 hash. Under a strong adversarial model -- an attacker who reads the entire Solana ledger -- the recorded scalars are not, by themselves, sufficient to reconstruct a face, and the descriptor itself is not persisted. A server-side alternative (AWS Rekognition, Azure Face) might marginally improve accuracy but would reintroduce the very honeypot the design is intended to avoid. The reference ResNet-34 attains 99.38\% accuracy on the LFW benchmark~\cite{vladmandic2021faceapi}; this figure is reported by the upstream library and is not independently re-verified by this work.
+
+\section{AI Risk Assessment: Groq and LLaMA 3.3 70B}
+\label{section:3.6}
+
+The problem this subsystem addresses is the information asymmetry that arises when a client receives dozens of bids on a single listing. A typical bid bundles a self-reported CV, an asking price, and a promised delivery date - three quantities the client has no easy way to triangulate against one another. CVs may be inflated, budgets may be unrealistically low (a common bait-and-switch tactic), timelines may not survive contact with the scope they describe. The role of the AI is not to make the hiring decision, but to surface the inconsistencies that a human reviewer would catch only after several minutes of careful reading per bid.
+
+FreelanceChain delegates LLM inference to \emph{llama-3.3-70b-versatile} via the Groq API, which executes open-source models on custom Language Processing Units (LPUs) at substantially lower per-token latency than equivalent GPU inference. The AI subsystem is split into two functions: structured risk assessment and grounded conversational follow-up.
+
+\textbf{Four-dimensional scoring.} The risk-assessment route prompts the model to score the bid along four independent axes:
+\begin{itemize}[noitemsep]
+    \item \emph{matchScore} - alignment between the freelancer's declared skills and the job's stated requirements,
+    \item \emph{authenticityScore} - CV credibility, weighing timeline coherence, project specificity, and the prevalence of generic filler,
+    \item \emph{budgetScore} - reasonableness of the proposed bid relative to scope, complexity, and prevailing market rate,
+    \item \emph{timelineScore} - feasibility of the promised delivery window given the indicated skills.
+\end{itemize}
+
+The four scores are combined into a composite that privileges \emph{skill fit} and \emph{honesty} over financial parameters:
+
+\begin{equation}
+    S_{\text{composite}} = 0.35 \cdot S_{\text{match}} + 0.35 \cdot S_{\text{auth}} + 0.15 \cdot S_{\text{budget}} + 0.15 \cdot S_{\text{timeline}}, \quad S_{\text{risk}} = 100 - S_{\text{composite}}.
+\end{equation}
+
+The classification thresholds - \textsc{low} ($S_{\text{risk}} \leq 35$), \textsc{medium} ($35 < S_{\text{risk}} \leq 60$), and \textsc{high} ($S_{\text{risk}} > 60$) - were calibrated against the informal study reported in Section~5.4 so that the \textsc{medium} band captures candidates worth a second look rather than a quick reject.
+
+\textbf{Robust ingestion and parsing.} Because bid evidence may arrive as free text or uploaded documents, the subsystem normalizes textual input before prompting the model. LLM outputs are parsed against the expected score schema, with a fallback path that degrades malformed responses into partial scores rather than transaction-blocking errors.
+
+\textbf{Conversational grounding.} The \emph{risk-chat} route turns the static assessment into a dialogue. The full prior evaluation - the four scores, the findings list, and the recommendation - is embedded verbatim in the system prompt before the user's follow-up is appended. The model is instructed to respond in two to five sentences as a hiring advisor. This grounding strategy is what prevents the chat from drifting into generic LLM advice: when the client asks ``why is the budget score 70 and not higher?'', the model has the original justification to refer to, not a hallucinated reconstruction.
+
+\textbf{Choice of provider.} Groq with LLaMA~3.3 70B was preferred over GPT-4o, Gemini~1.5 Flash, and Claude on four grounds. First, Groq's LPU hardware sustains over 500 tokens per second on 70B models, yielding median end-to-end latencies below two seconds - fast enough that the assessment feels interactive rather than batch. Second, the free tier accommodates development and demonstration without a credit card. Third, LLaMA~3.3 70B is the current state of the art among open-source models for instruction following and structured JSON output, both of which the four-score schema depends on. Fourth, the open-source weights are amenable to self-hosting, leaving the door open to a fully sovereign deployment without re-architecting the prompts.
+
+\section{IPFS for Decentralized Storage}
+\label{section:3.7}
+
+\gls{ipfs}~\cite{ipfs2015} is a content-addressed peer-to-peer file system: a file's Content Identifier (CID) is stable across storage nodes, and content integrity is verifiable against the CID at retrieval. FreelanceChain employs IPFS for job-description metadata, CVs uploaded with bids, work-submission deliverables, dispute-evidence packages, and SBT metadata URIs. Only the CID is persisted on-chain, minimizing data footprint and rent cost. Full documents are retrieved client-side through an IPFS gateway. This architecture cleanly separates large mutable content (IPFS) from immutable transactional records (Solana).
+
+In summary, the selected stack is internally coherent: Solana's throughput and cost make frequent blockchain interactions feasible at the prototype level; Anchor's constraint system reduces a common class of smart-contract vulnerabilities; Next.js enables a prototype front-end with integrated server-side capabilities; \emph{face-api.js} supports a browser-side, privacy-respecting initial implementation of identity verification; Groq with LLaMA~3.3 70B provides AI-assisted advisory evaluation; and IPFS supplies decentralized document storage. Stronger claims about production-readiness and economic viability at scale are deferred to future work.

@@ -1,0 +1,32 @@
+% Code listing settings
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=5pt,
+  frame=single,
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=2,
+  showstringspaces=false,
+  captionpos=b
+}
+
+\lstdefinelanguage{Rust}{
+  keywords={fn, let, mut, pub, use, struct, impl, enum, match, if, else, for, while, return, self, Self, true, false, mod, trait, where, type, const, static, unsafe, extern, crate, super, in, as, ref, move, Box, Vec, Option, Result, Some, None, Ok, Err},
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  string=[b]",
+  morestring=[b]'
+}
+
+\lstdefinelanguage{TypeScript}{
+  keywords={const, let, var, function, return, if, else, for, while, class, interface, type, export, import, from, async, await, new, this, extends, implements, enum, readonly, private, public, protected, static, void, null, undefined, true, false, try, catch, finally, throw},
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  string=[b]",
+  morestring=[b]'
+}

@@ -1,0 +1,353 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1782029540398,
+  "projectRoot": "\\\\wsl.localhost\\Ubuntu-22.04\\home\\networkprogram\\freelance-dapp",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      },
+      {
+        "name": "Rust",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "Cargo.toml"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "next",
+        "version": "14.2.0",
+        "category": "fullstack"
+      },
+      {
+        "name": "react",
+        "version": "18.3.1",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "18.3.1",
+        "category": "frontend"
+      },
+      {
+        "name": "mocha",
+        "version": "10.8.2",
+        "category": "testing"
+      }
+    ],
+    "packageManager": "cargo",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": "cargo test",
+    "lintCommand": "npm run lint",
+    "devCommand": "npm run dev",
+    "scripts": {
+      "dev": "next dev",
+      "build": "next build",
+      "start": "next start",
+      "build:program": "cargo build-sbf",
+      "deploy": "anchor deploy",
+      "test:program": "anchor test",
+      "lint": "next lint",
+      "demo:jobs": "ts-node scripts/create-demo-jobs.ts",
+      "demo:clear": "echo 'Close all jobs and clean slate for new demo'"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": "type-based"
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "scripts",
+      "pages",
+      "test",
+      "src",
+      "tests",
+      "public"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 8,
+      "lastAccessed": 1782029540170,
+      "keyFiles": [
+        "simple-create-jobs.ts",
+        "deploy.ts",
+        "simulate-community-vote.ts",
+        "create-jobs-cli.ts",
+        "create-sample-jobs.ts"
+      ]
+    },
+    "pages": {
+      "path": "pages",
+      "purpose": "Page components",
+      "fileCount": 9,
+      "lastAccessed": 1782029540180,
+      "keyFiles": [
+        "dashboard.tsx",
+        "index.tsx",
+        "_app.tsx",
+        "about.tsx",
+        "_document.tsx"
+      ]
+    },
+    "api": {
+      "path": "api",
+      "purpose": "API routes",
+      "fileCount": 0,
+      "lastAccessed": 1782029540190,
+      "keyFiles": []
+    },
+    "target": {
+      "path": "target",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1782029540208,
+      "keyFiles": [
+        "CACHEDIR.TAG"
+      ]
+    },
+    "test": {
+      "path": "test",
+      "purpose": "Test files",
+      "fileCount": 0,
+      "lastAccessed": 1782029540215,
+      "keyFiles": []
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 1,
+      "lastAccessed": 1782029540222,
+      "keyFiles": [
+        "env.d.ts"
+      ]
+    },
+    "programs": {
+      "path": "programs",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1782029540230,
+      "keyFiles": []
+    },
+    "SOICT_DATN_Application_ENG_Template": {
+      "path": "SOICT_DATN_Application_ENG_Template",
+      "purpose": null,
+      "fileCount": 5,
+      "lastAccessed": 1782029540236,
+      "keyFiles": [
+        "main.tex",
+        "glossary.tex",
+        "Cover2.tex",
+        "Cover.tex",
+        "reference.bib"
+      ]
+    },
+    "styles": {
+      "path": "styles",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1782029540245,
+      "keyFiles": [
+        "globals.css"
+      ]
+    },
+    "migrations": {
+      "path": "migrations",
+      "purpose": "Database migrations",
+      "fileCount": 0,
+      "lastAccessed": 1782029540253,
+      "keyFiles": []
+    },
+    "final_thesis": {
+      "path": "final_thesis",
+      "purpose": null,
+      "fileCount": 23,
+      "lastAccessed": 1782029540261,
+      "keyFiles": [
+        "main.tex",
+        "main.log",
+        "glossary.tex",
+        "main.texZone.Identifier",
+        "module_map.png"
+      ]
+    },
+    "monitoring": {
+      "path": "monitoring",
+      "purpose": null,
+      "fileCount": 5,
+      "lastAccessed": 1782029540267,
+      "keyFiles": [
+        "prometheus.yml",
+        "docker-compose.yml",
+        "README.md"
+      ]
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "Test files",
+      "fileCount": 1,
+      "lastAccessed": 1782029540275,
+      "keyFiles": [
+        "freelance-marketplace.ts"
+      ]
+    },
+    "contracts": {
+      "path": "contracts",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1782029540280,
+      "keyFiles": []
+    },
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 2,
+      "lastAccessed": 1782029540287,
+      "keyFiles": [
+        "sw.js",
+        "favicon.svg"
+      ]
+    },
+    "pages\\api": {
+      "path": "pages\\api",
+      "purpose": "API routes",
+      "fileCount": 1,
+      "lastAccessed": 1782029540299,
+      "keyFiles": [
+        "cv-proxy.ts"
+      ]
+    },
+    "target\\types": {
+      "path": "target\\types",
+      "purpose": "Type definitions",
+      "fileCount": 1,
+      "lastAccessed": 1782029540310,
+      "keyFiles": [
+        "freelance_marketplace.ts"
+      ]
+    },
+    "src\\pages": {
+      "path": "src\\pages",
+      "purpose": "Page components",
+      "fileCount": 2,
+      "lastAccessed": 1782029540324,
+      "keyFiles": [
+        "CreateJob.tsx",
+        "Dashboard.tsx"
+      ]
+    },
+    "src\\services": {
+      "path": "src\\services",
+      "purpose": "Business logic services",
+      "fileCount": 4,
+      "lastAccessed": 1782029540330,
+      "keyFiles": [
+        "pushNotifications.ts",
+        "ipfs.ts",
+        "api.ts"
+      ]
+    },
+    "src\\data": {
+      "path": "src\\data",
+      "purpose": "Data files",
+      "fileCount": 2,
+      "lastAccessed": 1782029540336,
+      "keyFiles": [
+        "sampleData.ts",
+        "demoJobs.ts"
+      ]
+    },
+    "src\\assets": {
+      "path": "src\\assets",
+      "purpose": "Static assets",
+      "fileCount": 1,
+      "lastAccessed": 1782029540343,
+      "keyFiles": [
+        "react.svg"
+      ]
+    },
+    "src\\config": {
+      "path": "src\\config",
+      "purpose": "Configuration files",
+      "fileCount": 9,
+      "lastAccessed": 1782029540349,
+      "keyFiles": [
+        "categories.ts",
+        "tokens.ts",
+        "rpc.ts"
+      ]
+    },
+    "src\\routes": {
+      "path": "src\\routes",
+      "purpose": "Route handlers",
+      "fileCount": 0,
+      "lastAccessed": 1782029540355,
+      "keyFiles": []
+    },
+    "src\\types": {
+      "path": "src\\types",
+      "purpose": "Type definitions",
+      "fileCount": 3,
+      "lastAccessed": 1782029540362,
+      "keyFiles": [
+        "index.ts",
+        "contracts.ts",
+        "solana.ts"
+      ]
+    },
+    "public\\models": {
+      "path": "public\\models",
+      "purpose": "Data models",
+      "fileCount": 8,
+      "lastAccessed": 1782029540398,
+      "keyFiles": [
+        "face_landmark_68_tiny_model.bin",
+        "face_recognition_model-weights_manifest.json",
+        "face_expression_model-weights_manifest.json"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "src\\components\\job\\MilestoneBuilder.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1782029710256,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\JobForm.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1782029675958,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

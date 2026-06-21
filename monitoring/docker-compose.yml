@@ -1,0 +1,52 @@
+services:
+  exporter:
+    build: ./exporter
+    container_name: fc-exporter
+    restart: unless-stopped
+    environment:
+      PROGRAM_ID: ${PROGRAM_ID:-FStwCj8zLzNkz7gTavooDcqF4FSyDcF9o9SCh96yyP7i}
+      SOLANA_RPC_URL: ${SOLANA_RPC_URL:-https://api.devnet.solana.com}
+      POLL_INTERVAL_SEC: ${POLL_INTERVAL_SEC:-30}
+      TX_LOOKBACK_LIMIT: ${TX_LOOKBACK_LIMIT:-100}
+      PORT: 9464
+    ports:
+      - "9464:9464"
+
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    container_name: fc-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
+    ports:
+      - "9090:9090"
+    depends_on:
+      - exporter
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: fc-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus_data:
+  grafana_data:
