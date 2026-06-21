@@ -41,7 +41,7 @@ export default function MintAchievementDialog({
   const { connection } = useConnection();
   const wallet = useWallet();
   const { mintAchievement } = useAchievements();
-  const { upload } = useIPFS();
+  const { upload, uploadFile } = useIPFS();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
@@ -81,6 +81,11 @@ export default function MintAchievementDialog({
         async (data) => {
           const cid = await upload(data);
           if (!cid) throw new Error('Failed to upload achievement metadata to IPFS');
+          return cid;
+        },
+        async (file) => {
+          const cid = await uploadFile(file);
+          if (!cid) throw new Error('Failed to upload achievement image to IPFS');
           return cid;
         }
       );

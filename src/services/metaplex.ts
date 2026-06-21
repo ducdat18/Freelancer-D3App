@@ -4,6 +4,7 @@ import { walletAdapterIdentity } from '@metaplex-foundation/umi-signer-wallet-ad
 import { createNft, mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata';
 import { generateSigner, percentAmount } from '@metaplex-foundation/umi';
 import { Achievement } from '../config/achievements';
+import { getIPFSUrl } from './ipfs';
 
 interface AchievementNFTMetadata {
   name: string;
@@ -24,17 +25,20 @@ interface AchievementNFTMetadata {
 }
 
 /**
- * Create NFT metadata for an achievement
+ * Create NFT metadata for an achievement.
+ * `imageUrl` should be a resolvable URL (typically an IPFS gateway URL produced
+ * by uploadAchievementImage). Falls back to the local asset path if omitted.
  */
 export function createAchievementMetadata(
   achievement: Achievement,
-  userAddress: string
+  userAddress: string,
+  imageUrl?: string
 ): AchievementNFTMetadata {
   return {
     name: achievement.name,
     symbol: achievement.symbol,
     description: achievement.description,
-    image: `https://your-domain.com/achievements/${achievement.type}.png`, // Replace with actual hosted image
+    image: imageUrl || getAchievementImageUrl(achievement.type),
     attributes: [
       {
         trait_type: 'Achievement Type',
@@ -115,16 +119,27 @@ export async function createAchievementNFT(
   wallet: any, // WalletAdapter
   achievement: Achievement,
   userAddress: string,
-  uploadToIPFS: (data: any) => Promise<string>
+  uploadToIPFS: (data: any) => Promise<string>,
+  uploadFile?: (file: File) => Promise<string>
 ): Promise<{ nftMint: PublicKey; metadataUri: string }> {
   try {
-    // Create metadata
-    const metadata = createAchievementMetadata(achievement, userAddress);
+    // 1. Generate the badge image and upload it to IPFS (falls back to the
+    //    local asset path if no file uploader was provided or the upload fails).
+    let imageUrl: string | undefined;
+    if (uploadFile) {
+      try {
+        imageUrl = await uploadAchievementImage(achievement, userAddress, uploadFile);
+      } catch (imgErr) {
+        console.warn('Achievement image upload failed, using fallback:', imgErr);
+      }
+    }
 
-    // Upload metadata to IPFS
-    const metadataUri = await uploadMetadataToIPFS(metadata, uploadToIPFS);
+    // 2. Build metadata referencing the IPFS image, then upload it to IPFS.
+    const metadata = createAchievementMetadata(achievement, userAddress, imageUrl);
+    const metadataCid = await uploadMetadataToIPFS(metadata, uploadToIPFS);
+    const metadataUri = getIPFSUrl(metadataCid);
 
-    // Mint the NFT on-chain via Metaplex (umi + Token Metadata program).
+    // 3. Mint the NFT on-chain via Metaplex (umi + Token Metadata program).
     const umi = createUmi(connection.rpcEndpoint)
       .use(mplTokenMetadata())
       .use(walletAdapterIdentity(wallet));
@@ -168,23 +183,57 @@ export async function mockCreateAchievementNFT(
 }
 
 /**
- * Get achievement image URL
- * In production, these should be hosted on IPFS or CDN
+ * Get achievement image URL (local fallback when no IPFS image is available).
  */
 export function getAchievementImageUrl(achievementType: number): string {
-  // Placeholder - replace with actual hosted images
   return `/achievements/${achievementType}.png`;
 }
 
+function escapeXml(s: string): string {
+  return s.replace(/[<>&'"]/g, (c) =>
+    ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' }[c] as string)
+  );
+}
+
 /**
- * Upload achievement image to IPFS
- * This should be done once for each achievement type and stored
+ * Generate a self-contained SVG badge for an achievement using its icon, color
+ * and rarity. No external assets required, so it can be minted as the NFT image.
+ */
+export function generateAchievementSvg(achievement: Achievement, userAddress: string): string {
+  const rarity = getRarity(achievement.type).toUpperCase();
+  const shortAddr = `${userAddress.slice(0, 4)}…${userAddress.slice(-4)}`;
+  const color = achievement.color;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${color}"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="#0a0a0a"/>
+  <rect x="16" y="16" width="480" height="480" rx="32" fill="url(#bg)" opacity="0.18"/>
+  <rect x="16" y="16" width="480" height="480" rx="32" fill="none" stroke="${color}" stroke-width="3"/>
+  <circle cx="256" cy="188" r="96" fill="${color}" opacity="0.15"/>
+  <circle cx="256" cy="188" r="96" fill="none" stroke="${color}" stroke-width="2"/>
+  <text x="256" y="226" font-size="110" text-anchor="middle">${escapeXml(achievement.icon)}</text>
+  <text x="256" y="356" font-size="32" font-family="Orbitron, Arial, sans-serif" font-weight="700" fill="#ffffff" text-anchor="middle">${escapeXml(achievement.name)}</text>
+  <text x="256" y="398" font-size="22" font-family="Arial, sans-serif" fill="${color}" text-anchor="middle" letter-spacing="3">${escapeXml(rarity)}</text>
+  <text x="256" y="452" font-size="18" font-family="monospace" fill="#9aa0a6" text-anchor="middle">${escapeXml(shortAddr)}</text>
+</svg>`;
+}
+
+/**
+ * Generate an achievement badge image and upload it to IPFS.
+ * Returns a resolvable gateway URL for use as the NFT image.
  */
 export async function uploadAchievementImage(
-  achievementType: number,
+  achievement: Achievement,
+  userAddress: string,
   uploadFile: (file: File) => Promise<string>
 ): Promise<string> {
-  // In practice, you'd have pre-created images for each achievement
-  // This is just a placeholder
-  throw new Error('Achievement images should be pre-uploaded and stored in config');
+  const svg = generateAchievementSvg(achievement, userAddress);
+  const file = new File([svg], `achievement-${achievement.type}.svg`, { type: 'image/svg+xml' });
+  const cid = await uploadFile(file);
+  if (!cid) throw new Error('Failed to upload achievement image to IPFS');
+  return getIPFSUrl(cid);
 }
