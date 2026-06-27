@@ -164,7 +164,11 @@ export default function DeliverableSubmit({
                       <Delete />
                     </IconButton>
                   }
-                  sx={{ bgcolor: 'grey.50', mb: 1, borderRadius: 1 }}
+                  sx={{
+                    bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'grey.50',
+                    mb: 1,
+                    borderRadius: 1,
+                  }}
                 >
                   <Box sx={{ width: '100%' }}>
                     <ListItemText

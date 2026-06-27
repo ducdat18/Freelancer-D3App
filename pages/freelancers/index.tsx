@@ -26,6 +26,7 @@ import { getExperienceLevel } from '../../src/utils/userRole';
 import { motion } from 'framer-motion';
 import { staggerContainer, staggerChild } from '../../src/utils/animations';
 import VerifiedBadge from '../../src/components/VerifiedBadge';
+import AISmartMatch from '../../src/components/ai/AISmartMatch';
 
 const MotionBox = motion.create(Box);
 const MotionCard = motion.create(Card);
@@ -407,6 +408,27 @@ export default function FindTalent() {
               Connect Wallet
             </Button>
           </Box>
+        )}
+
+        {!loading && !error && connected && myOpenJobs.length > 0 && (
+          <AISmartMatch
+            openJobs={myOpenJobs.map((job) => ({
+              id: job.publicKey.toString(),
+              title: job.account.title,
+              description: job.account.description,
+              budgetSol: job.account.budget.toNumber() / 1e9,
+            }))}
+            candidates={filteredFreelancers
+              .filter((f) => !f.isDemo && f.reputation)
+              .map((f) => ({
+                address: f.address,
+                completedJobs: f.reputation!.completedJobs,
+                averageRating: f.reputation!.averageRating,
+              }))}
+            onInvite={(jobId, freelancerAddress) =>
+              router.push(`/jobs/${jobId}?invite=${freelancerAddress}`)
+            }
+          />
         )}
 
         {loading ? (

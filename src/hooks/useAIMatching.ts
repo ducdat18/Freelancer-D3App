@@ -7,6 +7,14 @@ export interface MatchResult {
   completedJobs: number;
   averageRating: number;
   proposedRate: number;
+  reason?: string;
+}
+
+export interface MatchCandidate {
+  address: string;
+  skills?: string[];
+  completedJobs?: number;
+  averageRating?: number;
 }
 
 export interface PricingSuggestion {
@@ -27,6 +35,7 @@ export function useAIMatching() {
     requiredSkills: string[],
     budget: number,
     limit: number = 10,
+    candidates?: MatchCandidate[],
   ) => {
     try {
       setLoading(true);
@@ -34,7 +43,7 @@ export function useAIMatching() {
       const response = await fetch("/api/ai/matching", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jobDescription, requiredSkills, budget, limit }),
+        body: JSON.stringify({ jobDescription, requiredSkills, budget, limit, candidates }),
       });
       if (!response.ok) throw new Error("Failed to fetch matches");
       const data = await response.json();

@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Box, CircularProgress, IconButton, useTheme } from '@mui/material'
 import { BrokenImage, OpenInNew } from '@mui/icons-material'
+import { getIPFSUrls } from '../../services/ipfs'
 
 interface IPFSImageProps {
   hash: string
@@ -9,6 +10,7 @@ interface IPFSImageProps {
   height?: string | number
   borderRadius?: string | number
   objectFit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down'
+  /** Optional explicit gateway prefix (e.g. "https://my-gw/ipfs/"). Defaults to the configured Pinata gateway with public fallbacks. */
   gateway?: string
   showOpenButton?: boolean
 }
@@ -20,24 +22,39 @@ export default function IPFSImage({
   height = 'auto',
   borderRadius = 8,
   objectFit = 'cover',
-  gateway = 'https://ipfs.io/ipfs/',
+  gateway,
   showOpenButton = false,
 }: IPFSImageProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  // Index into the candidate gateway list; advances each time a gateway fails.
+  const [gatewayIndex, setGatewayIndex] = useState(0)
   const theme = useTheme()
   const isDark = theme.palette.mode === 'dark'
 
-  // Remove ipfs:// prefix if present
-  const cleanHash = hash.startsWith('ipfs://') ? hash.slice(7) : hash
+  // Build the ordered list of gateway URLs to try. An explicit `gateway` prop
+  // takes priority, then the configured Pinata gateway + public fallbacks.
+  const urls = useMemo(() => {
+    const cleanHash = hash.startsWith('ipfs://') ? hash.slice(7) : hash
+    const fallbacks = getIPFSUrls(hash)
+    if (gateway) {
+      return Array.from(new Set([`${gateway}${cleanHash}`, ...fallbacks]))
+    }
+    return fallbacks
+  }, [hash, gateway])
 
-  const imageUrl = `${gateway}${cleanHash}`
+  const imageUrl = urls[gatewayIndex] ?? urls[0] ?? ''
 
   const handleLoad = () => {
     setLoading(false)
   }
 
   const handleError = () => {
+    // Try the next gateway before giving up entirely.
+    if (gatewayIndex < urls.length - 1) {
+      setGatewayIndex(gatewayIndex + 1)
+      return
+    }
     setLoading(false)
     setError(true)
   }

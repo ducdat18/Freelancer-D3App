@@ -226,6 +226,19 @@ export function getIPFSUrl(hash: string): string {
 }
 
 /**
+ * Build the full list of candidate gateway URLs for a CID, primary first.
+ * Used by viewers (images/PDFs) to retry across gateways when one fails —
+ * freshly pinned content is reachable on the dedicated Pinata gateway long
+ * before it propagates to public gateways like ipfs.io.
+ */
+export function getIPFSUrls(hash: string): string[] {
+  const cid = normalizeCID(hash)
+  const gateways = [PRIMARY_GATEWAY, ...FALLBACK_GATEWAYS]
+  // De-duplicate in case PRIMARY_GATEWAY equals one of the fallbacks
+  return Array.from(new Set(gateways.map(g => buildGatewayUrl(g, cid))))
+}
+
+/**
  * Check if IPFS is configured
  */
 export function isIPFSConfigured(): boolean {
