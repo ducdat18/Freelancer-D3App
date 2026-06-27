@@ -23,7 +23,6 @@ import { lamportsToSol, bnToNumber, formatSol } from '../../src/types/solana';
 import { SolanaIconSimple } from '../../src/components/SolanaIcon';
 import { JOB_STATUS } from '../../src/config/constants';
 import { staggerContainer, staggerChild } from '../../src/utils/animations';
-import { DEMO_JOBS } from '../../src/data/demoJobs';
 import { fetchFromIPFS } from '../../src/services/ipfs';
 
 const MotionBox = motion.create(Box);
@@ -76,18 +75,14 @@ export default function Jobs() {
     });
   }, [jobs]);
 
-  // Merge real chain jobs with demo jobs (real jobs take priority)
-  const chainKeys = new Set(jobs.map(j => j.publicKey.toBase58()));
-  const allJobs = [
-    ...jobs.map(j => ({
-      ...j,
-      isDemo: false as const,
-      tags: [] as string[],
-      // Use IPFS-fetched category if available
-      category: categoryMap[j.publicKey.toBase58()] ?? '',
-    })),
-    ...DEMO_JOBS.filter(d => !chainKeys.has(d.publicKey.toBase58())),
-  ];
+  // Only real on-chain jobs (every card must be openable on its detail page)
+  const allJobs = jobs.map(j => ({
+    ...j,
+    isDemo: false as const,
+    tags: [] as string[],
+    // Use IPFS-fetched category if available
+    category: categoryMap[j.publicKey.toBase58()] ?? '',
+  }));
 
   const filteredJobs = allJobs
     .filter((job) => {

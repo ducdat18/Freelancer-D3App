@@ -4,7 +4,6 @@ import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { useJobsQuery } from '../../hooks/queries/useJobsQuery';
 import { bnToNumber } from '../../types/solana';
 import { staggerContainer, staggerChild } from '../../utils/animations';
-import { DEMO_JOBS } from '../../data/demoJobs';
 
 const MotionBox = motion.create(Box);
 const MotionCard = motion.create(Card);
@@ -16,29 +15,17 @@ export default function HomeStats() {
   const primaryMain = theme.palette.primary.main;
 
   const stats = (() => {
-    const demoTotal = DEMO_JOBS.length;
-    const demoActiveJobs = DEMO_JOBS.filter(j => 'open' in j.account.status).length;
-    const demoValue = DEMO_JOBS.reduce(
-      (sum, j) => sum + bnToNumber(j.account.budget) / LAMPORTS_PER_SOL, 0
-    );
-
     const chainJobs = jobs || [];
-    const chainKeys = new Set(chainJobs.map(j => j.publicKey.toBase58()));
-    const uniqueDemoCount = DEMO_JOBS.filter(d => !chainKeys.has(d.publicKey.toBase58())).length;
-
-    const totalJobs = chainJobs.length + uniqueDemoCount;
-    const chainActive = chainJobs.filter((j) => {
+    const totalJobs = chainJobs.length;
+    const activeJobs = chainJobs.filter((j) => {
       const status = typeof j.account.status === 'object'
         ? Object.keys(j.account.status)[0]
         : j.account.status;
       return status === 'open';
     }).length;
-    const activeJobs = chainActive + demoActiveJobs;
-
-    const chainValue = chainJobs.reduce(
+    const totalValue = chainJobs.reduce(
       (sum, job) => sum + bnToNumber(job.account.budget) / LAMPORTS_PER_SOL, 0
-    );
-    const totalValue = (chainValue + demoValue).toFixed(1);
+    ).toFixed(1);
 
     return [
       { label: 'Total Jobs', value: totalJobs.toString() },
