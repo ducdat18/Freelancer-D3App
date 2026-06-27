@@ -52,7 +52,7 @@ target/
 chat.db
 
 # Windows junk
-*.Zone.Identifier
+*Zone.Identifier
 NUL
 
 # Test scripts
@@ -67,3 +67,23 @@ list-job-accounts.js
 
 # Chat persistent store
 .chat-data/
+
+# Thesis / LaTeX artifacts (kept out of the app repo)
+final_thesis*/
+SOICT_DATN_Application_ENG_Template/
+*.zip
+*.tex
+*.aux
+*.toc
+*.lof
+*.lot
+*.out
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex*
+main.pdf
+
+# OMC tool session logs
+.omc/sessions/
