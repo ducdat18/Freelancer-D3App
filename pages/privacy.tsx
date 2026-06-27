@@ -1,9 +1,8 @@
 import { Container, Typography, Box, Paper } from '@mui/material';
-import Layout from '../src/components/Layout';
 
 export default function PrivacyPage() {
   return (
-    <Layout>
+    <>
       <Container maxWidth="md" sx={{ py: 6 }}>
         <Typography variant="h3" fontWeight={600} gutterBottom>
           Privacy Policy
@@ -22,6 +21,6 @@ export default function PrivacyPage() {
           </Box>
         </Paper>
       </Container>
-    </Layout>
+    </>
   );
 }

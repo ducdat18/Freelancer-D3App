@@ -31,7 +31,6 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { formatDistanceToNow } from 'date-fns';
-import Layout from '../../src/components/Layout';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import EmptyState from '../../src/components/EmptyState';
 import { useSolanaProgram } from '../../src/hooks/useSolanaProgram';
@@ -275,7 +274,7 @@ export default function Staking() {
 
   if (!connected) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="md" sx={{ py: 8 }}>
           <EmptyState
             title="Wallet Not Connected"
@@ -284,24 +283,24 @@ export default function Staking() {
             onAction={() => setVisible(true)}
           />
         </Container>
-      </Layout>
+      </>
     );
   }
 
   if (initialLoading) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <LoadingSpinner message="Loading staking data..." />
         </Container>
-      </Layout>
+      </>
     );
   }
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <Layout>
+    <>
       <Container maxWidth="lg" sx={{ py: 4 }}>
 
         {/* Header */}
@@ -768,6 +767,6 @@ export default function Staking() {
         )}
 
       </Container>
-    </Layout>
+    </>
   );
 }

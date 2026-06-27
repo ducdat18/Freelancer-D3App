@@ -33,7 +33,6 @@ import {
   Refresh,
 } from '@mui/icons-material';
 import { useWallet } from '@solana/wallet-adapter-react';
-import Layout from '../../src/components/Layout';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import EmptyState from '../../src/components/EmptyState';
 import { useSocialRecovery } from '../../src/hooks/useSocialRecovery';
@@ -175,31 +174,31 @@ export default function RecoverySettings() {
 
   if (!publicKey) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <EmptyState
             title="Wallet Not Connected"
             description="Connect your Solana wallet to manage social recovery settings."
           />
         </Container>
-      </Layout>
+      </>
     );
   }
 
   if (loading && !recoveryConfig) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="lg" sx={{ py: 8 }}>
           <LoadingSpinner message="Loading recovery settings..." />
         </Container>
-      </Layout>
+      </>
     );
   }
 
   const hasConfig = recoveryConfig && recoveryConfig.active;
 
   return (
-    <Layout>
+    <>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 4 }}>
@@ -480,6 +479,6 @@ export default function RecoverySettings() {
           </Grid>
         </Grid>
       </Container>
-    </Layout>
+    </>
   );
 }

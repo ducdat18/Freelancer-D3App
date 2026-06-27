@@ -5,7 +5,6 @@ import {
   Shield, Speed, PublicOutlined, LockOutlined,
   AccountBalanceWallet, Code, GavelOutlined, StarOutlined,
 } from '@mui/icons-material'
-import Layout from '../src/components/Layout'
 import { motion } from 'framer-motion'
 import { staggerContainer, staggerChild, fadeInUp } from '../src/utils/animations'
 
@@ -83,7 +82,7 @@ export default function AboutPage() {
   ]
 
   return (
-    <Layout>
+    <>
       <Box sx={{ overflow: 'hidden' }}>
         {/* Hero */}
         <Box
@@ -538,6 +537,6 @@ export default function AboutPage() {
 
         </Container>
       </Box>
-    </Layout>
+    </>
   )
 }

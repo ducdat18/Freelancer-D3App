@@ -1,7 +1,6 @@
 import { Container, Typography, Box, Paper, Grid, Card, CardContent, Button } from '@mui/material';
 import { MenuBook, Code, AccountBalanceWallet, Gavel } from '@mui/icons-material';
 import Link from 'next/link';
-import Layout from '../src/components/Layout';
 
 const sections = [
   {
@@ -32,7 +31,7 @@ const sections = [
 
 export default function DocsPage() {
   return (
-    <Layout>
+    <>
       <Container maxWidth="lg" sx={{ py: 6 }}>
         <Typography variant="h3" fontWeight={600} gutterBottom>
           Documentation
@@ -62,6 +61,6 @@ export default function DocsPage() {
           ))}
         </Grid>
       </Container>
-    </Layout>
+    </>
   );
 }

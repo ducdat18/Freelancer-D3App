@@ -23,7 +23,6 @@ import {
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { web3 } from '@coral-xyz/anchor';
-import Layout from '../../src/components/Layout';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import VerifiedBadge from '../../src/components/VerifiedBadge';
 import { useSolanaProgram } from '../../src/hooks/useSolanaProgram';
@@ -656,7 +655,7 @@ export default function IdentityPage() {
 
   if (!connected) {
     return (
-      <Layout>
+      <>
         <PageHeader />
         <Container maxWidth="sm" sx={{ py: 10, textAlign: 'center' }}>
           <LockOutlined sx={{ fontSize: 52, color: alpha(primaryMain, 0.3), mb: 2 }} />
@@ -666,18 +665,18 @@ export default function IdentityPage() {
           </Typography>
           <Button variant="contained" size="large" onClick={() => setVisible(true)} sx={{ fontWeight: 700, px: 4 }}>Connect Wallet</Button>
         </Container>
-      </Layout>
+      </>
     );
   }
 
   if (didLoading && !didDocument) {
     return (
-      <Layout>
+      <>
         <PageHeader />
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <LoadingSpinner message="Loading identity data..." />
         </Container>
-      </Layout>
+      </>
     );
   }
 
@@ -1226,7 +1225,7 @@ export default function IdentityPage() {
   );
 
   return (
-    <Layout>
+    <>
       <PageHeader />
       <Container maxWidth="lg">
         <Box sx={{ my: 4 }}>
@@ -1389,6 +1388,6 @@ export default function IdentityPage() {
           <Button variant="contained" onClick={handleAddSE} disabled={!seUri || didLoading} sx={{ fontWeight: 700, px: 3 }}>{didLoading ? 'Adding...' : 'Add Endpoint'}</Button>
         </DialogActions>
       </Dialog>
-    </Layout>
+    </>
   );
 }

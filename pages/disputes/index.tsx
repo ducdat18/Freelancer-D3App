@@ -25,7 +25,6 @@ import { web3 } from '@coral-xyz/anchor';
 import DisputeCard from '../../src/components/common/DisputeCard';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import EmptyState from '../../src/components/EmptyState';
-import Layout from '../../src/components/Layout';
 import { useEscrow } from '../../src/hooks/useEscrow';
 import { deriveWorkSubmissionPDA, deriveReputationPDA } from '../../src/utils/pda';
 import { useSolanaProgram } from '../../src/hooks/useSolanaProgram';
@@ -413,7 +412,7 @@ export default function DisputeResolution() {
   const resolvedCount = disputes.filter(d => d.account.status.resolved || (d.account.status as any).resolvedClient || (d.account.status as any).resolvedFreelancer).length;
 
   return (
-    <Layout>
+    <>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Header */}
         <Box
@@ -631,6 +630,6 @@ export default function DisputeResolution() {
           </>
         )}
       </Container>
-    </Layout>
+    </>
   );
 }

@@ -8,7 +8,6 @@ import { useReputation } from '../../src/hooks/useReputation';
 import JobCard from '../../src/components/JobCard';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import EmptyState from '../../src/components/EmptyState';
-import Layout from '../../src/components/Layout';
 import SBTGallery from '../../src/components/profile/SBTGallery';
 import { SolanaIconSimple } from '../../src/components/SolanaIcon';
 import { PictureAsPdf, Description, PersonAdd, Star, Gavel, VerifiedUser } from '@mui/icons-material';
@@ -105,7 +104,7 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="lg" sx={{ py: 6 }}>
           <LoadingSpinner
             message="Loading profile..."
@@ -116,19 +115,19 @@ export default function Profile() {
             ]}
           />
         </Container>
-      </Layout>
+      </>
     );
   }
 
   if (!profileAddress) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="lg">
           <Alert severity="error" sx={{ mt: 4 }}>
             Invalid address
           </Alert>
         </Container>
-      </Layout>
+      </>
     );
   }
 
@@ -179,7 +178,7 @@ export default function Profile() {
   // isKycVerified is loaded from chain in loadProfile effect
 
   return (
-    <Layout>
+    <>
       {/* Profile Hero Header */}
       <Box
         sx={{
@@ -613,6 +612,6 @@ export default function Profile() {
           </Grid>
         </Box>
       </Container>
-    </Layout>
+    </>
   );
 }

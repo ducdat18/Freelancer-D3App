@@ -5,7 +5,6 @@ import {
 } from '@mui/material';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
-import Layout from '../../../src/components/Layout';
 import JobForm from '../../../src/components/JobForm';
 import type { MilestoneInput } from '../../../src/components/JobForm';
 import { useJobs } from '../../../src/hooks/useJobs';
@@ -97,60 +96,60 @@ export default function EditJob() {
 
   if (loading) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="md" sx={{ py: 8, textAlign: 'center' }}>
           <CircularProgress />
         </Container>
-      </Layout>
+      </>
     );
   }
 
   if (pageError || !job) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="md" sx={{ py: 4 }}>
           <Alert severity="error">{pageError ?? 'Job not found'}</Alert>
         </Container>
-      </Layout>
+      </>
     );
   }
 
   if (!connected) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="md" sx={{ py: 4 }}>
           <Alert severity="warning">Connect your wallet to edit this job.</Alert>
         </Container>
-      </Layout>
+      </>
     );
   }
 
   if (!isOwner) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="md" sx={{ py: 4 }}>
           <Alert severity="error">Only the job owner can edit this job.</Alert>
         </Container>
-      </Layout>
+      </>
     );
   }
 
   if (!isEditable) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="md" sx={{ py: 4 }}>
           <Alert severity="warning">
             Only open jobs can be edited. Current status: <strong>{statusKey}</strong>.
           </Alert>
         </Container>
-      </Layout>
+      </>
     );
   }
 
   const initialDeadline = metadata?.deadline ? new Date(metadata.deadline * 1000) : undefined;
 
   return (
-    <Layout>
+    <>
       {/* Page Header */}
       <Box
         sx={{
@@ -211,7 +210,7 @@ export default function EditJob() {
           error={formError}
         />
       </Container>
-    </Layout>
+    </>
   );
 }
 

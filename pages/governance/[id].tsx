@@ -31,7 +31,6 @@ import {
   Science as ScienceIcon,
 } from '@mui/icons-material';
 import { useWallet } from '@solana/wallet-adapter-react';
-import Layout from '../../src/components/Layout';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import EmptyState from '../../src/components/EmptyState';
 import { useSolanaProgram } from '../../src/hooks/useSolanaProgram';
@@ -193,17 +192,17 @@ export default function ProposalDetail() {
 
   if (loading && !proposal) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="lg" sx={{ py: 8 }}>
           <LoadingSpinner message="Loading proposal..." />
         </Container>
-      </Layout>
+      </>
     );
   }
 
   if ((error || localError) && !proposal) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <Alert severity="error" sx={{ mb: 3 }}>
             {error || localError}
@@ -216,13 +215,13 @@ export default function ProposalDetail() {
             Back to Governance
           </Button>
         </Container>
-      </Layout>
+      </>
     );
   }
 
   if (!proposal) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <EmptyState
             title="Proposal Not Found"
@@ -231,7 +230,7 @@ export default function ProposalDetail() {
             onAction={() => router.push('/governance')}
           />
         </Container>
-      </Layout>
+      </>
     );
   }
 
@@ -268,7 +267,7 @@ export default function ProposalDetail() {
   const activeStep = proposal.executed ? 3 : votingEnded ? 2 : 1;
 
   return (
-    <Layout>
+    <>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 4 }}>
@@ -576,7 +575,7 @@ export default function ProposalDetail() {
           </Grid>
         </Grid>
       </Container>
-    </Layout>
+    </>
   );
 }
 

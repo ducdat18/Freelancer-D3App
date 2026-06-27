@@ -28,7 +28,6 @@ import ShieldIcon from '@mui/icons-material/Shield';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
-import Layout from '../../src/components/Layout';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import EmptyState from '../../src/components/EmptyState';
 import { useSybilResistance } from '../../src/hooks/useSybilResistance';
@@ -189,7 +188,7 @@ export default function StampsPage() {
 
   if (!connected) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="md" sx={{ py: 8 }}>
           <EmptyState
             title="Wallet Not Connected"
@@ -198,22 +197,22 @@ export default function StampsPage() {
             onAction={() => setVisible(true)}
           />
         </Container>
-      </Layout>
+      </>
     );
   }
 
   if (loading && !identityStamps) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <LoadingSpinner message="Loading identity stamps..." />
         </Container>
-      </Layout>
+      </>
     );
   }
 
   return (
-    <Layout>
+    <>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Header with Score */}
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4, mb: 5 }}>
@@ -503,6 +502,6 @@ export default function StampsPage() {
           })}
         </Grid>
       </Container>
-    </Layout>
+    </>
   );
 }

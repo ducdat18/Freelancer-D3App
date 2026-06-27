@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { ArrowForward, Lock, Speed, PublicOutlined } from '@mui/icons-material';
 import Logo from '../src/components/Logo';
-import Layout from '../src/components/Layout';
 import HomeStats from '../src/components/home/HomeStats';
 import TrendingJobs from '../src/components/home/TrendingJobs';
 import TopFreelancers from '../src/components/home/TopFreelancers';
@@ -28,7 +27,7 @@ export default function Home() {
   const secondaryMain = theme.palette.secondary.main;
 
   return (
-    <Layout>
+    <>
       <Box>
         {/* Hero Section */}
         <Box
@@ -289,6 +288,6 @@ export default function Home() {
           <CTASection />
         </Box>
       </Box>
-    </Layout>
+    </>
   );
 }

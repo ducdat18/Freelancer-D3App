@@ -2,7 +2,6 @@ import { Container, Typography, Box, Paper, List, ListItem, ListItemButton, List
 import { Chat as ChatIcon, Circle } from '@mui/icons-material'
 import { useState, useEffect } from 'react'
 import { useDatabaseChat } from '../../src/hooks/useDatabaseChat'
-import Layout from '../../src/components/Layout'
 import ChatDialog from '../../src/components/chat/ChatDialog'
 import { useWallet } from '@solana/wallet-adapter-react'
 
@@ -64,18 +63,18 @@ export default function MessagesPage() {
 
   if (!publicKey) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="md" sx={{ py: 4 }}>
           <Alert severity="warning">
             Please connect your wallet to view your messages
           </Alert>
         </Container>
-      </Layout>
+      </>
     )
   }
 
   return (
-    <Layout>
+    <>
       <Container maxWidth="md" sx={{ py: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -177,6 +176,6 @@ export default function MessagesPage() {
           />
         )}
       </Container>
-    </Layout>
+    </>
   )
 }

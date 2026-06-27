@@ -31,7 +31,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { web3 } from '@coral-xyz/anchor';
-import Layout from '../../src/components/Layout';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import EmptyState from '../../src/components/EmptyState';
 import { useSolanaProgram } from '../../src/hooks/useSolanaProgram';
@@ -249,7 +248,7 @@ export default function Referral() {
 
   if (initialLoading && connected) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <LoadingSpinner
             message="Syncing referral protocol..."
@@ -260,12 +259,12 @@ export default function Referral() {
             ]}
           />
         </Container>
-      </Layout>
+      </>
     );
   }
 
   return (
-    <Layout>
+    <>
       <Container maxWidth="lg" sx={{ py: 4 }}>
 
         {/* ── Header ── */}
@@ -509,6 +508,6 @@ export default function Referral() {
           </Paper>
         )}
       </Container>
-    </Layout>
+    </>
   );
 }

@@ -19,7 +19,6 @@ import {
   Assignment,
 } from '@mui/icons-material';
 import { useWallet } from '@solana/wallet-adapter-react';
-import Layout from '../../src/components/Layout';
 import JurorStakingPanel from '../../src/components/disputes/JurorStakingPanel';
 import {
   useStakingDispute,
@@ -111,18 +110,18 @@ export default function StakingDashboard() {
 
   if (!publicKey) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="lg" sx={{ py: 8 }}>
           <Alert severity="info">
             Please connect your wallet to access the Juror Staking Dashboard.
           </Alert>
         </Container>
-      </Layout>
+      </>
     );
   }
 
   return (
-    <Layout>
+    <>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Page Header */}
         <Box sx={{ mb: 4 }}>
@@ -448,6 +447,6 @@ export default function StakingDashboard() {
           </Grid>
         )}
       </Container>
-    </Layout>
+    </>
   );
 }

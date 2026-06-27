@@ -34,7 +34,6 @@ import {
   Info,
 } from '@mui/icons-material';
 import { useWallet } from '@solana/wallet-adapter-react';
-import Layout from '../../src/components/Layout';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import EmptyState from '../../src/components/EmptyState';
 import { useZKCredentials } from '../../src/hooks/useZKCredentials';
@@ -130,19 +129,19 @@ export default function PrivacyPage() {
 
   if (!publicKey) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <EmptyState
             title="Wallet Not Connected"
             description="Connect your Solana wallet to manage ZK privacy credentials."
           />
         </Container>
-      </Layout>
+      </>
     );
   }
 
   return (
-    <Layout>
+    <>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 4 }}>
@@ -334,6 +333,6 @@ export default function PrivacyPage() {
           </Grid>
         </Grid>
       </Container>
-    </Layout>
+    </>
   );
 }

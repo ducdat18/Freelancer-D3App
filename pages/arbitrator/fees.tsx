@@ -16,7 +16,6 @@ import {
 import { useWallet } from '@solana/wallet-adapter-react';
 import { web3, BN } from '@coral-xyz/anchor';
 import { AccountBalance, CheckCircle, Pending } from '@mui/icons-material';
-import Layout from '../../src/components/Layout';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import EmptyState from '../../src/components/EmptyState';
 import { useEscrow } from '../../src/hooks/useEscrow';
@@ -194,16 +193,16 @@ export default function ArbitratorFees() {
 
   if (!publicKey) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="lg" sx={{ py: 8 }}>
           <Alert severity="info">Please connect your wallet to view arbitrator fees</Alert>
         </Container>
-      </Layout>
+      </>
     );
   }
 
   return (
-    <Layout>
+    <>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Typography variant="h4" gutterBottom fontWeight={700}>
           Arbitrator Fees
@@ -363,6 +362,6 @@ export default function ArbitratorFees() {
           </Alert>
         </Snackbar>
       </Container>
-    </Layout>
+    </>
   );
 }

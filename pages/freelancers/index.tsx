@@ -16,7 +16,6 @@ import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { PublicKey } from '@solana/web3.js';
 import { formatSol } from '../../src/types/solana';
 import { useRouter } from 'next/router';
-import Layout from '../../src/components/Layout';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import { useSolanaProgram } from '../../src/hooks/useSolanaProgram';
 import { useJobs } from '../../src/hooks/useJobs';
@@ -251,7 +250,7 @@ export default function FindTalent() {
   };
 
   return (
-    <Layout>
+    <>
       {/* Page Header */}
       <Box
         sx={{
@@ -783,6 +782,6 @@ export default function FindTalent() {
           </DialogActions>
         </Dialog>
       </Container>
-    </Layout>
+    </>
   );
 }

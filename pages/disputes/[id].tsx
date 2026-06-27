@@ -32,7 +32,6 @@ import {
 } from '@mui/icons-material';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { web3 } from '@coral-xyz/anchor';
-import Layout from '../../src/components/Layout';
 import EvidenceUpload from '../../src/components/disputes/EvidenceUpload';
 import { useEscrow } from '../../src/hooks/useEscrow';
 import { useReputation } from '../../src/hooks/useReputation';
@@ -227,20 +226,20 @@ export default function DisputeDetail() {
 
   if (loading) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="lg" sx={{ py: 8, textAlign: 'center' }}>
           <CircularProgress size={60} />
           <Typography variant="h6" sx={{ mt: 2 }}>
             Loading dispute...
           </Typography>
         </Container>
-      </Layout>
+      </>
     );
   }
 
   if (error && !dispute) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <Alert severity="error" sx={{ mb: 3 }}>
             {error}
@@ -253,7 +252,7 @@ export default function DisputeDetail() {
             Back to Disputes
           </Button>
         </Container>
-      </Layout>
+      </>
     );
   }
 
@@ -269,7 +268,7 @@ export default function DisputeDetail() {
   const canUploadEvidence = (isClient || isFreelancer) && !isResolved;
 
   return (
-    <Layout>
+    <>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Header */}
         <Box sx={{ mb: 4 }}>
@@ -573,7 +572,7 @@ export default function DisputeDetail() {
           </Grid>
         </Grid>
       </Container>
-    </Layout>
+    </>
   );
 }
 

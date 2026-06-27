@@ -16,7 +16,6 @@ import SecurityIcon from '@mui/icons-material/Security';
 import { useRouter } from 'next/router';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { motion } from 'framer-motion';
-import Layout from '../../src/components/Layout';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import { useJobs } from '../../src/hooks/useJobs';
 import { lamportsToSol, bnToNumber, formatSol } from '../../src/types/solana';
@@ -144,7 +143,7 @@ export default function Jobs() {
   ];
 
   return (
-    <Layout>
+    <>
       {/* Page Header */}
       <Box
         sx={{
@@ -527,6 +526,6 @@ export default function Jobs() {
           </>
         )}
       </Container>
-    </Layout>
+    </>
   );
 }

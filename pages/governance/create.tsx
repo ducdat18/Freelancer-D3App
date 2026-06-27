@@ -23,7 +23,6 @@ import ScienceIcon from '@mui/icons-material/Science';
 import { useRouter } from 'next/router';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
-import Layout from '../../src/components/Layout';
 import EmptyState from '../../src/components/EmptyState';
 import { useSolanaProgram } from '../../src/hooks/useSolanaProgram';
 import { useDAOGovernance } from '../../src/hooks/useDAOGovernance';
@@ -114,7 +113,7 @@ export default function CreateProposalPage() {
 
   if (!connected) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="md" sx={{ py: 8 }}>
           <EmptyState
             title="Wallet Not Connected"
@@ -123,12 +122,12 @@ export default function CreateProposalPage() {
             onAction={() => setVisible(true)}
           />
         </Container>
-      </Layout>
+      </>
     );
   }
 
   return (
-    <Layout>
+    <>
       <Container maxWidth="md" sx={{ py: 4 }}>
         {/* Back Button */}
         <Button
@@ -372,6 +371,6 @@ export default function CreateProposalPage() {
           </Box>
         </Paper>
       </Container>
-    </Layout>
+    </>
   );
 }

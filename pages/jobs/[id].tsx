@@ -10,7 +10,6 @@ import {
   Grid,
   useTheme,
 } from '@mui/material';
-import Layout from '../../src/components/Layout';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import { useJobs } from '../../src/hooks/useJobs';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -388,7 +387,7 @@ export default function JobDetail() {
 
   if (loading) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="lg" sx={{ py: 6 }}>
           <LoadingSpinner
             message="Loading job details..."
@@ -399,18 +398,18 @@ export default function JobDetail() {
             ]}
           />
         </Container>
-      </Layout>
+      </>
     );
   }
 
   if (error || !job) {
     return (
-      <Layout>
+      <>
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <Alert severity="error">{error || 'Job not found'}</Alert>
           <Button onClick={() => router.push('/jobs')} sx={{ mt: 2 }}>Back to Jobs</Button>
         </Container>
-      </Layout>
+      </>
     );
   }
 
@@ -443,7 +442,7 @@ export default function JobDetail() {
   const jobStatusSt = statusPillMap[jobStatusKey] ?? statusPillMap.open;
 
   return (
-    <Layout>
+    <>
       {/* Page Header */}
       <Box
         sx={{
@@ -649,7 +648,7 @@ export default function JobDetail() {
           onRepost={handleRepostJob}
         />
       </Container>
-    </Layout>
+    </>
   );
 }
 

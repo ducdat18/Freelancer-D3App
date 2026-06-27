@@ -18,7 +18,6 @@ import {
 } from '@mui/material'
 import { Save, Person, Delete, PictureAsPdf, Description, CloudUpload } from '@mui/icons-material'
 import { useWallet } from '@solana/wallet-adapter-react'
-import Layout from '../../src/components/Layout'
 import PortfolioUpload from '../../src/components/freelancer/PortfolioUpload'
 import { useCVStorage } from '../../src/hooks/useCVStorage'
 import { uploadFileToIPFS } from '../../src/services/ipfs'
@@ -158,7 +157,7 @@ export default function FreelancerProfile() {
   }
 
   return (
-    <Layout>
+    <>
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Paper sx={{ p: 4 }}>
           {/* Header */}
@@ -386,6 +385,6 @@ export default function FreelancerProfile() {
 
         </Paper>
       </Container>
-    </Layout>
+    </>
   )
 }

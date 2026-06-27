@@ -13,7 +13,6 @@ import {
 } from '@mui/material';
 import { Person, Star } from '@mui/icons-material';
 import { useWallet } from '@solana/wallet-adapter-react';
-import Layout from '../../src/components/Layout';
 import JobForm from '../../src/components/JobForm';
 import { useJobs } from '../../src/hooks/useJobs';
 import { useIPFS } from '../../src/hooks/useIPFS';
@@ -114,7 +113,7 @@ export default function DirectHire() {
   const isLoading = loading || isUploading;
 
   return (
-    <Layout>
+    <>
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" gutterBottom fontWeight={700}>
@@ -197,6 +196,6 @@ export default function DirectHire() {
           />
         )}
       </Container>
-    </Layout>
+    </>
   );
 }

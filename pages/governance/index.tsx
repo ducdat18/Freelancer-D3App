@@ -21,7 +21,6 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useRouter } from 'next/router';
 import { useWallet } from '@solana/wallet-adapter-react';
-import Layout from '../../src/components/Layout';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import EmptyState from '../../src/components/EmptyState';
 import { useDAOGovernance } from '../../src/hooks/useDAOGovernance';
@@ -119,7 +118,7 @@ export default function GovernancePage() {
   const executedCount = proposals.filter(p => p.status === GovernanceProposalStatus.Executed).length;
 
   return (
-    <Layout>
+    <>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Header */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4, flexWrap: 'wrap', gap: 2 }}>
@@ -256,7 +255,7 @@ export default function GovernancePage() {
           </>
         )}
       </Container>
-    </Layout>
+    </>
   );
 }
 

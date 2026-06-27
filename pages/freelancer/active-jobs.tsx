@@ -4,7 +4,6 @@ import { useJobs } from '../../src/hooks/useJobs';
 import JobCard from '../../src/components/JobCard';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import EmptyState from '../../src/components/EmptyState';
-import Layout from '../../src/components/Layout';
 import { JOB_STATUS } from '../../src/config/constants';
 
 export default function ActiveJobs() {
@@ -19,7 +18,7 @@ export default function ActiveJobs() {
   );
 
   return (
-    <Layout>
+    <>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Typography variant="h4" gutterBottom fontWeight={700}>
           Active Jobs
@@ -45,6 +44,6 @@ export default function ActiveJobs() {
           )}
         </Box>
       </Container>
-    </Layout>
+    </>
   );
 }

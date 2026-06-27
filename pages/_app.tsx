@@ -1,5 +1,8 @@
 import type { AppProps } from 'next/app';
+import type { NextPage } from 'next';
+import type { ReactElement, ReactNode } from 'react';
 import { useMemo, useEffect } from 'react';
+import Layout from '../src/components/Layout';
 import { CssBaseline } from '@mui/material';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
@@ -64,7 +67,16 @@ function ReferralCaptureWrapper({ router }: { router: AppProps['router'] }) {
   return null;
 }
 
-export default function App({ Component, pageProps, router }: AppProps) {
+// Pages may opt out of the shared Layout via `Page.getLayout = (page) => page`.
+type NextPageWithLayout<P = {}> = NextPage<P> & {
+  getLayout?: (page: ReactElement) => ReactNode;
+};
+type AppPropsWithLayout = AppProps & { Component: NextPageWithLayout };
+
+export default function App({ Component, pageProps, router }: AppPropsWithLayout) {
+  // Render the Layout once here so it stays mounted across client-side route
+  // changes (no sidebar/navbar remount or refetch on every navigation).
+  const getLayout = Component.getLayout ?? ((page: ReactElement) => <Layout>{page}</Layout>);
   // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'
   // ⚠️ IMPORTANT: This is set to DEVNET for testing
   const network = WalletAdapterNetwork.Devnet;
@@ -100,7 +112,7 @@ export default function App({ Component, pageProps, router }: AppProps) {
               <ReferralCaptureWrapper router={router} />
               <AppThemeProvider>
                 <CssBaseline />
-                <Component {...pageProps} />
+                {getLayout(<Component {...pageProps} />)}
               </AppThemeProvider>
               </UserRoleProvider>
             </NotificationProvider>
