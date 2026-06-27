@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Box,
   TextField,
@@ -33,7 +33,24 @@ export default function MilestoneBuilder({
   const remaining = budget - total;
   const overBudget = total > budget;
 
+  // Raw text the user is typing, kept separate from the parsed numeric `amount`
+  // so partial decimals like "0.", "0.00", "0.001" survive each keystroke.
+  const [rawAmounts, setRawAmounts] = useState<string[]>(
+    () => milestones.map((m) => (m.amount ? String(m.amount) : ''))
+  );
+
+  // Safety net: realign the buffer when milestones are replaced externally
+  // (e.g. a saved draft is loaded). Add/remove keep it in sync directly below.
+  useEffect(() => {
+    setRawAmounts((prev) =>
+      prev.length === milestones.length
+        ? prev
+        : milestones.map((m, i) => prev[i] ?? (m.amount ? String(m.amount) : ''))
+    );
+  }, [milestones.length]);
+
   const handleAdd = useCallback(() => {
+    setRawAmounts((prev) => [...prev, '']);
     onChange([
       ...milestones,
       { title: '', description: '', amount: 0 },
@@ -42,6 +59,7 @@ export default function MilestoneBuilder({
 
   const handleRemove = useCallback(
     (index: number) => {
+      setRawAmounts((prev) => prev.filter((_, i) => i !== index));
       onChange(milestones.filter((_, i) => i !== index));
     },
     [milestones, onChange]
@@ -58,15 +76,21 @@ export default function MilestoneBuilder({
     [milestones, onChange]
   );
 
-  // A single milestone amount can be any value, but never greater than the budget.
   const handleAmountChange = useCallback(
     (index: number, raw: string) => {
+      // Accept only a (partial) non-negative decimal so the field never fights
+      // the user mid-type. Over-budget values are surfaced via the error UI,
+      // not silently capped.
+      if (raw !== '' && !/^\d*\.?\d*$/.test(raw)) return;
+      setRawAmounts((prev) => {
+        const next = [...prev];
+        next[index] = raw;
+        return next;
+      });
       const parsed = parseFloat(raw);
-      const amount = Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
-      const capped = budget > 0 ? Math.min(amount, budget) : amount;
-      handleChange(index, 'amount', capped);
+      handleChange(index, 'amount', Number.isFinite(parsed) ? Math.max(0, parsed) : 0);
     },
-    [budget, handleChange]
+    [handleChange]
   );
 
   return (
@@ -129,10 +153,9 @@ export default function MilestoneBuilder({
                 <TextField
                   fullWidth
                   label="Amount"
-                  type="number"
-                  value={milestone.amount || ''}
+                  value={rawAmounts[index] ?? ''}
                   onChange={(e) => handleAmountChange(index, e.target.value)}
-                  placeholder="0.00"
+                  placeholder="0.001"
                   size="small"
                   required
                   error={budget > 0 && milestone.amount > budget}
@@ -144,7 +167,7 @@ export default function MilestoneBuilder({
                   InputProps={{
                     endAdornment: <InputAdornment position="end">SOL</InputAdornment>,
                   }}
-                  inputProps={{ min: 0, max: budget > 0 ? budget : undefined, step: 0.01 }}
+                  inputProps={{ inputMode: 'decimal' }}
                 />
               </Box>
 

@@ -33,8 +33,9 @@ import { useKyc } from '../../src/hooks/useKyc';
 import { useFaceApi } from '../../src/hooks/useFaceApi';
 import { detectFaceDescriptor, detectWithExpressions, faceDistance } from '../../src/hooks/useFaceApi';
 import type { FaceDescriptor, FaceExpressions } from '../../src/hooks/useFaceApi';
-import { computeVerificationHash, validateDocumentQuality, parseMrz } from '../../src/utils/kycCommitment';
-import type { DocumentQualityResult, MrzParseResult } from '../../src/utils/kycCommitment';
+import { computeVerificationHash, validateDocumentQuality, parseMrz, validateCccd } from '../../src/utils/kycCommitment';
+import type { DocumentQualityResult, MrzParseResult, CccdValidationResult } from '../../src/utils/kycCommitment';
+import { ocrIdCard } from '../../src/utils/idOcr';
 import {
   ServiceType,
   VerificationMethodType,
@@ -306,6 +307,7 @@ export default function IdentityPage() {
     didDocument, credentials, loading: didLoading, error: didError,
     fetchDIDDocument, fetchUserCredentials,
     createDIDDocument, addVerificationMethod, removeVerificationMethod, addServiceEndpoint,
+    anchorVC,
   } = useDID();
 
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -345,6 +347,17 @@ export default function IdentityPage() {
   const [mrzLine2, setMrzLine2] = useState('');
   const [mrzResult, setMrzResult] = useState<MrzParseResult | null>(null);
   const [mrzExpanded, setMrzExpanded] = useState(false);
+
+  // CCCD number check (national ID only) — OCR auto-fill + structural validation
+  const [cccdInput, setCccdInput] = useState('');
+  const [cccdResult, setCccdResult] = useState<CccdValidationResult | null>(null);
+  const [cccdExpanded, setCccdExpanded] = useState(false);
+  const [ocrRunning, setOcrRunning] = useState(false);
+  const [ocrProgress, setOcrProgress] = useState(0);
+
+  // DID anchoring sub-status during the final KYC step
+  const [didAnchorStatus, setDidAnchorStatus] = useState<'idle' | 'anchoring' | 'done' | 'skipped'>('idle');
+  const [didAnchorMsg, setDidAnchorMsg] = useState<string | null>(null);
 
   // Latest verification hash (set after comparison — for result display)
   const [verificationHashHex, setVerificationHashHex] = useState<string | null>(null);
@@ -387,6 +400,8 @@ export default function IdentityPage() {
     setIdDescriptor(null);
     setIdDetectStatus(null);
     setDocQuality(null);
+    setCccdInput('');
+    setCccdResult(null);
     const url = URL.createObjectURL(file);
     setIdPreview(url);
 
@@ -404,7 +419,28 @@ export default function IdentityPage() {
       setIdDescriptor(desc);
       setDocQuality(quality);
     };
+
+    // For a national ID, OCR the card to auto-read & validate the CCCD number.
+    if ((idType ?? 'national_id') === 'national_id') {
+      setOcrRunning(true);
+      setOcrProgress(0);
+      setCccdExpanded(true);
+      try {
+        const ocr = await ocrIdCard(file, (p) => setOcrProgress(Math.round(p * 100)));
+        if (ocr.cccd) {
+          setCccdInput(ocr.cccd);
+          setCccdResult(validateCccd(ocr.cccd));
+        }
+      } catch { /* user can still type it manually */ }
+      finally { setOcrRunning(false); }
+    }
   }, [idType]);
+
+  const handleCccdChange = useCallback((value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 12);
+    setCccdInput(digits);
+    setCccdResult(digits.length === 0 ? null : validateCccd(digits));
+  }, []);
 
   // ─── Handle selfie capture ──────────────────────────────────────────────────
 
@@ -462,6 +498,33 @@ export default function IdentityPage() {
       await submitKyc(idType);
       const sig = await finalizeKyc(idType, verificationHash, match);
       setChainTxSig(sig);
+
+      // Anchor the verified KYC as a DID verifiable credential (best-effort:
+      // only works once the DID instructions are live on-chain; never blocks KYC).
+      if (match) {
+        setDidAnchorStatus('anchoring');
+        setDidAnchorMsg(null);
+        try {
+          if (!didDocument) {
+            await createDIDDocument();
+            await fetchDIDDocument();
+          }
+          // metadataUri references the same privacy-preserving commitment hash —
+          // no raw biometric/document data is anchored.
+          const credMeta = `kyc:${idType}:${verificationHashHex ?? Array.from(verificationHash).slice(0, 8).map((b) => b.toString(16).padStart(2, '0')).join('')}`;
+          await anchorVC('KYC', credMeta);
+          await fetchUserCredentials(publicKey as any);
+          setDidAnchorStatus('done');
+        } catch (didErr: any) {
+          const m: string = didErr?.message ?? '';
+          setDidAnchorStatus('skipped');
+          setDidAnchorMsg(
+            m.includes('not yet deployed')
+              ? 'DID credential bỏ qua — instruction DID chưa deploy on-chain.'
+              : `DID credential bỏ qua: ${m.slice(0, 100)}`,
+          );
+        }
+      }
     } catch (err: any) {
       const msg = err?.message ?? 'On-chain write failed';
       // Detect legacy account (deserialization failure) and offer migration
@@ -470,7 +533,8 @@ export default function IdentityPage() {
       }
       setChainError(msg);
     }
-  }, [idDescriptor, selfieDescriptor, idType, publicKey, finalise, submitKyc, finalizeKyc]);
+  }, [idDescriptor, selfieDescriptor, idType, publicKey, finalise, submitKyc, finalizeKyc,
+      didDocument, createDIDDocument, fetchDIDDocument, anchorVC, fetchUserCredentials, verificationHashHex]);
 
   const resetKyc = () => {
     setKycStep(0);
@@ -493,6 +557,13 @@ export default function IdentityPage() {
     setMrzLine2('');
     setMrzResult(null);
     setMrzExpanded(false);
+    setCccdInput('');
+    setCccdResult(null);
+    setCccdExpanded(false);
+    setOcrRunning(false);
+    setOcrProgress(0);
+    setDidAnchorStatus('idle');
+    setDidAnchorMsg(null);
     setLivenessChallenge(pickChallenge()); // fresh challenge on retry
     kycReset();
     resetKycOnChain().catch(() => {});
@@ -855,6 +926,76 @@ export default function IdentityPage() {
               </Collapse>
             </Box>
           )}
+
+          {/* CCCD number check — national ID only */}
+          {idType === 'national_id' && (idDetectStatus === 'found' || ocrRunning || cccdInput) && (
+            <Box sx={{ mt: 2 }}>
+              <Box
+                onClick={() => setCccdExpanded(!cccdExpanded)}
+                sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 1.25, bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'grey.50', border: 1, borderColor: cccdResult?.valid ? alpha(theme.palette.success.main, 0.3) : cccdResult && cccdResult.issues.length ? alpha(theme.palette.error.main, 0.3) : 'divider', borderRadius: 2, cursor: 'pointer', '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'grey.100' } }}
+              >
+                <BadgeOutlined sx={{ fontSize: 16, color: cccdResult?.valid ? theme.palette.success.main : alpha(primaryMain, 0.7), flexShrink: 0 }} />
+                <Typography variant="caption" sx={{ flex: 1, fontWeight: 700, color: cccdResult?.valid ? theme.palette.success.main : cccdResult && cccdResult.issues.length ? theme.palette.error.main : 'text.secondary' }}>
+                  {ocrRunning
+                    ? `Đang quét số CCCD... ${ocrProgress}%`
+                    : cccdResult?.valid
+                      ? `✓ Số CCCD hợp lệ — ${cccdResult.province}`
+                      : cccdResult && cccdResult.issues.length
+                        ? '✗ Số CCCD nghi vấn'
+                        : 'Kiểm tra số CCCD (12 số)'}
+                </Typography>
+                {cccdExpanded ? <ExpandLessOutlined sx={{ fontSize: 16, color: 'text.disabled' }} /> : <ExpandMoreOutlined sx={{ fontSize: 16, color: 'text.disabled' }} />}
+              </Box>
+              <Collapse in={cccdExpanded}>
+                <Box sx={{ mt: 1.5, px: 0.5, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                  {ocrRunning && <LinearProgress variant="determinate" value={ocrProgress} sx={{ borderRadius: 1 }} />}
+                  <Box sx={{ px: 2, py: 1, bgcolor: alpha(primaryMain, 0.03), border: 1, borderColor: alpha(primaryMain, 0.1), borderRadius: 1.5 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500, lineHeight: 1.6 }}>
+                      Hệ thống tự đọc số CCCD từ ảnh thẻ. Kiểm tra lại và sửa nếu sai. Cấu trúc 12 số (mã tỉnh + giới tính/thế kỷ + năm sinh) được dùng để phát hiện số bịa.
+                    </Typography>
+                  </Box>
+                  <TextField
+                    label="Số CCCD (12 số)"
+                    value={cccdInput}
+                    onChange={(e) => handleCccdChange(e.target.value)}
+                    fullWidth
+                    size="small"
+                    inputProps={{ inputMode: 'numeric', maxLength: 12, style: { fontFamily: 'monospace', letterSpacing: '0.18em', fontSize: '0.9rem' } }}
+                    placeholder="079201012345"
+                    helperText={`${cccdInput.length}/12`}
+                  />
+                  {cccdResult && cccdInput.length === 12 && (
+                    <Box sx={{ px: 2, py: 1.25, bgcolor: cccdResult.valid ? alpha(theme.palette.success.main, 0.05) : alpha(theme.palette.error.main, 0.05), border: 1, borderColor: cccdResult.valid ? alpha(theme.palette.success.main, 0.25) : alpha(theme.palette.error.main, 0.25), borderRadius: 1.5 }}>
+                      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: (cccdResult.issues.length || cccdResult.warnings.length) ? 1 : 0 }}>
+                        <Box>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, display: 'block', mb: 0.25 }}>Tỉnh/TP</Typography>
+                          <Typography variant="caption" sx={{ fontFamily: 'monospace', fontWeight: 800, color: cccdResult.province ? primaryMain : theme.palette.error.main }}>{cccdResult.province ?? `${cccdResult.provinceCode}?`}</Typography>
+                        </Box>
+                        <Box>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, display: 'block', mb: 0.25 }}>Giới tính</Typography>
+                          <Typography variant="caption" sx={{ fontFamily: 'monospace', fontWeight: 800, color: primaryMain }}>{cccdResult.gender ?? '—'}</Typography>
+                        </Box>
+                        <Box>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, display: 'block', mb: 0.25 }}>Năm sinh</Typography>
+                          <Typography variant="caption" sx={{ fontFamily: 'monospace', fontWeight: 800, color: primaryMain }}>{cccdResult.birthYear ?? '—'}</Typography>
+                        </Box>
+                        <Box>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, display: 'block', mb: 0.25 }}>Độ tin cậy</Typography>
+                          <Chip size="small" label={`${cccdResult.score}/100`} sx={{ height: 18, fontSize: '0.6rem', fontWeight: 800, bgcolor: cccdResult.valid ? alpha(theme.palette.success.main, 0.1) : alpha(theme.palette.warning.main, 0.1), color: cccdResult.valid ? theme.palette.success.main : theme.palette.warning.main }} />
+                        </Box>
+                      </Box>
+                      {cccdResult.issues.map((iss) => (
+                        <Typography key={iss} variant="caption" sx={{ color: theme.palette.error.main, display: 'block', fontWeight: 700 }}>⚠ {iss}</Typography>
+                      ))}
+                      {cccdResult.warnings.map((w) => (
+                        <Typography key={w} variant="caption" sx={{ color: theme.palette.warning.main, display: 'block', fontWeight: 600 }}>• {w}</Typography>
+                      ))}
+                    </Box>
+                  )}
+                </Box>
+              </Collapse>
+            </Box>
+          )}
         </Box>
       )}
 
@@ -952,6 +1093,7 @@ export default function IdentityPage() {
                   { label: 'Screen artifact', ok: docQuality ? docQuality.screenLikelihood < 0.4 : null, extra: docQuality ? `${(docQuality.screenLikelihood * 100).toFixed(0)}% likelihood` : undefined, invertOk: true },
                   { label: 'Liveness challenge', ok: true, extra: livenessChallenge.label },
                   ...(idType === 'passport' && mrzResult ? [{ label: 'MRZ checksum', ok: mrzResult.valid, extra: mrzResult.valid ? `${mrzResult.nationality}` : 'INVALID' }] : []),
+                  ...(idType === 'national_id' && cccdResult ? [{ label: 'CCCD number', ok: cccdResult.valid, extra: cccdResult.valid ? `${cccdResult.province}` : 'INVALID' }] : []),
                 ].map(({ label, ok, extra }) => (
                   <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
@@ -1001,6 +1143,18 @@ export default function IdentityPage() {
                   >
                     {chainTxSig.slice(0, 32)}…
                   </Typography>
+                </Box>
+              )}
+              {chainTxSig && didAnchorStatus !== 'idle' && (
+                <Box sx={{ px: 2.5, py: 1.25, bgcolor: alpha(didAnchorStatus === 'done' ? theme.palette.success.main : secondaryMain, 0.04), border: 1, borderColor: alpha(didAnchorStatus === 'done' ? theme.palette.success.main : secondaryMain, 0.2), borderRadius: 2, minWidth: 280 }}>
+                  <Typography variant="caption" sx={{ color: didAnchorStatus === 'done' ? theme.palette.success.main : secondaryMain, display: 'block', fontWeight: 700 }}>
+                    {didAnchorStatus === 'anchoring' && '⏳ Đang ghi DID credential...'}
+                    {didAnchorStatus === 'done' && '✓ KYC đã anchor làm Verifiable Credential (DID)'}
+                    {didAnchorStatus === 'skipped' && 'ℹ DID credential bỏ qua'}
+                  </Typography>
+                  {didAnchorMsg && (
+                    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.25, fontWeight: 500 }}>{didAnchorMsg}</Typography>
+                  )}
                 </Box>
               )}
               {chainError && !needsMigration && (

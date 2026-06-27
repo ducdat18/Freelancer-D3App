@@ -330,3 +330,120 @@ export function parseMrz(line1: string, line2: string): MrzParseResult {
     docType, nationality, dobChecksumOk, expiryChecksumOk, issues,
   };
 }
+
+// ─── Vietnam CCCD (12-digit Citizen ID) structural validation ────────────────
+
+/**
+ * Official province/city codes embedded in the first 3 digits of a CCCD.
+ * Source: Thông tư 07/2016/TT-BCA (63 provinces). A code outside this set is a
+ * strong signal of a fabricated number.
+ */
+const VN_PROVINCE_CODES: Record<string, string> = {
+  '001': 'Hà Nội', '002': 'Hà Giang', '004': 'Cao Bằng', '006': 'Bắc Kạn',
+  '008': 'Tuyên Quang', '010': 'Lào Cai', '011': 'Điện Biên', '012': 'Lai Châu',
+  '014': 'Sơn La', '015': 'Yên Bái', '017': 'Hòa Bình', '019': 'Thái Nguyên',
+  '020': 'Lạng Sơn', '022': 'Quảng Ninh', '024': 'Bắc Giang', '025': 'Phú Thọ',
+  '026': 'Vĩnh Phúc', '027': 'Bắc Ninh', '030': 'Hải Dương', '031': 'Hải Phòng',
+  '033': 'Hưng Yên', '034': 'Thái Bình', '035': 'Hà Nam', '036': 'Nam Định',
+  '037': 'Ninh Bình', '038': 'Thanh Hóa', '040': 'Nghệ An', '042': 'Hà Tĩnh',
+  '044': 'Quảng Bình', '045': 'Quảng Trị', '046': 'Thừa Thiên Huế', '048': 'Đà Nẵng',
+  '049': 'Quảng Nam', '051': 'Quảng Ngãi', '052': 'Bình Định', '054': 'Phú Yên',
+  '056': 'Khánh Hòa', '058': 'Ninh Thuận', '060': 'Bình Thuận', '062': 'Kon Tum',
+  '064': 'Gia Lai', '066': 'Đắk Lắk', '067': 'Đắk Nông', '068': 'Lâm Đồng',
+  '070': 'Bình Phước', '072': 'Tây Ninh', '074': 'Bình Dương', '075': 'Đồng Nai',
+  '077': 'Bà Rịa - Vũng Tàu', '079': 'Hồ Chí Minh', '080': 'Long An', '082': 'Tiền Giang',
+  '083': 'Bến Tre', '084': 'Trà Vinh', '086': 'Vĩnh Long', '087': 'Đồng Tháp',
+  '089': 'An Giang', '091': 'Kiên Giang', '092': 'Cần Thơ', '093': 'Hậu Giang',
+  '094': 'Sóc Trăng', '095': 'Bạc Liêu', '096': 'Cà Mau',
+};
+
+export interface CccdValidationResult {
+  valid: boolean;
+  score: number;            // 0–100 structural confidence
+  province: string | null;  // resolved province/city name
+  provinceCode: string;
+  gender: 'Nam' | 'Nữ' | null;
+  century: number | null;   // 19, 20, 21...
+  birthYear: number | null;
+  issues: string[];         // hard failures (fabricated structure)
+  warnings: string[];       // soft signals
+}
+
+/**
+ * Validate the structure of a Vietnamese CCCD (12-digit Citizen ID).
+ *
+ * Layout (Thông tư 07/2016/TT-BCA):
+ *   [0..2]  province code      → must be a real province
+ *   [3]     gender + century   → 0/1 = 20th c. (M/F), 2/3 = 21st c., 4/5 = 22nd...
+ *   [4..5]  last two digits of birth year
+ *   [6..11] random sequence
+ *
+ * This catches fabricated numbers (wrong length, invalid province, impossible
+ * birth year) without any server call. It cannot prove a *real* card wasn't
+ * forged — pair it with the image quality / anti-screen checks for that.
+ */
+export function validateCccd(input: string): CccdValidationResult {
+  const issues: string[] = [];
+  const warnings: string[] = [];
+  const digits = (input || '').replace(/\D/g, '');
+
+  const base: CccdValidationResult = {
+    valid: false, score: 0, province: null, provinceCode: digits.slice(0, 3),
+    gender: null, century: null, birthYear: null, issues, warnings,
+  };
+
+  if (digits.length === 0) {
+    return base;
+  }
+  if (digits.length !== 12) {
+    issues.push(`CCCD phải đúng 12 chữ số (đang có ${digits.length})`);
+    return base;
+  }
+
+  let score = 40; // passed the length gate
+
+  // Province code
+  const provinceCode = digits.slice(0, 3);
+  const province = VN_PROVINCE_CODES[provinceCode] ?? null;
+  if (province) {
+    score += 25;
+  } else {
+    issues.push(`Mã tỉnh "${provinceCode}" không tồn tại — số có thể bịa`);
+  }
+
+  // Gender + century digit:
+  // 0/1 → 1900s (base 19), 2/3 → 2000s (base 20), 4/5 → 2100s (base 21)...
+  const gcDigit = parseInt(digits[3], 10);
+  const centuryBase = 19 + Math.floor(gcDigit / 2);
+  const gender: 'Nam' | 'Nữ' = gcDigit % 2 === 0 ? 'Nam' : 'Nữ';
+
+  const yy = parseInt(digits.slice(4, 6), 10);
+  const birthYear = centuryBase * 100 + yy;
+  const century = centuryBase + 1; // human-friendly: base 19 → 20th century
+
+  const currentYear = new Date().getFullYear();
+  if (Number.isFinite(birthYear) && birthYear >= 1900 && birthYear <= currentYear) {
+    score += 25;
+  } else {
+    issues.push(`Năm sinh suy ra (${birthYear}) không hợp lệ`);
+  }
+  if (birthYear > currentYear - 14) {
+    warnings.push('Chủ thẻ dưới 14 tuổi — CCCD thường cấp từ 14 tuổi trở lên');
+  }
+
+  // Repeated/sequential random tail is a weak fabrication signal
+  const tail = digits.slice(6);
+  if (/^(\d)\1{5}$/.test(tail) || tail === '123456' || tail === '000000') {
+    warnings.push('6 số cuối có vẻ không ngẫu nhiên');
+    score -= 10;
+  }
+
+  score = Math.max(0, Math.min(100, score));
+  const valid = issues.length === 0;
+
+  return {
+    valid, score, province, provinceCode,
+    gender, century, birthYear: Number.isFinite(birthYear) ? birthYear : null,
+    issues, warnings,
+  };
+}
