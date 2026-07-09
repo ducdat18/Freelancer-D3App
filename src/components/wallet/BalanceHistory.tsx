@@ -176,7 +176,10 @@ export default function BalanceHistory() {
         <Divider sx={{ mb: 1 }} />
 
         {error && (
-          <Typography variant="body2" color="error" sx={{ py: 2 }}>{error}</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, py: 1.5 }}>
+            <Typography variant="caption" sx={{ color: 'warning.main' }}>{error}</Typography>
+            <Chip label="Retry" size="small" variant="outlined" onClick={refetchHistory} sx={{ cursor: 'pointer' }} />
+          </Box>
         )}
 
         {!error && rows.length === 0 && !histLoading && (
