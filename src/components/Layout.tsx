@@ -113,6 +113,7 @@ const NAV_SECTIONS: NavSection[] = [
     label: 'PLATFORM',
     requiresAuth: false,
     entries: [
+      { path: '/wallet',             name: 'Wallet',          Icon: AccountBalanceWalletIcon },
       { path: '/governance',         name: 'Governance',      Icon: HowToVoteIcon },
       { path: '/staking',            name: 'Staking',         Icon: AccountBalanceIcon },
       { path: '/referral',           name: 'Referral',        Icon: ShareIcon },
