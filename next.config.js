@@ -40,6 +40,24 @@ const nextConfig = {
     '@solana/wallet-adapter-react-ui',
     '@solana/wallet-adapter-wallets',
   ],
+
+  // Security headers applied to every response (defense-in-depth).
+  // Note: camera=(self) is kept ON because the browser-side KYC step needs the webcam.
+  async headers() {
+    const securityHeaders = [
+      // Prevent this site from being embedded in an iframe → clickjacking protection
+      { key: 'X-Frame-Options', value: 'DENY' },
+      // Stop browsers from MIME-sniffing a response away from the declared type
+      { key: 'X-Content-Type-Options', value: 'nosniff' },
+      // Do not leak full URLs to third parties on cross-origin navigation
+      { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+      // Least-privilege browser features: allow camera only for our own KYC page
+      { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=()' },
+      // Force HTTPS for 2 years (Vercel serves HTTPS); protects against SSL-strip
+      { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+    ];
+    return [{ source: '/(.*)', headers: securityHeaders }];
+  },
 };
 
 module.exports = nextConfig;

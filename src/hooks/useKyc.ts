@@ -12,8 +12,8 @@ export interface KycRecordOnChain {
   idType: 'national_id' | 'passport' | 'drivers_license';
   submittedAt: number;
   verifiedAt: number;
-  /** SHA-256 commitment of face descriptor + doc type + wallet pubkey */
-  verificationHash: number[];
+  /** Euclidean face-comparison distance as basis points: floor(delta * 10_000) */
+  faceDistanceBp: number;
 }
 
 function parseStatus(raw: any): KycStatusOnChain {
@@ -55,7 +55,7 @@ export function useKyc() {
         idType: parseIdType(record.idType),
         submittedAt: record.submittedAt.toNumber(),
         verifiedAt: record.verifiedAt.toNumber(),
-        verificationHash: Array.from(record.verificationHash as number[]),
+        faceDistanceBp: Number(record.faceDistanceBp ?? 0),
       };
     } catch {
       return null;
@@ -87,12 +87,12 @@ export function useKyc() {
   }, [program, publicKey]);
 
   /**
-   * Finalize KYC with a SHA-256 commitment instead of raw face distance.
-   * verificationHash = SHA-256(quantized_descriptor[128] || doc_type_byte || wallet_pubkey[32])
+   * Finalize KYC with the Euclidean face-comparison distance as basis points.
+   * faceDistanceBp = floor(delta * 10_000); descriptors/images stay in the browser.
    */
   const finalizeKyc = useCallback(async (
     idType: KycRecordOnChain['idType'],
-    verificationHash: Uint8Array,
+    faceDistanceBp: number,
     matched: boolean,
   ): Promise<string> => {
     if (!program || !publicKey) throw new Error('Wallet not connected');
@@ -102,7 +102,7 @@ export function useKyc() {
       const [kycPda] = deriveKycPDA(publicKey);
       // @ts-ignore
       const tx = await program.methods
-        .finalizeKyc(toIdTypeArg(idType), Array.from(verificationHash), matched)
+        .finalizeKyc(toIdTypeArg(idType), Math.max(0, Math.floor(faceDistanceBp)), matched)
         .accounts({
           kycRecord: kycPda,
           user: publicKey,
@@ -142,35 +142,7 @@ export function useKyc() {
     }
   }, [program, publicKey]);
 
-  /**
-   * Close a legacy KYC record (old struct layout from before verification_hash).
-   * Uses raw account access — bypasses Anchor deserialization.
-   * After calling this, call submitKyc to create a fresh record.
-   */
-  const closeKyc = useCallback(async (): Promise<string> => {
-    if (!program || !publicKey) throw new Error('Wallet not connected');
-    setLoading(true);
-    setError(null);
-    try {
-      const [kycPda] = deriveKycPDA(publicKey);
-      // @ts-ignore
-      const tx = await program.methods
-        .closeKycUnchecked()
-        .accounts({
-          kycRecord: kycPda,
-          user: publicKey,
-        })
-        .rpc();
-      return tx;
-    } catch (err: any) {
-      setError(err.message ?? String(err));
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, [program, publicKey]);
-
-  return { fetchKycRecord, submitKyc, finalizeKyc, resetKycOnChain, closeKyc, loading, error };
+  return { fetchKycRecord, submitKyc, finalizeKyc, resetKycOnChain, loading, error };
 }
 
 /** Fetch on-chain KYC status for any address (read-only, no hook state) */

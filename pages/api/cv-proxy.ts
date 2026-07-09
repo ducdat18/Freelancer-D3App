@@ -19,8 +19,16 @@ export const config = {
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Only GET is meaningful for a read-through proxy
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+
+  // Throttle per IP so the proxy can't be abused to burn bandwidth / fan out to gateways
+  const { checkRateLimit } = await import('../../src/utils/rateLimit');
+  if (!checkRateLimit(req, res, { namespace: 'proxy', max: 40, windowMs: 60_000 })) return;
+
   const { cid } = req.query;
 
+  // Only allow well-formed IPFS CIDs — blocks SSRF to arbitrary hosts
   if (typeof cid !== 'string' || !isValidCid(cid)) {
     return res.status(400).json({ error: 'Invalid CID' });
   }

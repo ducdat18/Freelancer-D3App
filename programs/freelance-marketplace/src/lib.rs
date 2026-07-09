@@ -1410,27 +1410,21 @@ pub mod freelance_marketplace {
         kyc::submit_kyc(ctx, id_type)
     }
 
-    /// Finalize KYC — record SHA-256 commitment of face comparison (Verified / Rejected).
-    /// verification_hash = SHA-256(quantized_descriptor[128] || doc_type_byte || wallet_pubkey[32])
-    /// Raw biometric data is never stored on-chain.
+    /// Finalize KYC — record the Euclidean face-comparison distance and outcome.
+    /// face_distance_bp = floor(delta * 10_000); the 128-d descriptors and images are
+    /// computed in the browser and never stored on-chain.
     pub fn finalize_kyc(
         ctx: Context<FinalizeKyc>,
         id_type: IdType,
-        verification_hash: [u8; 32],
+        face_distance_bp: u32,
         matched: bool,
     ) -> Result<()> {
-        kyc::finalize_kyc(ctx, id_type, verification_hash, matched)
+        kyc::finalize_kyc(ctx, id_type, face_distance_bp, matched)
     }
 
     /// Reset KYC — set record back to Pending
     pub fn reset_kyc(ctx: Context<ResetKyc>) -> Result<()> {
         kyc::reset_kyc(ctx)
-    }
-
-    /// Close a legacy KYC record (raw account access — for struct migration).
-    /// After closing, call submit_kyc to create a fresh record with the new layout.
-    pub fn close_kyc_unchecked(ctx: Context<CloseKycUnchecked>) -> Result<()> {
-        kyc::close_kyc_unchecked(ctx)
     }
 }
 

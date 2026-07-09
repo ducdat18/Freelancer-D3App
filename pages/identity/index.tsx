@@ -295,7 +295,7 @@ export default function IdentityPage() {
   const addressStr = publicKey?.toBase58() ?? null;
 
   const { status: kycStatus, isVerified, record, loaded: kycLoaded, startPending, finalise, reset: kycReset, syncFromChain } = useIdentityVerification(addressStr);
-  const { submitKyc, finalizeKyc, resetKycOnChain, closeKyc, fetchKycRecord, loading: kycChainLoading } = useKyc();
+  const { submitKyc, finalizeKyc, resetKycOnChain, fetchKycRecord, loading: kycChainLoading } = useKyc();
   const { status: faceApiStatus, detect } = useFaceApi();
 
   // On-chain transaction state
@@ -336,10 +336,6 @@ export default function IdentityPage() {
   // Step 4: comparison
   const [comparing, setComparing] = useState(false);
   const [compareResult, setCompareResult] = useState<{ distance: number; match: boolean } | null>(null);
-
-  // Migration: legacy account detected (old struct without verification_hash)
-  const [needsMigration, setNeedsMigration] = useState(false);
-  const [migrating, setMigrating] = useState(false);
 
   // MRZ (passport only)
   const [mrzLine1, setMrzLine1] = useState('');
@@ -492,10 +488,11 @@ export default function IdentityPage() {
       return;
     }
 
-    // Write commitment on-chain (submit pending → finalize)
+    // Write result on-chain (submit pending → finalize). Only the integer face
+    // distance (basis points) and the match flag leave the browser.
     try {
       await submitKyc(idType);
-      const sig = await finalizeKyc(idType, verificationHash, match);
+      const sig = await finalizeKyc(idType, Math.round(dist * 10000), match);
       setChainTxSig(sig);
 
       // Anchor the verified KYC as a DID verifiable credential (best-effort:
@@ -525,12 +522,7 @@ export default function IdentityPage() {
         }
       }
     } catch (err: any) {
-      const msg = err?.message ?? 'On-chain write failed';
-      // Detect legacy account (deserialization failure) and offer migration
-      if (msg.includes('account') || msg.includes('AccountNotInitialized') || msg.includes('size')) {
-        setNeedsMigration(true);
-      }
-      setChainError(msg);
+      setChainError(err?.message ?? 'On-chain write failed');
     }
   }, [idDescriptor, selfieDescriptor, idType, publicKey, finalise, submitKyc, finalizeKyc,
       didDocument, createDIDDocument, fetchDIDDocument, anchorVC, fetchUserCredentials, verificationHashHex]);
@@ -550,7 +542,6 @@ export default function IdentityPage() {
     setCompareResult(null);
     setChainTxSig(null);
     setChainError(null);
-    setNeedsMigration(false);
     setVerificationHashHex(null);
     setMrzLine1('');
     setMrzLine2('');
@@ -579,28 +570,6 @@ export default function IdentityPage() {
       setMrzResult(null);
     }
   }, []);
-
-  const handleMigrate = async () => {
-    setMigrating(true);
-    try {
-      await closeKyc();
-      setNeedsMigration(false);
-      setChainError(null);
-      // Re-attempt submit + finalize with the already-computed result
-      if (compareResult && idType && publicKey && selfieDescriptor) {
-        const verificationHash = await computeVerificationHash(
-          selfieDescriptor, idType, publicKey.toBytes(),
-        );
-        await submitKyc(idType);
-        const sig = await finalizeKyc(idType, verificationHash, compareResult.match);
-        setChainTxSig(sig);
-      }
-    } catch (err: any) {
-      setChainError(err?.message ?? 'Migration failed');
-    } finally {
-      setMigrating(false);
-    }
-  };
 
   // ─── DID handlers ───────────────────────────────────────────────────────────
 
@@ -1156,30 +1125,11 @@ export default function IdentityPage() {
                   )}
                 </Box>
               )}
-              {chainError && !needsMigration && (
+              {chainError && (
                 <Box sx={{ px: 2.5, py: 1.25, bgcolor: alpha(theme.palette.warning.main, 0.05), border: 1, borderColor: alpha(theme.palette.warning.main, 0.2), borderRadius: 2, minWidth: 280 }}>
                   <Typography variant="caption" sx={{ color: theme.palette.warning.main, display: 'block', fontWeight: 600 }}>
                     On-chain write skipped: {chainError}
                   </Typography>
-                </Box>
-              )}
-              {needsMigration && (
-                <Box sx={{ px: 2.5, py: 2, bgcolor: alpha(theme.palette.info.main, 0.05), border: 1, borderColor: alpha(theme.palette.info.main, 0.25), borderRadius: 2, minWidth: 280, textAlign: 'left' }}>
-                  <Typography variant="caption" sx={{ color: theme.palette.info.main, display: 'block', fontWeight: 800, mb: 0.75 }}>
-                    Account Migration Required
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500, display: 'block', mb: 1.5, lineHeight: 1.6 }}>
-                    Your on-chain KYC record uses an older format (stores raw face distance). Click below to close the old record and re-write with the new privacy-preserving commitment format.
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={handleMigrate}
-                    disabled={migrating}
-                    sx={{ fontWeight: 800, fontSize: '0.72rem' }}
-                  >
-                    {migrating ? 'Migrating...' : 'Migrate Account'}
-                  </Button>
                 </Box>
               )}
 

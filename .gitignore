@@ -70,6 +70,9 @@ list-job-accounts.js
 
 # Thesis / LaTeX artifacts (kept out of the app repo)
 final_thesis*/
+Final_real_thesis/
+Final_real_thesis.pdf
+shipyard-project-brief.md
 SOICT_DATN_Application_ENG_Template/
 *.zip
 *.tex
@@ -85,5 +88,14 @@ SOICT_DATN_Application_ENG_Template/
 *.synctex*
 main.pdf
 
-# OMC tool session logs
-.omc/sessions/
+# OMC tool session logs / agent + editor session data (not part of the deliverable)
+.omc/
+.claude/
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Thesis defense decks + Q&A prep notes (not part of the app deliverable)
+*.pptx
+~$*
+DEFENSE_*.md
