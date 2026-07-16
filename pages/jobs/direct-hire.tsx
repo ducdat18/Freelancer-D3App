@@ -25,7 +25,7 @@ export default function DirectHire() {
   const router = useRouter();
   const { freelancer } = router.query; // Get freelancer address from URL
   const { publicKey, connected } = useWallet();
-  const { createJob, loading, error } = useJobs();
+  const { createJob, loading, error } = useJobs({ autoFetch: false });
   const { upload, isUploading } = useIPFS();
   const { program } = useSolanaProgram();
 

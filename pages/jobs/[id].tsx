@@ -84,7 +84,7 @@ export default function JobDetail() {
   const [rateClientLoading, setRateClientLoading] = useState(false);
   const [repostJobDialogOpen, setRepostJobDialogOpen] = useState(false);
 
-  const { fetchJob, submitBid, cancelJob, repostJob } = useJobs();
+  const { fetchJob, submitBid, cancelJob, repostJob } = useJobs({ autoFetch: false });
   const { addNotification } = useNotificationContext();
   const { connected, publicKey } = useWallet();
   const { depositEscrow, fetchEscrow, submitWork } = useEscrow();

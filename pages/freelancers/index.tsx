@@ -18,7 +18,7 @@ import { formatSol } from '../../src/types/solana';
 import { useRouter } from 'next/router';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import { useSolanaProgram } from '../../src/hooks/useSolanaProgram';
-import { useJobs } from '../../src/hooks/useJobs';
+import { useOptimizedJobsList } from '../../src/hooks/useOptimizedJobsList';
 import Link from 'next/link';
 import ChatDialog from '../../src/components/chat/ChatDialog';
 import { getExperienceLevel } from '../../src/utils/userRole';
@@ -88,7 +88,8 @@ export default function FindTalent() {
   const { setVisible } = useWalletModal();
   const { program } = useSolanaProgram();
   const router = useRouter();
-  const { jobs, loading: loadingJobs } = useJobs({ autoFetch: true });
+  // Cached React Query hook so revisiting/reloading doesn't refetch on-chain.
+  const { jobs, loading: loadingJobs } = useOptimizedJobsList();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const primaryMain = theme.palette.primary.main;

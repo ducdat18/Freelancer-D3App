@@ -96,7 +96,7 @@ function nowTs() {
 
 export default function SampleJobsCreator() {
   const { connected, publicKey } = useWallet()
-  const { createJob }            = useJobs()
+  const { createJob }            = useJobs({ autoFetch: false })
   const theme = useTheme()
   const isDark = theme.palette.mode === 'dark'
   const primaryMain = theme.palette.primary.main

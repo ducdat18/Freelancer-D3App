@@ -20,7 +20,7 @@ export default function EditJob() {
   const primaryMain = theme.palette.primary.main;
 
   const { connected, publicKey } = useWallet();
-  const { fetchJob, updateJobMetadata } = useJobs();
+  const { fetchJob, updateJobMetadata } = useJobs({ autoFetch: false });
   const { isUploading } = useIPFS();
 
   const [job, setJob] = useState<any>(null);

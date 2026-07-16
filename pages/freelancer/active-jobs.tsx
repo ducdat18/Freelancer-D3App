@@ -1,14 +1,13 @@
 import { Container, Typography, Box } from '@mui/material';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { useJobs } from '../../src/hooks/useJobs';
+import { useOptimizedJobsList } from '../../src/hooks/useOptimizedJobsList';
 import JobCard from '../../src/components/JobCard';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
 import EmptyState from '../../src/components/EmptyState';
-import { JOB_STATUS } from '../../src/config/constants';
 
 export default function ActiveJobs() {
   const { publicKey } = useWallet();
-  const { jobs, loading } = useJobs({ status: JOB_STATUS.IN_PROGRESS });
+  const { jobs, loading } = useOptimizedJobsList('inProgress');
 
   // Filter jobs where current user is the selected freelancer
   const myActiveJobs = jobs.filter(job =>

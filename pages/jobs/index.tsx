@@ -17,7 +17,7 @@ import { useRouter } from 'next/router';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { motion } from 'framer-motion';
 import LoadingSpinner from '../../src/components/LoadingSpinner';
-import { useJobs } from '../../src/hooks/useJobs';
+import { useOptimizedJobsList } from '../../src/hooks/useOptimizedJobsList';
 import { lamportsToSol, bnToNumber, formatSol } from '../../src/types/solana';
 import { SolanaIconSimple } from '../../src/components/SolanaIcon';
 import { JOB_STATUS } from '../../src/config/constants';
@@ -41,7 +41,9 @@ export default function Jobs() {
   const { connected } = useWallet();
 
   const itemsPerPage = 9;
-  const { jobs, loading, error } = useJobs({ autoFetch: true });
+  // React Query hook: shared + persisted cache, refetchOnMount:false → revisiting
+  // the page (or a full reload) restores instantly instead of refetching on-chain.
+  const { jobs, loading, error } = useOptimizedJobsList();
 
   // Cache of jobPda -> category fetched from IPFS metadata
   const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});

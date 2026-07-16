@@ -1,12 +1,11 @@
 import { Container, Typography, Box } from '@mui/material';
-import { useJobs } from '../../hooks/useJobs';
+import { useOptimizedJobsList } from '../../hooks/useOptimizedJobsList';
 import JobCard from '../../components/JobCard';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import EmptyState from '../../components/EmptyState';
-import { JOB_STATUS } from '../../config/constants';
 
 export default function BrowseJobs() {
-  const { jobs, loading } = useJobs({ status: JOB_STATUS.OPEN });
+  const { jobs, loading } = useOptimizedJobsList('open');
 
   return (
     <Container maxWidth="lg">

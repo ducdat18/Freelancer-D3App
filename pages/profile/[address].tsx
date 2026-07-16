@@ -32,7 +32,7 @@ export default function Profile() {
   const [isJuror, setIsJuror] = useState(false);
 
   const { program } = useSolanaProgram();
-  const { fetchAllJobs } = useJobs();
+  const { fetchAllJobs } = useJobs({ autoFetch: false });
   const { fetchReputation } = useReputation();
   const [clientJobs, setClientJobs] = useState<any[]>([]);
   const [freelancerJobs, setFreelancerJobs] = useState<any[]>([]);

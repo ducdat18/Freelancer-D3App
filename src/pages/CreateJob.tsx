@@ -16,7 +16,7 @@ import { WalletOutlined } from '@mui/icons-material';
 export default function CreateJob() {
   const router = useRouter();
   const { publicKey, connected } = useWallet();
-  const { createJob, depositJobEscrow, loading, error } = useJobs();
+  const { createJob, depositJobEscrow, loading, error } = useJobs({ autoFetch: false });
   const { initJobMilestones, createMilestone: createMilestoneOnChain } = useMilestones();
   const { upload, isUploading } = useIPFS();
   const { listDrafts, deleteDraft } = useJobDraft();
