@@ -54,7 +54,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
 
         {profile.bio && (
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontStyle: 'italic', lineHeight: 1.6 }}>
-            "{profile.bio}"
+            &quot;{profile.bio}&quot;
           </Typography>
         )}
 

@@ -138,7 +138,7 @@ export default function DisputeCard({
                 fontSize: '0.82rem'
               }}
             >
-              "{reason}"
+              &quot;{reason}&quot;
             </Typography>
           </Box>
         )}

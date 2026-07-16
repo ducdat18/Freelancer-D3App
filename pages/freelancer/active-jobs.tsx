@@ -24,7 +24,7 @@ export default function ActiveJobs() {
           Active Jobs
         </Typography>
         <Typography variant="body1" color="text.secondary" gutterBottom>
-          Jobs you're currently working on
+          Jobs you&apos;re currently working on
         </Typography>
 
         <Box sx={{ mt: 4 }}>

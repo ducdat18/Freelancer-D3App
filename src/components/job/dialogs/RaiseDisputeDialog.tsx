@@ -43,7 +43,7 @@ export default function RaiseDisputeDialog({
           🗳️ Your dispute will be reviewed by the community through DAO voting. Provide clear evidence of why the rejection was unfair.
         </Alert>
         <Typography variant="body2" gutterBottom>
-          Explain why you believe the client's rejection is unfair:
+          Explain why you believe the client&apos;s rejection is unfair:
         </Typography>
         <TextField
           fullWidth

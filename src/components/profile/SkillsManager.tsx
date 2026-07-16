@@ -162,7 +162,7 @@ export default function SkillsManager({
         {/* Warning when limit reached */}
         {!readonly && skills.length >= maxSkills && (
           <Alert severity="info" sx={{ fontWeight: 500 }}>
-            You've reached the maximum of {maxSkills} skills.
+            You&apos;ve reached the maximum of {maxSkills} skills.
           </Alert>
         )}
 

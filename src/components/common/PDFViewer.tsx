@@ -128,7 +128,7 @@ export default function PDFViewer({
       {!loading && (
         <Box sx={{ p: 1, textAlign: 'center', bgcolor: isDark ? 'rgba(0,0,0,0.2)' : 'grey.50', borderTop: 1, borderColor: 'divider' }}>
           <Typography variant="caption" color="text.secondary" fontWeight={500}>
-            Can't see the PDF?{' '}
+            Can&apos;t see the PDF?{' '}
             <a href={pdfUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline', color: theme.palette.primary.main, fontWeight: 700 }}>
               Open in new tab
             </a>

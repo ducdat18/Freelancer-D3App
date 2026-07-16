@@ -174,7 +174,7 @@ export default function EditJob() {
           >
             <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: primaryMain }} />
             <Typography sx={{ fontFamily: '"Orbitron", monospace', fontSize: '0.58rem', letterSpacing: '0.12em', color: primaryMain }}>
-              // EDIT JOB
+              {'// EDIT JOB'}
             </Typography>
           </Box>
           <Typography

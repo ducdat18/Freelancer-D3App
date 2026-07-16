@@ -261,7 +261,7 @@ export default function AISmartMatch({ openJobs, candidates, onInvite }: AISmart
               );
             })}
             <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5 }}>
-              Ranked by AI from on-chain reputation. Always review a freelancer's profile before inviting.
+              Ranked by AI from on-chain reputation. Always review a freelancer&apos;s profile before inviting.
             </Typography>
           </Stack>
         )}

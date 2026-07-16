@@ -109,7 +109,7 @@ export default function BioEditor({
       {/* Warnings */}
       {isNearLimit && (
         <Alert severity="warning" sx={{ mt: 2 }}>
-          You're approaching the character limit
+          You&apos;re approaching the character limit
         </Alert>
       )}
 

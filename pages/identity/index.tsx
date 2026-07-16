@@ -605,7 +605,7 @@ export default function IdentityPage() {
           <Box>
             <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.4, mb: 1.5, bgcolor: isDark ? 'rgba(0,255,195,0.06)' : alpha(primaryMain, 0.08), border: 1, borderColor: alpha(primaryMain, 0.2), borderRadius: 1 }}>
               <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: primaryMain, boxShadow: isDark ? `0 0 6px ${primaryMain}` : 'none' }} />
-              <Typography sx={{ fontFamily: '"Orbitron", monospace', fontSize: '0.58rem', letterSpacing: '0.12em', color: primaryMain, fontWeight: 700 }}>// IDENTITY</Typography>
+              <Typography sx={{ fontFamily: '"Orbitron", monospace', fontSize: '0.58rem', letterSpacing: '0.12em', color: primaryMain, fontWeight: 700 }}>{'// IDENTITY'}</Typography>
             </Box>
             <Typography variant="h4" fontWeight={800} sx={{ fontFamily: '"Orbitron", sans-serif', background: isDark ? `linear-gradient(135deg, #fff 40%, ${primaryMain} 100%)` : `linear-gradient(135deg, ${theme.palette.text.primary} 40%, ${primaryMain} 100%)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1.2 }}>
               Identity & KYC

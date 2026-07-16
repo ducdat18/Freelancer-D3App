@@ -71,7 +71,7 @@ export default function RateClientDialog({
 
       <DialogContent>
         <Alert severity="success" sx={{ mb: 3 }}>
-          Job <strong>"{jobTitle}"</strong> is complete! Share your experience working with client{' '}
+          Job <strong>&quot;{jobTitle}&quot;</strong> is complete! Share your experience working with client{' '}
           <strong>{shortAddr}</strong>.
         </Alert>
 

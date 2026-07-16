@@ -106,7 +106,7 @@ export default function Dashboard({ forceRole }: DashboardProps) {
             >
               <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: primaryMain, boxShadow: isDark ? `0 0 6px ${primaryMain}` : 'none' }} />
               <Typography sx={{ fontFamily: '"Orbitron", monospace', fontSize: '0.58rem', letterSpacing: '0.12em', color: primaryMain }}>
-                // GETTING STARTED
+                {'// GETTING STARTED'}
               </Typography>
             </Box>
             <Typography
@@ -337,7 +337,7 @@ export default function Dashboard({ forceRole }: DashboardProps) {
               >
                 <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: primaryMain, boxShadow: isDark ? `0 0 6px ${primaryMain}` : 'none' }} />
                 <Typography sx={{ fontFamily: '"Orbitron", monospace', fontSize: '0.58rem', letterSpacing: '0.12em', color: primaryMain }}>
-                  // DASHBOARD
+                  {'// DASHBOARD'}
                 </Typography>
               </Box>
               <Typography

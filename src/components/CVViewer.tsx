@@ -108,7 +108,7 @@ export default function CVViewer({ open, onClose, cvHash, freelancerName }: CVVi
         {/* Warning for mock CV */}
         {isMockHash && (
           <Alert severity="warning" sx={{ m: 2 }}>
-            ⚠️ This is a <strong>test/mock CV</strong>. The file doesn't exist on IPFS.
+            ⚠️ This is a <strong>test/mock CV</strong>. The file doesn&apos;t exist on IPFS.
             Upload a real CV file to see it displayed here.
           </Alert>
         )}

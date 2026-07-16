@@ -749,7 +749,7 @@ export default function FindTalent() {
                 <CircularProgress size={32} />
               </Box>
             ) : myOpenJobs.length === 0 ? (
-              <Alert severity="info">You don't have any open jobs. Create a job first.</Alert>
+              <Alert severity="info">You don&apos;t have any open jobs. Create a job first.</Alert>
             ) : (
               <FormControl fullWidth>
                 <InputLabel>Select Job</InputLabel>

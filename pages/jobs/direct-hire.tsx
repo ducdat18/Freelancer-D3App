@@ -132,7 +132,7 @@ export default function DirectHire() {
 
         {!freelancer && connected && (
           <Alert severity="info" sx={{ mb: 3 }}>
-            No freelancer selected. Please go to "Find Talent" and select a freelancer to create a direct hire job.
+            No freelancer selected. Please go to &quot;Find Talent&quot; and select a freelancer to create a direct hire job.
           </Alert>
         )}
 
@@ -182,7 +182,7 @@ export default function DirectHire() {
             • Create a private job offer for a specific freelancer<br/>
             • The freelancer will be invited to bid on your job<br/>
             • Other freelancers can still see and bid on the job<br/>
-            • You can accept any bid, including the invited freelancer's
+            • You can accept any bid, including the invited freelancer&apos;s
           </Typography>
         </Alert>
 

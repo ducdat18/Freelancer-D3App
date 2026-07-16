@@ -21,6 +21,7 @@ export default function Profile() {
   const router = useRouter();
   const { address } = router.query;
   const { publicKey: viewerKey } = useWallet();
+  const theme = useTheme();
   const [tabValue, setTabValue] = useState(0);
   const [profileAddress, setProfileAddress] = useState<PublicKey | null>(null);
   const [reputation, setReputation] = useState<any>(null);
@@ -171,7 +172,6 @@ export default function Profile() {
   );
   const experienceLevel = reputation ? getExperienceLevel(reputation.completedJobs) : null;
 
-  const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const accentColor = theme.palette.primary.main;
   const initials = addressStr.slice(0, 2).toUpperCase();

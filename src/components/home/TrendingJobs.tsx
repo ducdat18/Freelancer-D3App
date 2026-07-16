@@ -50,7 +50,6 @@ export default function TrendingJobs() {
         <Grid container spacing={3}>
           {trendingJobs.map((job) => (
             <MotionGrid size={{ xs: 12, sm: 6, md: 4 }} key={job.publicKey.toString()} variants={staggerChild}>
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               <JobCard job={job as any} />
             </MotionGrid>
           ))}

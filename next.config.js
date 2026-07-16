@@ -4,12 +4,11 @@ const nextConfig = {
   // Disable SWC minification to avoid issues with Solana libraries
   swcMinify: false,
 
-  // `next lint` is wired up (.eslintrc → next/core-web-vitals) so linting can be
-  // run manually, but the production build is not blocked by the ~25 pre-existing
-  // cosmetic lint errors (unescaped entities, JSX comment nodes). Fix those and
-  // then flip this to false to enforce lint at build time.
+  // `next lint` is wired up (.eslintrc → next/core-web-vitals). The codebase is
+  // now free of lint *errors* (only exhaustive-deps warnings remain, which do
+  // not fail the build), so lint is enforced at build time.
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
 
   webpack: (config, { isServer }) => {

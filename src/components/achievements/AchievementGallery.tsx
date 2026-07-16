@@ -151,7 +151,7 @@ export default function AchievementGallery({
           sx={{ mb: 4, border: 1, borderColor: 'success.light', bgcolor: isDark ? 'rgba(76,175,80,0.1)' : 'rgba(76,175,80,0.05)' }}
         >
           <Typography variant="body2" fontWeight={700}>
-            🎉 You've unlocked {eligibleAchievements.length} new milestone{eligibleAchievements.length > 1 ? 's' : ''}!
+            🎉 You&apos;ve unlocked {eligibleAchievements.length} new milestone{eligibleAchievements.length > 1 ? 's' : ''}!
           </Typography>
           <Typography variant="caption" display="block" sx={{ mt: 0.5, fontWeight: 500 }}>
             Click any badge below to mint your permanent on-chain NFT record.
