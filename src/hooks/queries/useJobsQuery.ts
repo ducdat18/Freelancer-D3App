@@ -193,7 +193,6 @@ export function useCreateJobMutation() {
       // `program.methods` is cast to any to break Anchor's deeply-nested
       // generic that trips TS2589 ("type instantiation excessively deep");
       // runtime behaviour is unchanged.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cast avoids Anchor TS2589
       const tx = await (program.methods as any)
         .createJob(new BN(jobId), title, description, budget, metadataUri, null)
         .accounts({
@@ -238,7 +237,6 @@ export function useSubmitBidMutation() {
       const [bidPda] = deriveBidPDA(jobPda, publicKey);
       const proposedBudget = new BN(proposedBudgetSol * LAMPORTS_PER_SOL);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cast avoids Anchor TS2589
       const tx = await (program.methods as any)
         .submitBid(proposedBudget, proposal, timelineDays, cvUri || null)
         .accounts({
@@ -271,7 +269,6 @@ export function useSelectBidMutation() {
     mutationFn: async ({ jobPda, bidPda }: { jobPda: PublicKey; bidPda: PublicKey }) => {
       if (!program || !publicKey) throw new Error('Wallet not connected');
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cast avoids Anchor TS2589
       const tx = await (program.methods as any)
         .selectBid()
         .accounts({
@@ -311,7 +308,6 @@ export function useCompleteJobMutation() {
     }) => {
       if (!program || !publicKey) throw new Error('Wallet not connected');
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cast avoids Anchor TS2589
       const tx = await (program.methods as any)
         .completeJob()
         .accounts({
@@ -350,7 +346,6 @@ export function useCancelJobMutation() {
       };
       if (escrowPda) accounts.escrow = escrowPda;
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cast avoids Anchor TS2589
       const tx = await (program.methods as any)
         .cancelJob()
         .accounts(accounts)
