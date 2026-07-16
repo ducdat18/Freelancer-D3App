@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { LAMPORTS_PER_SOL, ParsedTransactionWithMeta } from '@solana/web3.js';
 
@@ -16,7 +16,9 @@ interface UseBalanceHistoryResult {
   history: BalanceHistoryPoint[]; // oldest → newest
   loading: boolean;
   error: string | null;
-  refetch: () => void;
+  hasLoaded: boolean;
+  /** Manually trigger a fetch (nothing runs on mount to avoid RPC bursts). */
+  load: () => void;
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -24,39 +26,92 @@ const isRateLimit = (e: any) =>
   /429|too many requests|rate/i.test(e?.message || String(e));
 
 /**
- * Reconstructs a wallet's SOL balance timeline from its on-chain transaction
- * history. For each signature we read the parsed transaction's pre/post balances
- * for this wallet's account index — `postBalances[i]` is the exact balance right
- * after that tx, so no client-side running-sum guesswork is needed.
- *
- * Public devnet RPC rate-limits `getParsedTransactions` hard, so we fetch in
- * small throttled chunks with backoff and surface whatever we managed to load.
+ * Past transactions are immutable (postBalances are historical facts), so the
+ * reconstructed timeline can be cached in localStorage and reused across page
+ * reloads and re-visits without hitting the RPC again. A manual refresh simply
+ * re-fetches and appends any newer transactions. Keyed per wallet + limit.
  */
-export function useBalanceHistory(limit = 15): UseBalanceHistoryResult {
+const CACHE_VERSION = 'v1';
+const cacheKeyFor = (owner: string, limit: number) =>
+  `balhist_${CACHE_VERSION}_${owner}_${limit}`;
+
+function readCache(owner: string, limit: number): BalanceHistoryPoint[] | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(cacheKeyFor(owner, limit));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed?.history) ? (parsed.history as BalanceHistoryPoint[]) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(owner: string, limit: number, history: BalanceHistoryPoint[]) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(
+      cacheKeyFor(owner, limit),
+      JSON.stringify({ savedAt: Date.now(), history }),
+    );
+  } catch {
+    /* quota / private mode — cache is best-effort */
+  }
+}
+
+/**
+ * Reconstructs a wallet's SOL balance timeline from its on-chain transaction
+ * history. `postBalances[i]` is the exact balance right after each tx, so no
+ * client-side running-sum guesswork is needed.
+ *
+ * IMPORTANT: this does NOT auto-fetch on mount. The public devnet RPC
+ * (api.devnet.solana.com) rate-limits `getParsedTransactions` aggressively and
+ * firing it on page load contributes to app-wide 429s. Fetching is user-driven
+ * (via `load`) and throttled into small chunks with backoff.
+ */
+export function useBalanceHistory(limit = 10): UseBalanceHistoryResult {
   const { connection } = useConnection();
   const { publicKey, connected } = useWallet();
   const [history, setHistory] = useState<BalanceHistoryPoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const inFlight = useRef(false);
 
-  const fetchHistory = useCallback(async () => {
-    if (!publicKey || !connected) {
+  const owner = publicKey?.toBase58() ?? null;
+
+  // Hydrate from the per-wallet localStorage cache on mount / wallet switch so
+  // a re-visit or full page reload shows the last result instantly — no RPC.
+  useEffect(() => {
+    if (!owner) {
       setHistory([]);
+      setHasLoaded(false);
       return;
     }
+    const cached = readCache(owner, limit);
+    if (cached) {
+      setHistory(cached);
+      setHasLoaded(true);
+    } else {
+      // A different wallet with no cache — don't show the previous wallet's data.
+      setHistory([]);
+      setHasLoaded(false);
+    }
+  }, [owner, limit]);
+
+  const load = useCallback(async () => {
+    if (!publicKey || !connected || inFlight.current) return;
+    inFlight.current = true;
 
     const owner = publicKey.toBase58();
 
-    /** Fetch one chunk of parsed txs with up to 3 retries on rate-limit. */
     const getChunk = async (sigs: string[]): Promise<(ParsedTransactionWithMeta | null)[]> => {
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
-          return await connection.getParsedTransactions(sigs, {
-            maxSupportedTransactionVersion: 0,
-          });
+          return await connection.getParsedTransactions(sigs, { maxSupportedTransactionVersion: 0 });
         } catch (e) {
           if (isRateLimit(e) && attempt < 2) {
-            await sleep(600 * (attempt + 1)); // 600ms, 1200ms backoff
+            await sleep(800 * (attempt + 1)); // 800ms, 1600ms backoff
             continue;
           }
           throw e;
@@ -72,6 +127,8 @@ export function useBalanceHistory(limit = 15): UseBalanceHistoryResult {
       const signatures = await connection.getSignaturesForAddress(publicKey, { limit });
       if (signatures.length === 0) {
         setHistory([]);
+        writeCache(owner, limit, []);
+        setHasLoaded(true);
         return;
       }
 
@@ -94,8 +151,7 @@ export function useBalanceHistory(limit = 15): UseBalanceHistoryResult {
         };
       };
 
-      // Fetch in small chunks (newest → oldest) and stream partial results in.
-      const CHUNK = 5;
+      const CHUNK = 4;
       const collected: BalanceHistoryPoint[] = [];
       let sawError = false;
 
@@ -107,35 +163,39 @@ export function useBalanceHistory(limit = 15): UseBalanceHistoryResult {
             const pt = toPoint(sigInfo, txs[j]);
             if (pt) collected.push(pt);
           });
-          // Render progressively (oldest → newest).
           setHistory([...collected].reverse());
         } catch (e) {
           sawError = true;
-          break; // stop hammering the RPC; keep what we have
+          break;
         }
-        if (start + CHUNK < signatures.length) await sleep(250); // gentle throttle
+        if (start + CHUNK < signatures.length) await sleep(400);
       }
 
+      // Persist so the next visit / reload restores instantly without an RPC
+      // call. Don't overwrite a good cache with nothing if the RPC threw early.
+      if (collected.length > 0) {
+        writeCache(owner, limit, [...collected].reverse());
+      }
+
+      setHasLoaded(true);
       if (collected.length === 0 && sawError) {
-        setError('RPC rate limit reached. Try again, or set a dedicated RPC (NEXT_PUBLIC_SOLANA_RPC_URL).');
+        setError('RPC rate limit reached. Public devnet is throttling — retry, or set a dedicated RPC (NEXT_PUBLIC_SOLANA_RPC_URL).');
       } else if (sawError) {
-        setError(`Showing ${collected.length} of ${signatures.length} — RPC rate limit hit, retry for more.`);
+        setError(`Showing ${collected.length} of ${signatures.length} — public RPC throttled the rest. Retry for more.`);
       }
     } catch (err: any) {
       console.error('Error fetching balance history:', err);
+      setHasLoaded(true);
       setError(
         isRateLimit(err)
-          ? 'RPC rate limit reached. Try again in a moment, or configure a dedicated RPC.'
+          ? 'RPC rate limit reached. Public devnet is throttling — retry in a moment, or configure a dedicated RPC.'
           : err?.message || 'Failed to load balance history',
       );
     } finally {
       setLoading(false);
+      inFlight.current = false;
     }
   }, [connection, publicKey, connected, limit]);
 
-  useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
-
-  return { history, loading, error, refetch: fetchHistory };
+  return { history, loading, error, hasLoaded, load };
 }

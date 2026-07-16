@@ -5,6 +5,7 @@ import {
   Typography,
   Divider,
   Chip,
+  Button,
   IconButton,
   Tooltip,
   CircularProgress,
@@ -17,6 +18,7 @@ import {
   ArrowDownward,
   OpenInNew,
   ShowChart,
+  History,
 } from '@mui/icons-material';
 import { useWalletBalance } from '../../hooks/useWalletBalance';
 import { useBalanceHistory, BalanceHistoryPoint } from '../../hooks/useBalanceHistory';
@@ -90,9 +92,9 @@ export default function BalanceHistory() {
   const theme = useTheme();
   const accent = theme.palette.primary.main;
   const { balance, loading: balLoading, refetch: refetchBalance } = useWalletBalance();
-  const { history, loading: histLoading, error, refetch: refetchHistory } = useBalanceHistory(25);
+  const { history, loading: histLoading, error, hasLoaded, load: loadHistory } = useBalanceHistory(10);
 
-  const refetchAll = () => { refetchBalance(); refetchHistory(); };
+  const refetchHistory = loadHistory;
 
   const netChange = useMemo(
     () => history.reduce((sum, p) => sum + p.change, 0),
@@ -135,15 +137,39 @@ export default function BalanceHistory() {
             <Typography variant="caption" color="text.secondary">Solana Devnet</Typography>
           </Box>
 
-          <Tooltip title="Refresh">
-            <IconButton onClick={refetchAll} size="small" sx={{ color: accent }}>
+          <Tooltip title="Refresh balance">
+            <IconButton onClick={refetchBalance} size="small" sx={{ color: accent }}>
               <Refresh />
             </IconButton>
           </Tooltip>
         </Box>
       </Paper>
 
+      {/* Not-loaded prompt — history is user-triggered to avoid RPC bursts */}
+      {!hasLoaded && (
+        <Paper sx={{ p: 4, mb: 3, textAlign: 'center' }}>
+          <History sx={{ fontSize: 36, color: 'text.secondary', mb: 1 }} />
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Load your recent transactions to see the balance trend and history.
+          </Typography>
+          <Button
+            variant="contained"
+            startIcon={histLoading ? <CircularProgress size={16} color="inherit" /> : <History />}
+            disabled={histLoading}
+            onClick={loadHistory}
+          >
+            {histLoading ? 'Loading…' : 'Load Transaction History'}
+          </Button>
+          {error && (
+            <Typography variant="caption" sx={{ color: 'warning.main', display: 'block', mt: 2 }}>
+              {error}
+            </Typography>
+          )}
+        </Paper>
+      )}
+
       {/* Trend */}
+      {hasLoaded && (
       <Paper sx={{ p: 3, mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -169,8 +195,10 @@ export default function BalanceHistory() {
           <Sparkline points={history} color={accent} />
         )}
       </Paper>
+      )}
 
       {/* Transaction history */}
+      {hasLoaded && (
       <Paper sx={{ p: 3 }}>
         <Typography variant="h6" fontWeight={700} gutterBottom>Transaction History</Typography>
         <Divider sx={{ mb: 1 }} />
@@ -246,6 +274,7 @@ export default function BalanceHistory() {
           </Box>
         )}
       </Paper>
+      )}
     </Box>
   );
 }

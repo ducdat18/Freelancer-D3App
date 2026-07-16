@@ -1,4 +1,6 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { ReactNode } from 'react';
 import { isRateLimitError } from '../utils/rpcRetry';
 
@@ -32,12 +34,21 @@ function getRetryDelay(attemptIndex: number, error: unknown): number {
   return 1000;
 }
 
+// How long a persisted cache entry is allowed to be restored from storage.
+// gcTime must be >= this so entries survive in-memory GC long enough to be
+// re-persisted; both are set to 24h.
+const PERSIST_MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
+
+// Bump this to invalidate ALL persisted caches after a breaking data/shape
+// change or a deploy (old caches with a different buster are discarded).
+const PERSIST_BUSTER = 'v1';
+
 // Create a client with optimized defaults for Solana RPC
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 3 * 60 * 1000, // Data stays fresh for 3 minutes
-      gcTime: 10 * 60 * 1000, // Keep unused data in cache for 10 minutes
+      gcTime: PERSIST_MAX_AGE, // Keep in cache long enough to be persisted
       refetchOnWindowFocus: false, // Don't spam RPC on tab focus
       refetchOnMount: false, // Don't refetch if data exists
       refetchOnReconnect: false, // Don't refetch on network reconnect
@@ -52,14 +63,34 @@ const queryClient = new QueryClient({
   },
 });
 
+// Persist the whole query cache to localStorage so on-chain data survives a
+// full page reload — no refetch storm on load when the data hasn't changed.
+// `storage: undefined` on the server makes the persister a safe no-op (SSR).
+const persister = createSyncStoragePersister({
+  storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+  key: 'FREELANCECHAIN_RQ_CACHE',
+});
+
 export function QueryProvider({ children }: { children: ReactNode }) {
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister,
+        maxAge: PERSIST_MAX_AGE,
+        buster: PERSIST_BUSTER,
+        dehydrateOptions: {
+          // Only persist successful queries; never persist errors/pending so a
+          // reload doesn't restore a failed RPC state as if it were data.
+          shouldDehydrateQuery: (query) =>
+            query.state.status === 'success' && query.state.data !== undefined,
+        },
+      }}
+    >
       {children}
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }
 
 // Export for use in tests or custom configurations
 export { queryClient };
-
